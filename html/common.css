@@ -1,0 +1,317 @@
+@page {
+  size: 7.76in 10.35in;
+  margin: 0.75in 0.7in 0.6in 0.7in;
+  @bottom-right {
+    content: counter(page);
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 9pt;
+    color: #9CA3AF;
+  }
+}
+
+* { box-sizing: border-box; }
+body {
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  color: #1f2937;
+  font-size: 10.5pt;
+  line-height: 1.6;
+  margin: 0;
+  padding: 0;
+}
+
+/* ---------- CHAPTER TITLE PAGE ---------- */
+.chapter-hero {
+  page-break-before: always;
+  page-break-after: always;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 9in;
+}
+.phase-label {
+  font-size: 9.5pt;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #4F46E5;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+.chapter-number {
+  font-size: 14pt;
+  color: #6B7280;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+.chapter-hero h1 {
+  font-size: 26pt;
+  color: #1F2937;
+  margin: 0 0 16px 0;
+  line-height: 1.2;
+}
+.chapter-hero p {
+  font-size: 12pt;
+  color: #4B5563;
+  max-width: 5in;
+  line-height: 1.6;
+}
+
+/* ---------- HEADINGS ---------- */
+h2 {
+  font-size: 15pt;
+  color: #1F2937;
+  margin-top: 36px;
+  margin-bottom: 14px;
+  border-left: 4px solid #4F46E5;
+  padding-left: 10px;
+  page-break-after: avoid;
+}
+h3 {
+  font-size: 12pt;
+  color: #374151;
+  margin-top: 24px;
+  margin-bottom: 8px;
+  page-break-after: avoid;
+}
+p, ul, ol {
+  margin: 0 0 14px 0;
+}
+
+/* ---------- CALLOUTS ---------- */
+.callout {
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin: 16px 0;
+  font-size: 10pt;
+  page-break-inside: avoid;
+  line-height: 1.6;
+}
+.callout-title { font-weight: 700; font-size: 10pt; margin-bottom: 5px; }
+.callout.key { background: #EEF2FF; border-left: 5px solid #4F46E5; }
+.callout.key .callout-title { color: #4F46E5; }
+.callout.warn { background: #FFF7ED; border-left: 5px solid #EA580C; }
+.callout.warn .callout-title { color: #EA580C; }
+.callout.interview { background: #FDF2F8; border-left: 5px solid #DB2777; }
+.callout.interview .callout-title { color: #DB2777; }
+.callout.tip { background: #ECFDF5; border-left: 5px solid #059669; }
+.callout.tip .callout-title { color: #059669; }
+
+/* ---------- TABLES ---------- */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  font-size: 9.5pt;
+  page-break-inside: avoid;
+}
+th, td {
+  border: 1px solid #E5E7EB;
+  padding: 10px 12px;
+  text-align: left;
+  vertical-align: top;
+}
+th {
+  background: #4F46E5;
+  color: white;
+  font-weight: 600;
+}
+tr:nth-child(even) {
+  background: #F9FAFB;
+}
+
+/* ---------- CODE BLOCKS ---------- */
+pre {
+  background: #111827;
+  color: #F3F4F6;
+  padding: 14px 16px;
+  border-radius: 8px;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 9.5pt;
+  line-height: 1.5;
+  overflow-x: auto;
+  margin: 18px 0;
+  page-break-inside: avoid;
+}
+
+/* ---------- CHECKLIST ---------- */
+.checklist {
+  background: #F9FAFB;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin: 24px 0;
+  page-break-inside: avoid;
+}
+.checklist h3 { margin-top: 0; color: #1F2937; }
+.check-item { display: flex; align-items: flex-start; gap: 10px; margin: 8px 0; font-size: 10pt; }
+.checkbox { width: 14px; height: 14px; border: 2px solid #D1D5DB; border-radius: 3px; flex-shrink: 0; margin-top: 3px; }
+
+/* ---------- QUIZ ---------- */
+.quiz-section {
+  margin-top: 32px;
+  page-break-inside: avoid;
+}
+.quiz-question {
+  margin-bottom: 22px;
+  page-break-inside: avoid;
+}
+.quiz-question p {
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+.quiz-option {
+  margin: 4px 0;
+  padding-left: 4px;
+}
+.writing-line {
+  border-bottom: 1px solid #D1D5DB;
+  height: 26px;
+  margin-bottom: 10px;
+}
+.answer-key {
+  font-size: 6.5pt;
+  color: #6B7280;
+  border-top: 1px dashed #E5E7EB;
+  margin-top: 35px;
+  padding-top: 8px;
+  page-break-inside: avoid;
+}
+
+/* ---------- PHASE 2 OVERRIDES ---------- */
+.phase-two .chapter-hero h1 {
+  font-size: 24pt;
+}
+.phase-two .chapter-hero p {
+  font-size: 11.5pt;
+}
+.phase-two .answer-key {
+  font-size: 7.5pt;
+  color: #4B5563;
+  background: #F3F4F6;
+  border: 1px solid #D1D5DB;
+  border-radius: 6px;
+  padding: 14px;
+}
+
+/* ---------- SYNTHESIS ---------- */
+.synthesis-box {
+  background: #F8FAFC;
+  border: 1px solid #CBD5E1;
+  border-radius: 8px;
+  padding: 18px;
+  margin: 24px 0;
+  page-break-inside: avoid;
+}
+.synthesis-box h3 {
+  color: #1E293B;
+  margin-top: 0;
+}
+
+/* ---------- CAPSTONE WORKSPACES ---------- */
+.workspace {
+  background: #F9FAFB;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin: 16px 0;
+  page-break-inside: avoid;
+}
+.workspace-title {
+  font-weight: 700;
+  font-size: 9.5pt;
+  color: #4F46E5;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+.capstone .quiz-question {
+  margin-bottom: 18px;
+}
+.capstone .quiz-question p {
+  margin-bottom: 4px;
+}
+.capstone .quiz-option {
+  margin: 3px 0;
+}
+
+/* ---------- FRONT MATTER ---------- */
+@page cover {
+  margin: 0;
+  @bottom-right { content: ""; }
+}
+@page backcover {
+  margin: 0;
+  @bottom-right { content: ""; }
+}
+.front-matter {
+  line-height: 1.6;
+}
+.cover {
+  page: cover;
+  width: 100%;
+  height: 10.35in;
+  background: linear-gradient(160deg, #5B21B6 0%, #4338CA 40%, #1E40AF 100%);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 1in 0.9in 0.9in 0.9in;
+  page-break-after: always;
+}
+.cover .top-block, .cover .bottom-block { width: 100%; }
+.cover .kicker { font-size: 10pt; letter-spacing: 3px; opacity: 0.8; margin-bottom: 24px; text-transform: uppercase; font-weight: 600; }
+.cover h1 { font-size: 44pt; margin: 0 0 12px 0; line-height: 1.05; font-weight: 900; letter-spacing: -1px; }
+.cover .subtitle { font-size: 13.5pt; opacity: 0.92; max-width: 5.5in; line-height: 1.4; margin-bottom: 28px; font-weight: 400; }
+.cover .byline { font-size: 11.5pt; opacity: 0.9; font-weight: 500; }
+.cover .year { font-size: 10pt; opacity: 0.65; margin-top: 4px; }
+.cover .terminal-tag { background: rgba(15, 23, 42, 0.65); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; padding: 10px 14px; font-family: 'Consolas', 'Courier New', monospace; font-size: 9.5pt; color: #A7F3D0; max-width: 5.5in; margin-top: 10px; }
+.front-matter h2.fm-title, h2.fm-title {
+  font-size: 17pt;
+  color: #4338CA;
+  margin: 0 0 24px 0;
+  text-align: center;
+  border-bottom: 2px solid #4338CA;
+  padding-bottom: 10px;
+}
+.front-matter h3.fm-sub, h3.fm-sub { font-size: 12.5pt; color: #4338CA; border-left: 4px solid #4338CA; padding-left: 11px; margin: 28px 0 10px 0; }
+.fm-body { font-size: 10.5pt; line-height: 1.75; margin: 0 0 14px 0; color: #374151; }
+.fm-lead { text-align: center; font-style: italic; color: #6B7280; margin-bottom: 28px; }
+.front-matter .callout { border-radius: 9px; padding: 16px 18px; margin: 20px 0; font-size: 10.5pt; }
+.front-matter .callout-title { font-size: 10.5pt; margin-bottom: 7px; }
+.front-matter .callout.key { border-left-width: 5px; }
+.front-matter .callout.warn { border-left-width: 5px; }
+.front-matter .callout.interview { border-left-width: 5px; }
+.front-matter .callout.tip { border-left-width: 5px; }
+.legend-item { display: flex; gap: 11px; margin: 12px 0; align-items: flex-start; page-break-inside: avoid; }
+.legend-dot { width: 14px; height: 14px; border-radius: 4px; flex-shrink: 0; margin-top: 3px; }
+h2.fm-title.toc-title { page-break-before: always; }
+.toc-block { margin-bottom: 12px; }
+.toc-phase { font-size: 12.5pt; font-weight: 700; color: white; background: #4F46E5; padding: 7px 16px; border-radius: 7px; margin: 18px 0 3px 0; page-break-after: avoid; page-break-inside: avoid; }
+.toc-chapters { font-size: 10.5pt; color: #374151; }
+.toc-chapters div { padding: 4.5px 2px; border-bottom: 1px dotted #E5E7EB; }
+.section-break { page-break-before: always; }
+.legend-indigo { background: #4F46E5; }
+.legend-orange { background: #EA580C; }
+.legend-pink { background: #DB2777; }
+.legend-green { background: #059669; }
+.legend-violet { background: #7C3AED; }
+
+/* ---------- CHAPTER 1 DIAGRAM ---------- */
+.instruction-cycle { background: #F3F4F6; border: 1px solid #E5E7EB; border-radius: 8px; padding: 14px; margin: 18px 0; text-align: center; }
+.instruction-step { display: inline-block; width: 30%; background: white; padding: 10px; border-radius: 6px; text-align: left; vertical-align: middle; }
+.instruction-fetch { border-left: 4px solid #4F46E5; }
+.instruction-decode { border-left: 4px solid #EA580C; }
+.instruction-execute { width: 26%; border-left: 4px solid #059669; }
+.instruction-arrow { display: inline-block; width: 4%; font-weight: bold; color: #6B7280; vertical-align: middle; }
+.instruction-detail { font-size: 8pt; color: #4B5563; }
+
+/* ---------- CONCEPT DIAGRAM PLACEHOLDERS ---------- */
+.concept-diagram { border: 2px dashed #4F46E5; background: #EEF2FF; padding: 14px; border-radius: 8px; margin: 18px 0; text-align: center; page-break-inside: avoid; }
+.concept-diagram-detail { font-size: 9pt; color: #4B5563; }
+.formula-diagram { background: #F3F4F6; border: 1px solid #E5E7EB; padding: 14px; border-radius: 8px; margin: 18px 0; text-align: center; }
+.terminal-code-font { font-family: 'Fira Code', Consolas, Monaco, 'Courier New', Courier, monospace; font-size: 9.5pt; font-weight: 500; letter-spacing: -0.2px; }
+.litmus-box { background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 14px 16px; margin: 14px 0; page-break-inside: avoid; }
+.litmus-title { font-weight: 700; color: #1E293B; margin-bottom: 4px; font-size: 10.5pt; }
+.terminal-box { background: #0F172A; color: #E2E8F0; border-radius: 8px; padding: 14px 18px; font-family: 'Consolas', 'Courier New', monospace; font-size: 9.5pt; line-height: 1.5; margin: 20px 0; }
+.terminal-box .green { color: #34D399; }
+.terminal-box .cyan { color: #38BDF8; }
