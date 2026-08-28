@@ -17,21 +17,38 @@ The folders are created automatically by `code.py` if they do not already exist.
 
 ## File naming
 
-Use matching chapter names:
+`html/0.html` is the curriculum index. Each day has its own numbered HTML file. Each volume also has an empty lesson marker named with the first day after the volume:
 
 ```text
-html/0.html   -> pdfs/0.pdf
-html/1.html   -> pdfs/1.pdf
-html/25.html  -> pdfs/25.pdf
+html/0.html          -> pdfs/0.pdf
+html/1.html          -> pdfs/1.pdf
+html/30.html         -> pdfs/30.pdf
+html/31. Lesson 1.html -> pdfs/31. Lesson 1.pdf
+html/365.html        -> pdfs/365.pdf
+html/366. Lesson 12.html -> pdfs/366. Lesson 12.pdf
 ```
 
-Only files ending in `.html` inside the `html` folder are processed.
+Lesson names and markers:
 
-Chapters use the shared `html/common.css` stylesheet instead of
-duplicating their common CSS in every file. Phase-two title and answer-key
-differences are scoped with the `phase-two` body class, and the unique
-`synthesis-box` and capstone workspace components are defined in the shared
-stylesheet.
+| Marker file | Lesson name | Days |
+| --- | --- | ---: |
+| `31. Lesson 1.html` | Silicon, Machine Architecture &amp; Low-Level Math | 1-30 |
+| `61. Lesson 2.html` | Data Structures, Memory Layouts &amp; Cache Alignment | 31-60 |
+| `91. Lesson 3.html` | Algorithmic Mastery, SDE Sheet Patterns &amp; Optimization | 61-90 |
+| `121. Lesson 4.html` | Dynamic Programming, Graph Theory &amp; Backtracking | 91-120 |
+| `151. Lesson 5.html` | Operating Systems, Kernel Internals &amp; Memory Architecture | 121-150 |
+| `181. Lesson 6.html` | I/O Models, POSIX, Assembly &amp; Binary Exploitation | 151-180 |
+| `211. Lesson 7.html` | Multithreading, Lock-Free Concurrency &amp; Memory Models | 181-210 |
+| `241. Lesson 8.html` | Asynchronous Engines, Network Protocols &amp; Sockets | 211-240 |
+| `271. Lesson 9.html` | Web Protocols, Application Security &amp; Framework Internals | 241-270 |
+| `301. Lesson 10.html` | Database Internals, Storage Engines &amp; Query Optimization | 271-300 |
+| `336. Lesson 11.html` | Distributed Systems, Consensus, Cloud Native &amp; Data Engineering | 301-335 |
+| `366. Lesson 12.html` | High-Scale System Design, Production Triage &amp; Staff+ Leadership | 336-365 |
+
+The marker is placed after the preceding numbered day when sorted, so `31. Lesson 1.html` is the lesson marker between days 30 and 31. All lesson markers and numbered day files are empty until content is added. Only files ending in `.html` inside the `html` folder are processed.
+
+Lesson pages use the shared `html/common.css` stylesheet instead of
+duplicating their common CSS in every file.
 
 ## How to use
 
