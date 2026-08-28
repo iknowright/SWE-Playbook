@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="common.css">
+<title>Chapter 1: Silicon Physics, Logic Gates, Pipelining & The History of Computing</title>
+</head>
+<body class="chapter-one">
+
+<!-- ==========================================================================
+     PAGE 1 (ODD): HISTORY PART 1 (THE FOUNDATIONS)
+     ========================================================================== -->
+<div class="page-container content-flow">
+  <div>
+    <div class="phase-label">Phase 1 &middot; Absolute Foundations &amp; Machine Architecture</div>
+    <div class="chapter-number">Chapter 1</div>
+    <h1 class="chapter-title">MOSFET Semiconductor Physics, Logic Gates, Clock Cycles &amp; CPU Registers</h1>
+
+    <h2>1.0 The Origin of Computing: From Gears to Silicon</h2>
+    <p>Before we analyze the nanosecond timings of modern L1 caches or branch predictors, we must understand how computation evolved from abstract philosophy into physical reality. The entire discipline of software engineering is the culmination of centuries of mathematics, physics, and profound human tragedy.</p>
+
+    <h3>The Mechanical Pioneers: Babbage &amp; Lovelace (1830s)</h3>
+    <p>In 1837, English mathematician <strong>Charles Babbage</strong> proposed the <em>Analytical Engine</em>, a mechanical computer designed to be powered by a steam engine. It contained an Arithmetic Logic Unit (the "Mill"), conditional branching, and memory (the "Store"). It was the first Turing-complete design in history, though it was never fully built in his lifetime.</p>
+    <p><strong>Ada Lovelace</strong>, observing the Analytical Engine, realized it could manipulate more than just numbers. She wrote the world's first machine algorithm (to compute Bernoulli numbers) and prophesied that such machines could one day compose music and manipulate general symbols. She is recognized as the world's first computer programmer.</p>
+
+    <h3>Boolean Algebra: George Boole (1854)</h3>
+    <p>In 1854, <strong>George Boole</strong> published <em>The Laws of Thought</em>, proving that classical logic could be reduced to algebraic equations using only <code>True (1)</code> and <code>False (0)</code>. For 80 years, this remained purely theoretical mathematics.</p>
+
+    <h3>The Electrical Bridge: Claude Shannon (1937)</h3>
+    <p>In 1937, a 21-year-old MIT student named <strong>Claude Shannon</strong> wrote a master's thesis proving that Boolean algebra could be perfectly mapped to electrical relay switches. By arranging physical switches in series (AND) and parallel (OR), Shannon proved that electricity could evaluate logic. This thesis single-handedly birthed modern digital circuit design.</p>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 2 (EVEN): WHITEBOARD
+     ========================================================================== -->
+<div class="page-container">
+  <div class="whiteboard-page">
+    <div class="wb-header">
+      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+      <div class="wb-ref">REF: CH01_HISTORY_FOUNDATIONS</div>
+    </div>
+    <div class="wb-invariants">
+      <div><b>The Shannon Invariant:</b> Electrical circuits and Boolean logic are isomorphic. If you can express it in math, you can build it in silicon.</div>
+    </div>
+    <div class="wb-canvas"></div>
+    <div class="wb-footer">
+      <span>GIT GOOD &middot; SYSTEMS VERIFICATION</span>
+      <span>PAGE 2</span>
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 3 (ODD): HISTORY PART 2 (ALAN TURING)
+     ========================================================================== -->
+<div class="page-container content-flow">
+  <div>
+    <h3>The Father of Computer Science: Alan Turing (1912–1954)</h3>
+    <p>No individual has shaped the foundation of modern computing more profoundly than the English mathematician <strong>Alan Turing</strong>. He is universally recognized as the father of theoretical computer science and artificial intelligence.</p>
+
+    <p><strong>The Turing Machine (1936):</strong> At age 24, Turing published <em>"On Computable Numbers, with an Application to the Entscheidungsproblem."</em> To solve a profound mathematical paradox, he invented a theoretical device: an infinite tape with a read/write head that transitioned between states based on a table of rules. He proved that a <em>Universal Turing Machine</em> could simulate any other calculating machine. <strong>Every modern CPU—from your iPhone's ARM processor to a massive cloud server—is simply a physical implementation of a Universal Turing Machine.</strong></p>
+
+    <p><strong>Destroying the Enigma (World War II):</strong> During WWII, the German military used the Enigma machine to encrypt communications. The cipher changed daily, generating 159 quintillion possible combinations. Working at Bletchley Park, Turing realized that humans could never decrypt this fast enough. He designed an electromechanical machine called the <strong>Bombe</strong>, which used logical contradictions to mathematically eliminate millions of impossible Enigma settings per second. Turing’s machine broke the German naval codes, allowing the Allies to reroute convoys away from U-boats. Historians estimate Turing’s work shortened the war by 2 to 4 years and saved over 14 million lives.</p>
+
+    <p><strong>Post-War, AI, and Betrayal:</strong> After the war, Turing designed the Automatic Computing Engine (ACE), one of the first stored-program computers. In 1950, he published a paper asking, <em>"Can machines think?"</em> proposing the <strong>Turing Test</strong>, which remains the foundational benchmark for Artificial Intelligence.</p>
+
+    <div class="callout warn">
+      <div class="callout-title">The Tragedy of Alan Turing (Historical Truth)</div>
+      Alan Turing was a gay man living in an era when homosexuality was illegal in the UK. In 1952, despite being a war hero, he was arrested for "gross indecency" under the Labouchere Amendment. To avoid prison, he was forced to accept chemical castration (hormone injections). His security clearance was revoked, destroying his career. In 1954, at age 41, Turing died from cyanide poisoning, widely believed to be suicide via a laced apple. It took until 2013 for the British government to issue a posthumous royal pardon. <strong>The man who saved millions of lives and invented the concept of software was destroyed by the government he protected.</strong>
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 4 (EVEN): WHITEBOARD
+     ========================================================================== -->
+<div class="page-container">
+  <div class="whiteboard-page">
+    <div class="wb-header">
+      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+      <div class="wb-ref">REF: CH01_TURING_MACHINE</div>
+    </div>
+    <div class="wb-invariants">
+      <div><b>Turing Completeness:</b> A system is Turing Complete if it can simulate a Universal Turing Machine. C++, Python, and even SQL (via Recursive CTEs) are Turing Complete. HTML is not.</div>
+    </div>
+    <div class="wb-canvas"></div>
+    <div class="wb-footer">
+      <span>GIT GOOD &middot; SYSTEMS VERIFICATION</span>
+      <span>PAGE 4</span>
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 5 (ODD): HISTORY PART 3 (SILICON & C)
+     ========================================================================== -->
+<div class="page-container content-flow">
+  <div>
+    <h3>From Vacuum Tubes to the MOSFET (1947–1959)</h3>
+    <p>Early computers like the ENIAC used vacuum tubes for logic. They were massive, generated extreme heat, and burned out constantly. In 1947, <strong>John Bardeen, Walter Brattain, and William Shockley</strong> at Bell Labs invented the <em>Point-Contact Transistor</em>, replacing vacuum tubes with solid Germanium.</p>
+    
+    <p>However, the true revolution occurred in 1959. <strong>Mohamed Atalla and Dawon Kahng</strong> invented the <strong>MOSFET (Metal-Oxide-Semiconductor Field-Effect Transistor)</strong>. Unlike earlier transistors, MOSFETs could be miniaturized and mass-produced on a flat, 2D silicon wafer using photolithography. Today, a modern Apple M-series or AMD Ryzen chip contains over 50 billion MOSFETs.</p>
+
+    <h3>Dennis Ritchie &amp; The Systems Awakening (1972)</h3>
+    <p>As hardware shrank, the software needed to control it was still written in tedious, machine-specific Assembly language. At Bell Labs, <strong>Dennis Ritchie</strong> created the <strong>C programming language</strong>. C was a miracle of abstraction: it provided high-level control structures (loops, functions) while exposing direct physical memory addresses via <em>pointers</em>. Ritchie and Ken Thompson used C to rewrite the UNIX operating system, making it the first OS capable of being ported to different hardware architectures. C and UNIX birthed the modern internet, Linux, macOS, and Windows.</p>
+
+    <h2>1.1 Solid-State Physics &amp; MOSFET Transistor Mechanics</h2>
+    <p>To understand software, you must understand the switch that executes it. A computer does not "know" math; it only knows how to block or permit the flow of electrons.</p>
+
+    <h3>Semiconductor Doping</h3>
+    <p>Pure silicon is a poor conductor. To make it useful, engineers "dope" the silicon crystal with impurities:</p>
+    <ul>
+      <li><strong>N-Type Doping:</strong> Injecting Phosphorus adds extra free <em>electrons</em> (Negative charge carriers).</li>
+      <li><strong>P-Type Doping:</strong> Injecting Boron creates missing electrons, known as <em>holes</em> (Positive charge carriers).</li>
+    </ul>
+
+    <h3>MOSFET Anatomy &amp; The Threshold Voltage ($V_{th}$)</h3>
+    <p>An NMOS transistor has a P-type substrate (body) with two N-type wells (Source and Drain). Between them is a Gate made of conductive metal, separated from the substrate by an ultra-thin insulator (Silicon Dioxide, $\text{SiO}_2$).</p>
+    
+    <p>When $0\text{V}$ is applied to the Gate, the P-type substrate blocks current. The switch is <strong>OFF</strong>.<br>
+    When a positive voltage ($> V_{th}$, e.g., $1.2\text{V}$) is applied to the Gate, it creates an electric field that repels holes and pulls free electrons to the surface, creating an <em>N-channel inversion layer</em> connecting the Source and Drain. The switch is <strong>ON</strong>, and current flows at nearly the speed of light.</p>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 6 (EVEN): WHITEBOARD
+     ========================================================================== -->
+<div class="page-container">
+  <div class="whiteboard-page">
+    <div class="wb-header">
+      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+      <div class="wb-ref">REF: CH01_MOSFET_PHYSICS</div>
+    </div>
+    <div class="wb-invariants">
+      <div><b>Gate Capacitance:</b> The Gate insulator is incredibly thin (a few atoms thick in 3nm processes). If static electricity spikes, it punctures the oxide, permanently destroying the transistor.</div>
+    </div>
+    <div class="wb-canvas"></div>
+    <div class="wb-footer">
+      <span>GIT GOOD &middot; SYSTEMS VERIFICATION</span>
+      <span>PAGE 6</span>
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 7 (ODD): CMOS LOGIC GATES
+     ========================================================================== -->
+<div class="page-container content-flow">
+  <div>
+    <h2>1.2 CMOS Logic Gate Construction &amp; Power Dynamics</h2>
+    <p>Early CPUs used only NMOS transistors. They constantly leaked power when holding a `0` state, generating immense heat. The solution was <strong>CMOS (Complementary Metal-Oxide-Semiconductor)</strong>, which pairs NMOS with its opposite, PMOS.</p>
+
+    <ul>
+      <li><strong>NMOS:</strong> Conducts when the Gate is High ($1$). Placed in the Pull-Down Network (to Ground).</li>
+      <li><strong>PMOS:</strong> Conducts when the Gate is Low ($0$). Placed in the Pull-Up Network (to $V_{DD}$ / Power).</li>
+    </ul>
+
+    <h3>The CMOS Inverter (NOT Gate)</h3>
+    <p>By wiring one PMOS and one NMOS together, we create an Inverter. When the input is $1$, the NMOS turns on (pulling output to $0$) and the PMOS turns off. When the input is $0$, the PMOS turns on (pulling output to $1$) and the NMOS turns off. <strong>Crucially, they are never both ON at the same time, meaning zero static current flows from Power to Ground.</strong></p>
+
+    <div class="callout key">
+      <div class="callout-title">The Universal Gates: NAND &amp; NOR</div>
+      Using 4 transistors (2 PMOS, 2 NMOS), we can build a <strong>NAND Gate</strong> (NOT-AND). NAND is computationally universal—you can build every other logic gate (AND, OR, XOR, NOT), memory cells, and ALUs entirely out of billions of NAND gates.
+    </div>
+
+    <h3>The Power Wall Equation ($P = C \cdot V^2 \cdot f$)</h3>
+    <p>Every time a CMOS gate switches from 0 to 1, it must charge its microscopic capacitance ($C$). The total dynamic power consumed by a CPU is defined by physics:</p>
+    <pre><code>P = C * V^2 * f</code></pre>
+    <p>Where $P$ is Power (Heat), $C$ is Capacitance, $V$ is Voltage, and $f$ is Clock Frequency.</p>
+    
+    <div class="callout warn">
+      <div class="callout-title">Why CPUs Stopped at 5 GHz (Dennard Scaling Collapse)</div>
+      To increase frequency ($f$), engineers had to increase voltage ($V$) to switch transistors faster. But because voltage is squared ($V^2$), heat generation exploded exponentially. By 2005, a single 5 GHz core was generating more heat per square millimeter than a nuclear reactor core, literally melting the silicon. The industry hit the "Power Wall" and was forced to pivot to multi-core architectures instead of scaling single-core clock speeds.
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 8 (EVEN): WHITEBOARD
+     ========================================================================== -->
+<div class="page-container">
+  <div class="whiteboard-page">
+    <div class="wb-header">
+      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+      <div class="wb-ref">REF: CH01_CMOS_POWER_WALL</div>
+    </div>
+    <div class="wb-invariants">
+      <div><b>Static Leakage:</b> In modern 3nm chips, transistors are so small that quantum tunneling occurs. Electrons literally teleport across the gate barrier even when the switch is OFF, creating static leakage power.</div>
+    </div>
+    <div class="wb-canvas"></div>
+    <div class="wb-footer">
+      <span>GIT GOOD &middot; SYSTEMS VERIFICATION</span>
+      <span>PAGE 8</span>
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 9 (ODD): THE ALU & SILICON MATH (PART 1)
+     ========================================================================== -->
+<div class="page-container content-flow">
+  <div>
+    <h2>1.3 The Arithmetic Logic Unit (ALU) &amp; Silicon Math</h2>
+    <p>How does a physical arrangement of silicon and copper perform mathematical addition? It uses the Boolean logic gates we just built.</p>
+
+    <h3>The Half-Adder</h3>
+    <p>If we want to add two binary bits (A and B), there are four possible outcomes:</p>
+    <ul>
+      <li>$0 + 0 = 0$ (Carry 0)</li>
+      <li>$0 + 1 = 1$ (Carry 0)</li>
+      <li>$1 + 0 = 1$ (Carry 0)</li>
+      <li>$1 + 1 = 0$ (Carry 1)</li>
+    </ul>
+    <p>This truth table exactly matches two logic gates. The <strong>Sum</strong> is an <code>XOR</code> gate ($A \oplus B$). The <strong>Carry</strong> is an <code>AND</code> gate ($A \cdot B$). Wiring these two gates together gives us a <em>Half-Adder</em>.</p>
+
+    <h3>The Full-Adder</h3>
+    <p>A Half-Adder is useless for multi-bit numbers because it cannot accept a Carry from a previous column. A <em>Full-Adder</em> combines two Half-Adders and an <code>OR</code> gate to add three bits: A, B, and Carry-In ($C_{in}$).</p>
+    <pre><code>Sum = (A ^ B) ^ Cin
+Cout = (A &amp; B) | (Cin &amp; (A ^ B))</code></pre>
+
+    <h3>The Ripple-Carry Bottleneck</h3>
+    <p>To build a 64-bit adder, the naive approach is to chain 64 Full-Adders together. The $C_{out}$ of bit 0 wires into the $C_{in}$ of bit 1, and so on. This is a <strong>Ripple-Carry Adder</strong>. </p>
+    <p><strong>The fatal flaw:</strong> Bit 63 cannot compute its final result until the carry ripple propagates through all 62 previous adders. At $0.05\text{ ns}$ per gate, 64 bits of propagation delay ($64 \times 0.05\text{ ns} = 3.2\text{ ns}$) completely violates modern $4\text{ GHz}$ clock speeds (where a full cycle is only $0.25\text{ ns}$). You cannot wait $O(N)$ time for addition.</p>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 10 (EVEN): WHITEBOARD
+     ========================================================================== -->
+<div class="page-container">
+  <div class="whiteboard-page">
+    <div class="wb-header">
+      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+      <div class="wb-ref">REF: CH01_ALU_RIPPLE_CARRY</div>
+    </div>
+    <div class="wb-invariants">
+      <div><b>Hardware Latency:</b> Silicon is bound by the speed of light. Every logic gate a signal passes through adds picoseconds of propagation delay. $O(N)$ gate chains are impossible at gigahertz speeds.</div>
+    </div>
+    <div class="wb-canvas"></div>
+    <div class="wb-footer">
+      <span>GIT GOOD &middot; SYSTEMS VERIFICATION</span>
+      <span>PAGE 10</span>
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 11 (ODD): THE ALU & CARRY-LOOKAHEAD
+     ========================================================================== -->
+<div class="page-container content-flow">
+  <div>
+    <h3>The 64-Bit Carry-Lookahead Adder (CLA)</h3>
+    <p>To achieve $O(\log N)$ or near $O(1)$ addition times, CPU designers use <strong>Carry-Lookahead Adders</strong>. Instead of waiting for the carry to ripple physically, the CLA computes whether each bit position will <em>Generate</em> or <em>Propagate</em> a carry instantly, in parallel.</p>
+
+    <ul>
+      <li><strong>Generate ($G_i$):</strong> A carry is guaranteed to be generated if both A and B are 1. ($G_i = A_i \cdot B_i$)</li>
+      <li><strong>Propagate ($P_i$):</strong> A carry will be passed along if at least one of A or B is 1. ($P_i = A_i \oplus B_i$)</li>
+    </ul>
+
+    <p>Using pure Boolean algebra, the carry for column 1 ($C_1$) can be computed directly from the inputs without waiting for $C_0$ to ripple:</p>
+    <pre><code>C1 = G0 | (P0 &amp; C0)
+C2 = G1 | (P1 &amp; G0) | (P1 &amp; P0 &amp; C0)
+C3 = G2 | (P2 &amp; G1) | (P2 &amp; P1 &amp; G0) | (P2 &amp; P1 &amp; P0 &amp; C0)</code></pre>
+    
+    <p>By unrolling the logic, a massive tree of parallel AND/OR gates calculates all 64 carries simultaneously. While this requires exponentially more transistors (silicon area), it ensures that a 64-bit integer addition completes in less than $0.2\text{ ns}$, well within a single clock cycle.</p>
+
+    <div class="callout interview">
+      <div class="callout-title">Systems Design Interview Truth (Pink)</div>
+      If an interviewer asks you to optimize an algorithm, the core philosophy mimics silicon: <strong>Trade space for time.</strong> The Carry-Lookahead Adder spends millions of extra transistors (Space) to flatten a linear time $O(N)$ bottleneck into a logarithmic/constant time $O(\log N)$ operation (Time). This is the exact same principle behind dynamic programming memoization, Redis caching, and database indexes.
+    </div>
+
+    <h3>ALU Multiplexing</h3>
+    <p>The ALU doesn't just add. It contains dedicated sub-circuits for Bit-Shifting, XOR, AND, and NOT. A hardware <strong>Multiplexer (MUX)</strong> acts as a switchyard. Depending on the opcode instruction decoded by the CPU, control wires activate specific pathways in the MUX, routing the output of the correct sub-circuit into the final destination register.</p>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 12 (EVEN): WHITEBOARD
+     ========================================================================== -->
+<div class="page-container">
+  <div class="whiteboard-page">
+    <div class="wb-header">
+      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+      <div class="wb-ref">REF: CH01_CARRY_LOOKAHEAD</div>
+    </div>
+    <div class="wb-invariants">
+      <div><b>Space-Time Tradeoff:</b> The CLA expands the boolean equation flat. This creates high "Fan-In" (gates with many inputs), which has physical capacitance limits, necessitating a multi-level tree structure.</div>
+    </div>
+    <div class="wb-canvas"></div>
+    <div class="wb-footer">
+      <span>GIT GOOD &middot; SYSTEMS VERIFICATION</span>
+      <span>PAGE 12</span>
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 13 (ODD): THE HARDWARE CLOCK
+     ========================================================================== -->
+<div class="page-container content-flow">
+  <div>
+    <h2>1.4 The Hardware Clock, Oscillators &amp; Physical Limits</h2>
+    <p>A CPU is a vast, chaotic ocean of billions of logic gates. If signals flowed continuously through this ocean unmanaged, data would arrive at registers at different times, creating catastrophic race conditions. The CPU requires a metronome: <strong>The Clock</strong>.</p>
+
+    <h3>Quartz Crystals &amp; Piezoelectric Resonance</h3>
+    <p>The heartbeat of a motherboard begins with a piece of quartz crystal. Quartz is <em>piezoelectric</em>—if you squeeze it, it generates a voltage; if you apply a voltage, it physically bends. By hooking it to an amplifier circuit, the crystal physically vibrates at a mathematically perfect frequency (often $24\text{ MHz}$ or $100\text{ MHz}$).</p>
+    
+    <p>This base frequency is too slow for a CPU. A circuit called a <strong>Phase-Locked Loop (PLL)</strong> multiplies this base frequency up to gigahertz speeds (e.g., $100\text{ MHz} \times 40 = 4.0\text{ GHz}$). This high-speed square wave is then blasted across the entire silicon die via an <em>H-Tree Clock Distribution Network</em> to ensure the pulse hits every flip-flop at the exact same picosecond.</p>
+
+    <h3>Clock Cycle Math</h3>
+    <p>The duration of a single clock cycle ($T$) is the inverse of the frequency ($f$):</p>
+    <ul>
+      <li><strong>1 MHz (1970s):</strong> $T = 1,000\text{ ns}$. Light travels $300\text{ meters}$.</li>
+      <li><strong>1 GHz (2000s):</strong> $T = 1.0\text{ ns}$. Light travels $30\text{ centimeters}$.</li>
+      <li><strong>4 GHz (Modern):</strong> $T = 0.25\text{ ns}$. Electricity in copper travels less than $5\text{ centimeters}$ per cycle.</li>
+    </ul>
+
+    <div class="callout key">
+      <div class="callout-title">The Physical Limit of Locality</div>
+      At 4 GHz, if data is located on the other side of a large server motherboard, the electrical signal literally <strong>cannot reach the CPU before the next clock cycle fires</strong>. This is why L1 caches MUST be physically etched directly adjacent to the ALU on the silicon die.
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 14 (EVEN): WHITEBOARD
+     ========================================================================== -->
+<div class="page-container">
+  <div class="whiteboard-page">
+    <div class="wb-header">
+      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+      <div class="wb-ref">REF: CH01_CLOCK_OSCILLATORS</div>
+    </div>
+    <div class="wb-invariants">
+      <div><b>Clock Skew:</b> If the wire routing the clock signal to Register A is slightly longer than the wire to Register B, A updates later than B. Engineers spend months routing equal-length serpentine wires to eliminate skew.</div>
+    </div>
+    <div class="wb-canvas"></div>
+    <div class="wb-footer">
+      <span>GIT GOOD &middot; SYSTEMS VERIFICATION</span>
+      <span>PAGE 14</span>
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 15 (ODD): TIMING INVARIANTS & METASTABILITY
+     ========================================================================== -->
+<div class="page-container content-flow">
+  <div>
+    <h3>Flip-Flop Timing Invariants &amp; Metastability</h3>
+    <p>CPU memory registers are made of SRAM Flip-Flops. A flip-flop only captures the incoming data on the exact rising edge of the clock pulse. However, physics demands stability:</p>
+    <ul>
+      <li><strong>Setup Time ($t_{setup}$):</strong> The data signal must arrive and stabilize at the flip-flop's input <em>before</em> the clock pulse hits.</li>
+      <li><strong>Hold Time ($t_{hold}$):</strong> The data signal must remain stable for a brief fraction of a nanosecond <em>after</em> the clock pulse hits.</li>
+    </ul>
+
+    <div class="callout warn">
+      <div class="callout-title">Metastability (The Schrödinger's Cat of Hardware)</div>
+      If a signal arrives late and is actively changing from 0 to 1 at the exact moment the clock pulse strikes (violating setup/hold times), the flip-flop enters <strong>Metastability</strong>. Its voltage gets stuck at 0.5V—neither a 0 nor a 1. This invalid voltage propagates through the ALU, completely corrupting the operating system. Overclocking a CPU raises the frequency so high that ALUs don't have enough time to finish their math before the next clock pulse demands the answer, resulting in metastability and the infamous "Blue Screen of Death".
+    </div>
+
+    <h3>Thermal Throttling &amp; The Speed Limit</h3>
+    <p>We discussed the Power Wall ($P = C \cdot V^2 \cdot f$). When a CPU runs an intense workload (like rendering 4K video or running an infinite `while(true)` loop), transistor switching generates extreme heat. If the silicon exceeds ~100°C, the copper interconnects undergo electromigration (atoms physically detach and move, destroying the chip).</p>
+    <p>To save itself, the CPU hardware invokes <strong>Thermal Throttling</strong>. It intentionally drops the clock frequency from $4.5\text{ GHz}$ down to $800\text{ MHz}$. This is why your laptop fan screams and your application latency suddenly spikes from $10\text{ms}$ to $500\text{ms}$ under sustained load.</p>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 16 (EVEN): WHITEBOARD
+     ========================================================================== -->
+<div class="page-container">
+  <div class="whiteboard-page">
+    <div class="wb-header">
+      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+      <div class="wb-ref">REF: CH01_TIMING_METASTABILITY</div>
+    </div>
+    <div class="wb-invariants">
+      <div><b>Critical Path:</b> The maximum clock speed of a CPU is dictated by its "Critical Path"—the single longest chain of logic gates an electrical signal must traverse between two flip-flops.</div>
+    </div>
+    <div class="wb-canvas"></div>
+    <div class="wb-footer">
+      <span>GIT GOOD &middot; SYSTEMS VERIFICATION</span>
+      <span>PAGE 16</span>
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 17 (ODD): THE INSTRUCTION ENGINE & 5-STAGE PIPELINE
+     ========================================================================== -->
+<div class="page-container content-flow">
+  <div>
+    <h2>1.5 The Instruction Engine &amp; 5-Stage CPU Pipeline</h2>
+    <p>Early computers executed one instruction completely before starting the next. If an instruction took 5 clock cycles, the CPU's throughput was utterly crippled. Modern CPUs use an assembly-line architecture known as <strong>Instruction Pipelining</strong>.</p>
+
+    <h3>The Classic 5-Stage RISC Pipeline</h3>
+    <ol>
+      <li><strong>Instruction Fetch (IF):</strong> The CPU reads the Program Counter (`RIP` register), goes to the L1 Instruction Cache, and pulls down the next binary opcode bytes.</li>
+      <li><strong>Instruction Decode (ID):</strong> The hardware decodes the raw bytes. It figures out "this is an ADD instruction", signs-extends any immediate constants, and reads the current values of the required registers.</li>
+      <li><strong>Execute (EX):</strong> The ALU performs the actual math, or calculates the physical memory address for a pointer dereference.</li>
+      <li><strong>Memory Access (MEM):</strong> If the instruction requires reading/writing to RAM, the L1 Data Cache is accessed here. (If it's just register math, this stage does nothing).</li>
+      <li><strong>Write-Back (WB):</strong> The final computed value is latched permanently into the destination register.</li>
+    </ol>
+
+    <h3>Explaining Throughput with Examples</h3>
+    <p><strong>The Easy Example: Register Math</strong><br>
+    <code>add eax, ebx</code><br>
+    This instruction flies through the pipeline. IF fetches it. ID reads EAX and EBX. EX adds them in the ALU. MEM does nothing. WB writes the result back to EAX. Crucially, while this instruction is in the EX stage, the CPU has already fetched the <em>next</em> instruction into ID, and the one after that into IF. 1 instruction completes every single clock cycle (IPC = 1).</p>
+
+    <p><strong>The Hard Example: Pointer Dereference &amp; Branching</strong><br>
+    <code>cmp rax, [rbx + rcx*8] ; jz loop_start</code><br>
+    This is brutal. The CPU must compute the complex array index address in the EX stage (`rbx + rcx*8`). Then, in the MEM stage, it must query the L1 cache. If the cache misses, the pipeline <strong>stalls for 200 clock cycles</strong> waiting for main RAM. Only then can it compare the value to RAX. Based on the result, the <code>jz</code> (Jump if Zero) instruction decides whether to jump or continue. But the pipeline has already been speculatively fetching the next instructions! If it guessed wrong, it must flush the entire pipeline.</p>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 18 (EVEN): WHITEBOARD
+     ========================================================================== -->
+<div class="page-container">
+  <div class="whiteboard-page">
+    <div class="wb-header">
+      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+      <div class="wb-ref">REF: CH01_PIPELINE_ARCHITECTURE</div>
+    </div>
+    <div class="wb-invariants">
+      <div><b>Von Neumann Bottleneck:</b> CPUs compute infinitely faster than RAM can deliver data. The shared memory bus restricts throughput, forcing the creation of the massive L1/L2/L3 cache hierarchies.</div>
+    </div>
+    <div class="wb-canvas"></div>
+    <div class="wb-footer">
+      <span>GIT GOOD &middot; SYSTEMS VERIFICATION</span>
+      <span>PAGE 18</span>
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 19 (ODD): PIPELINE HAZARDS & RELEVANCY
+     ========================================================================== -->
+<div class="page-container content-flow">
+  <div>
+    <h3>Pipeline Hazards</h3>
+    <p>Because multiple instructions are flowing through the pipeline simultaneously, physics and logic collide, creating <strong>Hazards</strong>.</p>
+
+    <ul>
+      <li><strong>Data Hazards (RAW - Read After Write):</strong>
+        <pre><code>add rax, rbx  // Instruction 1: computes RAX
+mov rcx, rax  // Instruction 2: needs RAX</code></pre>
+        Instruction 2 is in the Decode stage and needs the value of `RAX`. But Instruction 1 is only in the Execute stage and won't write the answer into `RAX` until the Write-Back stage, 2 cycles later! The CPU must physically stall. <em>Hardware Solution:</em> <strong>Operand Forwarding (Bypassing).</strong> The CPU wires the output of the ALU directly back into its own input, bypassing the register file entirely to save cycles.
+      </li>
+      <li><strong>Structural Hazards:</strong> Occur when two instructions need the exact same hardware circuit at the same time (e.g., both trying to access the L1 cache simultaneously). Solved by splitting L1 into distinct Instruction (L1I) and Data (L1D) caches.</li>
+      <li><strong>Control Hazards:</strong> <code>if (x == 0)</code> forces a branch. The CPU doesn't know which path to fetch next until the comparison completes in the EX stage. If it waits, it wastes cycles. <em>Hardware Solution:</em> <strong>Branch Prediction.</strong> The CPU uses machine learning (Branch History Tables) to guess the outcome and fetches speculatively. If it guesses wrong, a massive 15-20 cycle pipeline flush penalty occurs.</li>
+    </ul>
+
+    <div class="callout tip">
+      <div class="callout-title">Software Engineering Relevancy (Green)</div>
+      Why does a backend developer need to care about pipeline flushes? Because of <strong>Sorting</strong>. If you process a massive array with an <code>if (data[i] &gt; 128)</code> condition, an unsorted array causes the Branch Predictor to guess randomly (50% fail rate), resulting in millions of pipeline flushes. Processing a <em>sorted</em> array allows the Branch Predictor to achieve 99.9% accuracy. Benchmarks show processing a sorted array is often <strong>6x faster</strong> than an unsorted array purely due to hardware branch prediction!
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 20 (EVEN): WHITEBOARD
+     ========================================================================== -->
+<div class="page-container">
+  <div class="whiteboard-page">
+    <div class="wb-header">
+      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+      <div class="wb-ref">REF: CH01_PIPELINE_HAZARDS</div>
+    </div>
+    <div class="wb-invariants">
+      <div><b>Speculative Execution Vulnerability:</b> Features like Branch Prediction fetch memory proactively. Exploiting this physical behavior is the root cause of the infamous Spectre and Meltdown hardware security flaws.</div>
+    </div>
+    <div class="wb-canvas"></div>
+    <div class="wb-footer">
+      <span>GIT GOOD &middot; SYSTEMS VERIFICATION</span>
+      <span>PAGE 20</span>
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 21 (ODD): CPU REGISTERS & FLAGS
+     ========================================================================== -->
+<div class="page-container content-flow">
+  <div>
+    <h2>1.6 CPU Registers, Flags &amp; Sub-Register Slicing</h2>
+    <p>Registers are the absolute top of the memory hierarchy. Unlike RAM (which uses leaky capacitors that must be refreshed), registers are built from <strong>6-Transistor SRAM cells</strong>. They hold their state perfectly and respond in sub-nanosecond time.</p>
+
+    <h3>x86-64 General Purpose Registers (GPRs)</h3>
+    <p>The AMD64/x86-64 architecture defines 16 primary 64-bit registers: <code>RAX</code>, <code>RBX</code>, <code>RCX</code>, <code>RDX</code>, <code>RSI</code>, <code>RDI</code>, <code>RBP</code>, <code>RSP</code>, and <code>R8</code> through <code>R15</code>.</p>
+
+    <p>Because x86 is backwards-compatible with 16-bit processors from the 1970s, registers are physically sliced:</p>
+    <ul>
+      <li><code>RAX</code> (64-bit)</li>
+      <li><code>EAX</code> (Lower 32 bits of RAX)</li>
+      <li><code>AX</code> (Lower 16 bits of EAX)</li>
+      <li><code>AL</code> / <code>AH</code> (Lower and Upper 8 bits of AX)</li>
+    </ul>
+
+    <div class="callout key">
+      <div class="callout-title">The 32-Bit Zero-Extension Rule (Indigo)</div>
+      If you write a value to an 8-bit or 16-bit register (like <code>mov ax, 0xFFFF</code>), the upper bits of RAX remain completely untouched. However, in 64-bit mode, <strong>writing to a 32-bit register (<code>mov eax, 0xFFFFFFFF</code>) automatically forces the hardware to zero-out the upper 32 bits of RAX.</strong> Why? It breaks false dependencies in the Out-of-Order execution engine, allowing the CPU to rename the register without waiting for the old upper 32 bits to retire.
+    </div>
+
+    <h3>The Status Flags (`RFLAGS`)</h3>
+    <p>Every time the ALU performs arithmetic or logic, it automatically mutates the <code>RFLAGS</code> register bits to provide context to upcoming conditional jumps:</p>
+    <ul>
+      <li><strong>ZF (Zero Flag):</strong> Set to 1 if the ALU result is exactly 0. Used by <code>jz</code> (Jump if Zero) and <code>je</code> (Jump if Equal).</li>
+      <li><strong>CF (Carry Flag):</strong> Set to 1 if unsigned addition overflows, or unsigned subtraction underflows.</li>
+      <li><strong>OF (Overflow Flag):</strong> Set to 1 if <em>signed</em> Two's Complement arithmetic crosses the positive/negative boundary (e.g., adding two positives yields a negative).</li>
+      <li><strong>SF (Sign Flag):</strong> Set to 1 if the Most Significant Bit (MSB) of the result is 1 (indicating a negative number in signed math).</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 22 (EVEN): WHITEBOARD
+     ========================================================================== -->
+<div class="page-container">
+  <div class="whiteboard-page">
+    <div class="wb-header">
+      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+      <div class="wb-ref">REF: CH01_CPU_REGISTERS</div>
+    </div>
+    <div class="wb-invariants">
+      <div><b>RSP & RBP:</b> <code>RSP</code> physically points to the top of the Call Stack in RAM. <code>RBP</code> is the Base Pointer, anchoring the current function's local variables. Modifying RSP manually is how malware hijacks execution flow.</div>
+    </div>
+    <div class="wb-canvas"></div>
+    <div class="wb-footer">
+      <span>GIT GOOD &middot; SYSTEMS VERIFICATION</span>
+      <span>PAGE 22</span>
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 23 (ODD): COMPILATION STACK & ABIS
+     ========================================================================== -->
+<div class="page-container content-flow">
+  <div>
+    <h2>1.7 The Full Code Translation Stack &amp; OS Binary ABIs</h2>
+    <p>Your high-level code is merely an illusion. The physical CPU does not understand C#, Java, or Python.</p>
+
+    <h3>The Compilation Descent</h3>
+    <ol>
+      <li><strong>Lexical/Syntax Parsing:</strong> Code is converted to an Abstract Syntax Tree (AST).</li>
+      <li><strong>Intermediate Representation (IR):</strong> Converted to a platform-agnostic bytecode (like .NET IL or Java Bytecode).</li>
+      <li><strong>JIT/AOT Compilation:</strong> The runtime dynamically compiles IR into native Assembly instructions targeted specifically for the host CPU (e.g., mapping arrays to AVX-512 SIMD instructions if the CPU supports it).</li>
+      <li><strong>Micro-operation (uOps) Decoding:</strong> Inside the CPU, complex x86 CISC assembly instructions are intercepted by decoders and broken down into tiny, RISC-like $\mu\text{ops}$ that the actual physical execution units understand.</li>
+    </ol>
+
+    <h3>The Application Binary Interface (ABI) Boundary</h3>
+    <p>When you compile a C++ or Rust binary, you cannot copy the Linux executable to a Windows machine and run it, even if both machines have identical Intel Core i9 CPUs. Why? Because the Operating System enforces a strict ABI.</p>
+    
+    <p><strong>Microsoft x64 ABI (Windows):</strong></p>
+    <ul>
+      <li>Function arguments 1 to 4 are placed in <code>RCX</code>, <code>RDX</code>, <code>R8</code>, <code>R9</code>.</li>
+      <li>Remaining arguments are pushed to the physical Stack.</li>
+      <li><strong>Mandatory Shadow Space:</strong> The caller MUST allocate 32 empty bytes on the stack before calling a function, providing the callee a safe place to dump register contents if it gets preempted by a hardware interrupt.</li>
+    </ul>
+
+    <p><strong>System V AMD64 ABI (Linux / macOS):</strong></p>
+    <ul>
+      <li>Function arguments 1 to 6 are placed in <code>RDI</code>, <code>RSI</code>, <code>RDX</code>, <code>RCX</code>, <code>R8</code>, <code>R9</code>.</li>
+      <li><strong>The Red Zone:</strong> An optimization allowing leaf functions (functions that don't call other functions) to freely use the 128 bytes <em>below</em> the Stack Pointer without bothering to adjust the <code>RSP</code> register, saving critical clock cycles.</li>
+    </ul>
+    
+    <p>If a Linux binary executes on Windows, it will place Parameter 1 into <code>RDI</code>, but the Windows kernel expects it in <code>RCX</code>. The program immediately crashes due to a segmentation fault.</p>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 24 (EVEN): WHITEBOARD
+     ========================================================================== -->
+<div class="page-container">
+  <div class="whiteboard-page">
+    <div class="wb-header">
+      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+      <div class="wb-ref">REF: CH01_ABI_BOUNDARIES</div>
+    </div>
+    <div class="wb-invariants">
+      <div><b>Syscalls:</b> User-space apps cannot touch disks or networks directly. They must load parameters into registers and execute the <code>syscall</code> assembly instruction, triggering a context switch into Ring 0 (Kernel Space).</div>
+    </div>
+    <div class="wb-canvas"></div>
+    <div class="wb-footer">
+      <span>GIT GOOD &middot; SYSTEMS VERIFICATION</span>
+      <span>PAGE 24</span>
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 25 (ODD): PRODUCTION HAZARDS
+     ========================================================================== -->
+<div class="page-container content-flow">
+  <div>
+    <h2>1.8 Production Hazards, Postmortems &amp; Interviews</h2>
+    
+    <h3>Real-World Postmortem: The Thread Pool Starvation Cascade</h3>
+    <p>In high-scale enterprise systems, abstract code often collides brutally with physical hardware reality. Consider an ASP.NET Core or Node.js web server handling 10,000 requests per second. The code utilizes a heavily contended global counter for metrics: <code>Interlocked.Increment(ref globalCounter)</code>.</p>
+    
+    <p><strong>The Hardware Reality:</strong> The <code>globalCounter</code> sits in a 64-byte cache line in main RAM. When Core 1 increments it, it pulls that cache line into its exclusive L1 cache, locking it via the MESI protocol. Instantly, Core 2, 3, and 4 also try to increment it. The hardware Bus Snooper forces Core 1 to flush the cache line back to RAM, invalidates it across the die, and gives it to Core 2. </p>
+    
+    <p>Because the CPU cores are fighting over the exact same physical silicon address, the pipelines stall for hundreds of cycles waiting for cache coherence. Throughput plummets. The web framework's Thread Pool sees requests backing up, so it blindly spawns <em>more</em> threads to handle the load. These new threads add <em>more</em> contention to the exact same cache line. Context switching overhead explodes, thermal throttling kicks in, and the server enters a death spiral, taking down the entire cluster. <strong>The fix? Shard the counters per-core (ThreadLocal) and aggregate asynchronously, respecting the physical cache lines.</strong></p>
+
+    <div class="callout interview">
+      <div class="callout-title">The Staff Engineer Whiteboard Test (Pink)</div>
+      "Walk me through what happens physically inside the machine when you execute <code>int c = a + b;</code>."<br><br>
+      <strong>Your Answer:</strong> "The compiler parses the AST and JITs down to <code>add eax, ebx</code>. The Program Counter (RIP) requests the instruction address. The MMU translates the virtual address to physical via the TLB. The L1I cache serves the opcode to the Fetch stage. The Decoder transforms it into a micro-op and routes the EAX and EBX register values. In the Execute stage, a 32-bit Carry-Lookahead Adder uses XOR and AND gates to compute the sum and update the ZF/CF RFLAGS in less than 0.2ns. Finally, the Write-Back stage latches the electron voltages into the EAX SRAM flip-flops, simultaneously zero-extending the upper 32 bits of RAX to prevent false data dependencies."
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 26 (EVEN): WHITEBOARD
+     ========================================================================== -->
+<div class="page-container">
+  <div class="whiteboard-page">
+    <div class="wb-header">
+      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+      <div class="wb-ref">REF: CH01_PRODUCTION_HAZARDS</div>
+    </div>
+    <div class="wb-invariants">
+      <div><b>Mechanical Sympathy:</b> Software that runs contrary to hardware design (e.g., unpredictable branching, unaligned memory, false sharing) will be orders of magnitude slower than software written with mechanical sympathy.</div>
+    </div>
+    <div class="wb-canvas"></div>
+    <div class="wb-footer">
+      <span>GIT GOOD &middot; SYSTEMS VERIFICATION</span>
+      <span>PAGE 26</span>
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 27 (ODD): QUIZ & CHECKLIST PART 1
+     ========================================================================== -->
+<div class="page-container content-flow">
+  <div>
+    <h2>1.9 Chapter Verification, Checklist &amp; Quiz</h2>
+
+    <div class="checklist">
+      <h3>Verification Checklist</h3>
+      <div class="check-item"><div class="checkbox"></div><div>I can explain Turing's contribution to computing and the Universal Turing Machine.</div></div>
+      <div class="check-item"><div class="checkbox"></div><div>I understand how Gate voltage creates an inversion layer in a MOSFET.</div></div>
+      <div class="check-item"><div class="checkbox"></div><div>I can sketch the 4 transistors comprising a CMOS NAND gate.</div></div>
+      <div class="check-item"><div class="checkbox"></div><div>I can explain why the 5 GHz Power Wall forced the industry into multi-core CPUs.</div></div>
+      <div class="check-item"><div class="checkbox"></div><div>I understand how Carry-Lookahead Adders reduce $O(N)$ ripple delays to $O(\log N)$.</div></div>
+      <div class="check-item"><div class="checkbox"></div><div>I can list the 5 stages of the classic RISC instruction pipeline.</div></div>
+      <div class="check-item"><div class="checkbox"></div><div>I know the difference between RAW, WAR, and WAW data hazards.</div></div>
+      <div class="check-item"><div class="checkbox"></div><div>I can explain why sorting an array drastically speeds up Branch Prediction.</div></div>
+      <div class="check-item"><div class="checkbox"></div><div>I understand the x86-64 32-bit zero-extension rule for registers like EAX.</div></div>
+      <div class="check-item"><div class="checkbox"></div><div>I can contrast the System V AMD64 ABI with the Microsoft x64 ABI.</div></div>
+    </div>
+
+    <h3>Comprehensive Examination</h3>
+
+    <div class="quiz-section">
+      <div class="quiz-question">
+        <p>1. What mathematical model did Alan Turing invent in 1936 that defines the absolute limits of computation for all modern CPUs?</p>
+        <div class="quiz-option">A) The Bombe Enigma Decoder</div>
+        <div class="quiz-option">B) The Von Neumann Architecture</div>
+        <div class="quiz-option">C) The Universal Turing Machine</div>
+        <div class="quiz-option">D) The Carry-Lookahead Algorithm</div>
+      </div>
+
+      <div class="quiz-question">
+        <p>2. What occurs in a CMOS circuit when both the NMOS and PMOS transistors switch states, and why is this critical?</p>
+        <div class="quiz-option">A) Static leakage drops to zero.</div>
+        <div class="quiz-option">B) Dynamic power ($P = C \cdot V^2 \cdot f$) is consumed as capacitance charges/discharges.</div>
+        <div class="quiz-option">C) The processor enters metastability.</div>
+        <div class="quiz-option">D) A structural hazard is generated in the pipeline.</div>
+      </div>
+
+      <div class="quiz-question">
+        <p>3. Why are Ripple-Carry Adders physically incapable of supporting modern 4 GHz clock speeds for 64-bit math?</p>
+        <div class="quiz-option">A) They require too many transistors.</div>
+        <div class="quiz-option">B) The carry bit propagation delay scales linearly $O(N)$, exceeding the ~0.25ns clock period limit.</div>
+        <div class="quiz-option">C) They consume excessive amounts of static power.</div>
+        <div class="quiz-option">D) They cannot handle Two's Complement negative numbers.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 28 (EVEN): WHITEBOARD
+     ========================================================================== -->
+<div class="page-container">
+  <div class="whiteboard-page">
+    <div class="wb-header">
+      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+      <div class="wb-ref">REF: CH01_QUIZ_SCRATCHPAD_1</div>
+    </div>
+    <div class="wb-canvas"></div>
+    <div class="wb-footer">
+      <span>GIT GOOD &middot; SYSTEMS VERIFICATION</span>
+      <span>PAGE 28</span>
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 29 (ODD): QUIZ & PROMPTS PART 2
+     ========================================================================== -->
+<div class="page-container content-flow">
+  <div>
+    <div class="quiz-section">
+      <div class="quiz-question">
+        <p>4. When executing an array iteration with an <code>if (data[i] &lt; 0)</code> check, why does execution speed increase drastically if the array is pre-sorted?</p>
+        <div class="quiz-option">A) The L1 Cache prefetcher aligns the data more efficiently.</div>
+        <div class="quiz-option">B) The CPU's Hardware Branch Predictor achieves near 100% accuracy, eliminating 15-cycle speculative flush penalties.</div>
+        <div class="quiz-option">C) The ALU can vectorize the math using SIMD instructions automatically.</div>
+        <div class="quiz-option">D) The OS virtual memory manager avoids page faults.</div>
+      </div>
+
+      <div class="quiz-question">
+        <p>5. In the x86-64 architecture, what happens physically when an instruction writes a value to the 32-bit <code>EAX</code> register?</p>
+        <div class="quiz-option">A) The upper 32 bits of the 64-bit <code>RAX</code> register remain unchanged.</div>
+        <div class="quiz-option">B) The CPU throws an interrupt if the value exceeds 32 bits.</div>
+        <div class="quiz-option">C) The hardware automatically zeroes out the upper 32 bits of the <code>RAX</code> register to break false dependencies.</div>
+        <div class="quiz-option">D) The CPU utilizes the 32-byte Shadow Space to store the remainder.</div>
+      </div>
+
+      <div class="quiz-question">
+        <p>6. How does the System V AMD64 ABI (Linux) primarily differ from the Microsoft x64 ABI (Windows) regarding function calls?</p>
+        <div class="quiz-option">A) Linux uses 6 registers for parameters and a 128B Red Zone; Windows uses 4 registers and requires 32B Shadow Space.</div>
+        <div class="quiz-option">B) Windows uses Big-Endian byte ordering; Linux uses Little-Endian.</div>
+        <div class="quiz-option">C) Linux passes all parameters via the Stack; Windows passes all parameters via Registers.</div>
+        <div class="quiz-option">D) Windows forces all calls through the `syscall` instruction; Linux does not.</div>
+      </div>
+
+      <h3 style="margin-top: 24px;">Systems Writing Prompts</h3>
+      
+      <p style="font-weight: 700; margin-bottom: 4px; font-size: 9.5pt;">Prompt 1: The Pipeline Hazard</p>
+      <p style="font-size: 9pt;">Explain the exact mechanical difference between a Data Hazard (RAW) and a Control Hazard. Describe the hardware mitigation strategy for both (Bypassing vs. Prediction) and the resulting penalty if the mitigation fails.</p>
+
+      <p style="font-weight: 700; margin-top: 18px; margin-bottom: 4px; font-size: 9.5pt;">Prompt 2: The Turing Legacy</p>
+      <p style="font-size: 9pt;">Summarize Alan Turing's contribution to WWII cryptography via the Bombe machine. Explain how this relates to the fundamental concept of narrowing a computational search space in modern algorithmic design.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 30 (EVEN): ANSWER KEY + SPLIT WHITEBOARD
+     ========================================================================== -->
+<div class="page-container">
+  <!-- Top: Answer Key -->
+  <div class="litmus-box" style="margin-top: 0; margin-bottom: 12px; padding: 12px 14px; font-size: 7.5pt; line-height: 1.45;">
+    <div style="font-weight: 800; color: #4338CA; text-transform: uppercase; margin-bottom: 6px; font-size: 8pt;">Chapter 1 Technical Answer Key</div>
+    <div style="margin-bottom: 4px;"><b>1. (C)</b> The Universal Turing Machine abstractly defined modern computation (tape, states, read/write heads), separating hardware from software logic.</div>
+    <div style="margin-bottom: 4px;"><b>2. (B)</b> CMOS draws nearly zero static current. Power is only drawn dynamically when transistors switch states, pulling electrons to charge physical capacitance.</div>
+    <div style="margin-bottom: 4px;"><b>3. (B)</b> A 64-bit ripple-carry requires the final bit to wait for 63 previous AND/OR operations, causing a latency that physically cannot resolve within a 0.25ns window.</div>
+    <div style="margin-bottom: 4px;"><b>4. (B)</b> Unsorted data causes ~50% branch misprediction, causing the CPU to fetch incorrect instructions and flush the 15-stage pipeline repeatedly. Sorted data yields 99.9% prediction accuracy.</div>
+    <div style="margin-bottom: 4px;"><b>5. (C)</b> Writing to 32-bit sub-registers (EAX, ECX) triggers hardware zero-extension of the upper 32-bits (RAX, RCX) to facilitate register renaming in Out-of-Order execution.</div>
+    <div style="margin-bottom: 8px;"><b>6. (A)</b> The Linux ABI (System V) is heavily register-optimized (RDI, RSI, RDX, RCX, R8, R9) and utilizes a Red Zone. Windows enforces 4 registers (RCX, RDX, R8, R9) and strict 32B caller shadow space.</div>
+    <div style="margin-bottom: 4px;"><b>Prompt 1:</b> Data hazards (RAW) occur when Inst B needs data that Inst A hasn't finished writing. Mitigation: Operand Forwarding (wiring ALU output directly back to input). Penalty: Pipeline stall (bubbles). Control hazards occur on conditional jumps before the condition resolves. Mitigation: Branch Prediction. Penalty: Massive pipeline flush (discarding speculatively fetched work).</div>
+    <div><b>Prompt 2:</b> Enigma generated 159 quintillion combinations daily. Turing's Bombe didn't test every combination; it used known plaintext ("cribs") and logical contradictions to eliminate millions of impossible settings concurrently. This is the ultimate example of algorithmic pruning (like Alpha-Beta pruning or backtracking), proving that brute force is inferior to mathematical space reduction.</div>
+  </div>
+
+  <!-- Bottom: Split Whiteboard -->
+  <div class="whiteboard-page wb-split">
+    <div class="wb-header">
+      <div class="wb-title">Whiteboard &amp; Synthesis Workspace</div>
+      <div class="wb-ref">REF: CH01_FINAL_SYNTHESIS</div>
+    </div>
+    <div class="wb-canvas"></div>
+    <div class="wb-footer">
+      <span>GIT GOOD &middot; CHAPTER 1 COMPLETE</span>
+      <span>PAGE 30</span>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
