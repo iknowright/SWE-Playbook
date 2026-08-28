@@ -4,428 +4,553 @@
 <head>
     <meta charset="utf-8">
     <link rel="stylesheet" href="common.css">
+    <title>Git Good in 1 year: Senior SWE Playbook</title>
 </head>
 
 <body>
 
+    <!-- ============ COVER PAGE ============ -->
     <div class="cover">
         <div class="top-block">
-            <div class="kicker">Self-Paced SWE Masterclass</div>
+            <div class="kicker">Self-Paced SWE Systems Masterclass</div>
             <h1>GIT GOOD</h1>
-            <div class="subtitle">SWE 101</div>
+            <div class="subtitle">The 365-Day SWE Playbook</div>
             <div class="terminal-tag">
-                $ git commit -m "getting j*b is not that hard gng🥀" --no-verify
+                $ git commit -m "fix(career): bag that j*b brody 🥀" --no-verify
             </div>
         </div>
         <div class="bottom-block">
-            <div class="byline">Written &amp; Compiled by Srajan Rai</div>
+            <div class="byline">Written &amp; Verified by me &middot; Synthesized via AI </div>
             <div class="year">2026 &middot; First Edition</div>
         </div>
     </div>
+
+    <!-- ============ ABOUT THE AUTHOR & MANIFESTO ============ -->
     <h2 class="fm-title">About the Author and This Book</h2>
 
     <h3 class="fm-sub">About the Author</h3>
-    <p class="fm-body">I'm Srajan Rai, a software engineer writing high-performance backend systems in C#/.NET who got
-        deeply tired of finding a j*b in 2026 and wanted to help others avoid the same pitfalls.</p>
-    <p class="fm-body">Like most developers, I spent years writing code that was completely fine—right up until AI
-        bubble showed up and took my job. Every chapter in this 215-chapter monster exists because I had to prepare for
-        them in these 4 months of my unemployed career. I wanted to understand the raw data, from starting, from zero,
-        why your CPU stalls for 200 cycles when you chase a pointer across the heap, how memory barriers stop hardware
-        reordering, and why microservices always pick 3:00 AM to deadlock.</p>
-    <p class="fm-body">The standard was simple: if I couldn't explain the physical hardware mechanics, sketch the memory
-        layout, and write the zero-allocation implementation cold on a whiteboard under interview pressure, I didn't
-        actually own the concept. So I wrote the roadmap to fix that, and yes I bought an IPad for this btw xd</p>
+    <p class="fm-body">I'm Srajan Rai, a software engineer writing backend systems in C#/.NET who got deeply tired of current job market and levels of interviews that demand everything from theory to actual hands-on experience.</p>
+
+    <p class="fm-body">Like most developers, I spent years writing code that was completely fine—right up until one day I got laid off and took some time off to react to this job famine, So after getting back from my vacation and preparing for 1 month 16 hrs a day, I got the job and wanted to create a self pace play book to help myself. I created this book to help myself and others like me, Every chapter in this 365-day masterclass exists because I refused to rely on buzzwords or memorized answers. I wanted to understand the absolute everything: how CPU pipelines execute instructions, why cache line false sharing degrades performance, how lock-free primitives eliminate contention, and how distributed state machines prevent split-brain anomalies under network partitions. And yes, I bought an iPad specifically to sketch every single memory layout and state machine in this book.</p>
+    <p class="fm-body">The standard was simple: if I couldn't explain the physical hardware mechanics, sketch the memory layout, trace the failure recovery path, and defend the trade-offs on a whiteboard under pressure, I didn't actually own the concept. This playbook is that roadmap.</p>
 
     <h3 class="fm-sub">About This Book</h3>
-    <p class="fm-body">This is not just an AI slop cheat sheet, and it is not an academic textbook from 1982 written in
-        Assembly Language. It is an unapologetic, exhaustive <strong>215-chapter, 9-phase Poojan lvl
-            masterclass</strong> engineered to take you from <em>"it works on my machine and I vibe-coded"</em> to
-        Staff-level systems mastery and Senior-level design architecture.</p>
+    <p class="fm-body">This is not a high-level cheat sheet, and it is not an academic textbook created by a human. It is an unapologetic, exhaustive <strong>365-day, 12-volume systems curriculum</strong> engineered to take me from any level to Staff-level systems design and architecture.</p>
 
-    <p class="fm-body">We start at the absolute metal—logic gates, binary arithmetic, clock cycles, and stack frame
-        pointers—and systematically build upward through kernel internals, lock-free ring buffers, database storage
-        engines, distributed consensus algorithms, zero-allocation compiler optimizations, and multi-region system
-        design.</p>
-    <p class="fm-body">Every single chapter follows an unyielding <strong>5-Layer Pedagogical Framework</strong>:</p>
+    <p class="fm-body">We start at physical silicon—logic gates, 2's complement arithmetic, clock cycles, and stack frame layouts—and systematically build upward through operating system kernels, lock-free concurrency, database storage engines, distributed consensus, zero-allocation compiler optimizations, high-scale system design, and production incident triage.</p>
+
+    <p class="fm-body">Every single module follows an unyielding <strong>5-Layer Pedagogical Framework</strong>:</p>
     <ul>
-        <li><strong>1. Physical Memory &amp; Hardware Reality:</strong> What physical RAM, CPU registers, and 64-byte
-            cache lines are actually doing under the hood while your code executes.</li>
-        <li><strong>2. Abstract Theory &amp; Mathematical Invariants:</strong> Formal complexity bounds ($O, \Omega,
-            \Theta$) and proof-of-correctness invariants so you stop guessing at algorithmic limits.</li>
-        <li><strong>3. Production-Grade Implementation:</strong> Complete, unabridged source code with zero-allocation
-            optimizations and error handling—no lazy <code>// TODO: left as an exercise for the reader</code> shortcuts.
-        </li>
-        <li><strong>4. Elite Algorithmic &amp; LeetCode Patterns:</strong> Core interview archetypes and brutal edge
-            cases designed to ensure you never freeze in a technical screening.</li>
-        <li><strong>5. Verification, Synthesis &amp; Multi-Format Examination:</strong> Self-assessment checklists and
-            multi-question quizzes with full technical rationale so you can audit your own gaps before an interviewer
-            does.</li>
+        <li><strong>1. Physical Memory &amp; Hardware Reality:</strong> What physical RAM, CPU registers, and 64-byte cache lines are doing under the hood during execution.</li>
+        <li><strong>2. Abstract Theory &amp; Mathematical Invariants:</strong> Formal complexity bounds ($O, \Omega, \Theta$), proof-of-correctness invariants, and state transition models.</li>
+        <li><strong>3. Production-Grade Implementation:</strong> Complete, unabridged source code with zero-allocation optimizations, error handling, and memory safety.</li>
+        <li><strong>4. Elite Algorithmic &amp; Real-World Scenarios:</strong> Core interview archetypes, non-trivial edge cases, and high-frequency failure scenarios.</li>
+        <li><strong>5. Verification, Synthesis &amp; Examination:</strong> Self-assessment checklists and multi-question quizzes with full technical rationale to audit knowledge gaps.</li>
     </ul>
-    <p class="fm-body">The goal is not just to pass an interview or collect buzzwords for LinkedIn. It is to build
-        mechanical knowledge so sharp that code reviews get better, your latency graphs drop, and you never have to type
-        <code>git push --force</code> with your eyes closed again.
-    </p>
 
-    <!-- ============ TOC ============ -->
-    <!-- ============ TOC (COMPACT TITLES) ============ -->
+    <!-- ============ COMPLETE 365-DAY TABLE OF CONTENTS ============ -->
     <h2 class="fm-title toc-title">Table of Contents</h2>
 
-    <!-- PHASE 1 -->
+    <!-- VOLUME I -->
     <div class="toc-block">
-        <div class="toc-phase">Foundations, Machine Architecture &amp; Core Logic
-        </div>
+        <div class="toc-phase">Volume I: Silicon, Machine Architecture &amp; Low-Level Math</div>
         <div class="toc-chapters">
-            <div>1. How Computers Execute Code</div>
-            <div>2. Binary, 2's Complement &amp; Floating-Point Precision</div>
-            <div>3. Memory Hierarchy: Caches, Stack &amp; Heap</div>
-            <div>4. Primitive Types, Casting &amp; Memory Sizing</div>
-            <div>5. Control Flow &amp; Hardware Branch Prediction</div>
-            <div>6. Loops, Invariants &amp; Misprediction Hazards</div>
-            <div>7. Functions, Stack Frames &amp; Calling Conventions</div>
-            <div>8. Parameter Passing Semantics &amp; Stack Allocations</div>
-            <div>9. Static Arrays, Dynamic Lists &amp; Index Arithmetic</div>
-            <div>10. Strings, Encodings &amp; Interning Pools</div>
-            <div>11. Singly &amp; Doubly Linked Lists</div>
-            <div>12. Stacks, Queues &amp; Circular Buffers</div>
-            <div>13. Recursion &amp; Call Stack Mechanics</div>
-            <div>14. Tail Recursion &amp; Frame Reuse (TCO)</div>
-            <div>15. Hash Tables, Bitwise Masking &amp; Collisions</div>
-            <div>16. Equality Contracts &amp; GetHashCode Invariants</div>
-            <div>17. Classes, Structs &amp; Object Header Overhead</div>
-            <div>18. Inheritance, vtables &amp; Virtual Dispatch</div>
-            <div>19. Interfaces &amp; Interface Dispatch Tables (itables)</div>
-            <div>20. Boxing, Unboxing &amp; Generic Specialization</div>
-            <div>21. Collections &amp; LINQ Pipeline Internals</div>
-            <div>22. Iterators, yield return &amp; State Machines</div>
-            <div>23. Exception Handling Internals &amp; SEH Unwinding</div>
-            <div>24. Production Debugging &amp; Memory Dumps</div>
-            <div>25. Algorithmic Complexity &amp; Asymptotic Bounds</div>
+            <div>1. MOSFET Semiconductor Physics: Gate Voltage, Inversion Channels &amp; CMOS Inverters</div>
+            <div>2. Combinational Silicon Logic: Universal NAND/NOR Gates, Half-Adders &amp; 64-Bit Carry-Lookahead ALUs</div>
+            <div>3. Quartz Crystal Oscillators, Piezoelectric Resonance, PLL Multipliers &amp; Clock Period Math</div>
+            <div>4. Physical Scaling Limits: Signal Propagation Delay, Clock Jitter &amp; The 5 GHz Power Wall ($P = C \cdot V^2 \cdot f$)</div>
+            <div>5. Von Neumann vs. Harvard Architecture &amp; The Physical Memory Bus Bottleneck</div>
+            <div>6. The Classical 5-Stage CPU Pipeline: Fetch (IF), Decode (ID), Execute (EX), Memory (MEM), Write-back (WB)</div>
+            <div>7. Advanced CPU Execution: Instruction Pipelining Hazards (Data RAW/WAR/WAW, Structural, Control)</div>
+            <div>8. Superscalar Execution, Out-of-Order Execution (OoO) &amp; The Reorder Buffer (ROB)</div>
+            <div>9. Hardware Branch Predictors: 2-Bit Saturating Counters, Two-Level Adaptive Predictors &amp; Branch Misprediction Penalties</div>
+            <div>10. Speculative Execution, CPU Pipeline Flushes &amp; Hardware Vulnerabilities (Spectre / Meltdown)</div>
+            <div>11. x86-64 vs. ARM64 ISA: Instruction Formats, Fixed-Length vs. Variable-Length Decoding</div>
+            <div>12. General Purpose Register Maps (RAX–R15), Sub-Register Slicing &amp; The 32-Bit Zero-Extension Rule</div>
+            <div>13. Status Flags Register: Zero Flag (ZF), Carry Flag (CF), Overflow Flag (OF), Sign Flag (SF)</div>
+            <div>14. Operating System ABIs: Microsoft x64 (4-Register + 32B Shadow Space) vs. System V AMD64 (6-Register + Red Zone)</div>
+            <div>15. CISC to RISC Translation: Instruction Decoders, Micro-operations (&mu;ops) &amp; Microcode ROM</div>
+            <div>16. Positional Number Bases: Binary (Base-2), Octal (Base-8), Hexadecimal (Base-16) &amp; The Nibble Isomorphism</div>
+            <div>17. Endianness in Silicon: Little-Endian vs. Big-Endian Memory Storage &amp; Byte-Swapping Intrinsics</div>
+            <div>18. Signed Integers: Sign-and-Magnitude vs. 1's Complement vs. 2's Complement Arithmetic Invariants</div>
+            <div>19. 2's Complement ALU Unification: Addition, Subtraction ($A - B = A + (\sim B + 1)$) &amp; Asymmetric Range Bounds</div>
+            <div>20. Sign Extension (MOVSX) vs. Zero Extension (MOVZX) in CPU Registers</div>
+            <div>21. The Integer Arithmetic Hazards: Unsigned Loop Underflows, Math.Abs(int.MinValue) Overflows &amp; Midpoint Traps</div>
+            <div>22. Floating-Point Foundations: Non-Terminating Binary Fractional Expansions ($0.1_{10}$) &amp; Why $0.1 + 0.2 \neq 0.3$</div>
+            <div>23. IEEE 754 Standard: 32-Bit Float vs. 64-Bit Double Bitfield Partitioning (Sign, Biased Exponent, Mantissa)</div>
+            <div>24. IEEE 754 Normalization: The Implicit Leading Bit, Biased Exponents &amp; Dynamic Range Calculations</div>
+            <div>25. IEEE 754 Edge Cases: Signed Zeroes (+0.0 / -0.0), Infinities, Quiet NaN vs. Signaling NaN (NaN == NaN Falsehood)</div>
+            <div>26. Subnormal / Denormal Floating-Point Numbers: Microcode Fallback Hazards &amp; Flush-To-Zero (FTZ) Flags</div>
+            <div>27. Catastrophic Cancellation, Floating-Point Epsilon Comparisons &amp; 128-Bit Financial decimal Architecture</div>
+            <div>28. The Complete Bitwise Toolkit: AND, OR, XOR, NOT, Logical/Arithmetic Shifts</div>
+            <div>29. Elite Bit Manipulation: Brian Kernighan's Algorithm, Isolating Lowest Set Bit (x &amp; -x), Power-of-Two Auditing</div>
+            <div>30. Advanced Bitmasking: In-Place XOR Swaps, State Bitsets, Hardware Intrinsics (POPCNT, LZCNT, TZCNT)</div>
         </div>
     </div>
 
-    <!-- PHASE 2 -->
+    <!-- VOLUME II -->
     <div class="toc-block">
-        <div class="toc-phase">Intermediate Data Structures &amp; Algorithms</div>
+        <div class="toc-phase">Volume II: Data Structures, Memory Layouts &amp; Cache Alignment</div>
         <div class="toc-chapters">
-            <div>26. Two-Pointer Convergence &amp; Fast/Slow Pointers</div>
-            <div>27. Sliding Window Mastery: Fixed &amp; Dynamic</div>
-            <div>28. Prefix Sums &amp; Difference Arrays</div>
-            <div>29. Monotonic Stacks &amp; Monotonic Deques</div>
-            <div>30. Binary Search &amp; Search Space Reduction</div>
-            <div>31. String Searching: KMP, Rabin-Karp &amp; Z-Algorithm</div>
-            <div>32. Priority Queues, Heaps &amp; Flat-Array Math</div>
-            <div>33. Quadratic Sorting Algorithms</div>
-            <div>34. Divide-and-Conquer: Merge, Quick &amp; Heap Sort</div>
-            <div>35. Non-Comparison Sorting: Counting, Radix &amp; Bucket</div>
-            <div>36. Interval Scheduling &amp; Sweep Line Algorithms</div>
-            <div>37. Disjoint Set Union (DSU / Union-Find)</div>
-            <div>38. Trees &amp; Binary Search Trees (BST)</div>
-            <div>39. Tree Traversals: DFS &amp; BFS Level-Order</div>
-            <div>40. Self-Balancing AVL Trees &amp; Rotations</div>
-            <div>41. Red-Black Trees &amp; Production Sets</div>
-            <div>42. Tries, Radix Trees &amp; Suffix Arrays</div>
-            <div>43. Graph Representations: Matrix, List &amp; CSR</div>
-            <div>44. Graph Traversals: Multi-Source &amp; Cycles</div>
-            <div>45. Topological Sorting &amp; DAG Dependencies</div>
-            <div>46. Shortest Paths: Dijkstra &amp; Bellman-Ford</div>
-            <div>47. All-Pairs Shortest Paths: Floyd-Warshall &amp; Johnson's</div>
-            <div>48. Minimum Spanning Trees: Kruskal &amp; Prim</div>
-            <div>49. Tarjan's SCC, Bridges &amp; Articulation Points</div>
-            <div>50. Network Flow: Ford-Fulkerson &amp; Dinic's</div>
+            <div>31. Primitive Data Types: Memory Sizing, Structural Alignment, Field Offsets &amp; Padding</div>
+            <div>32. Contiguous Memory Arrays: Static Arrays, Dynamic Vectors, Amortized Geometric Resizing Proofs</div>
+            <div>33. Cache-Friendly Array Traversal: Row-Major vs. Column-Major Memory Strides &amp; L1 Data Cache Hits</div>
+            <div>34. String Internals: Character Encodings (ASCII, UTF-8 Variable Byte Math, UTF-16 Surrogate Pairs)</div>
+            <div>35. Managed String Architecture: Immutability, String Interning Pools, Substring Allocations &amp; Zero-Copy Spans</div>
+            <div>36. Singly Linked Lists: Node Memory Layout, Dynamic Allocation Overhead &amp; Pointer-Chasing Cache Misses</div>
+            <div>37. Doubly Linked Lists: Sentinel Nodes, Bidirectional Traversal, Memory Footprints &amp; Unrolled Linked Lists</div>
+            <div>38. Stack Data Structures: Array-Based Stacks vs. Linked Stacks, Call Stack Simulation, Frame Depth Limits</div>
+            <div>39. Queue Data Structures: FIFO Queues, Deques, Circular Buffers &amp; Head/Tail Ring Wrap Math</div>
+            <div>40. Monotonic Stacks: Next Greater Element, Stock Span &amp; Largest Rectangle in Histogram Invariants</div>
+            <div>41. Monotonic Deques: Sliding Window Maximum/Minimum Tracking in $O(N)$ Time</div>
+            <div>42. Hash Table Foundations: Hash Functions (MurmurHash3, xxHash, CityHash), Uniform Distribution &amp; Avalanching</div>
+            <div>43. Hash Collisions 1: Separate Chaining (Linked Lists, Self-Balancing Trees) &amp; Load Factor Dynamics</div>
+            <div>44. Hash Collisions 2: Open Addressing (Linear Probing, Quadratic Probing, Double Hashing) &amp; Tombstones</div>
+            <div>45. High-Performance Hash Tables: Robin Hood Hashing, Cuckoo Hashing &amp; Flat-Array Memory Layouts</div>
+            <div>46. Object Equality Contracts: Equals(), GetHashCode(), Hash Code Immutability &amp; Mutable Key Corruption</div>
+            <div>47. Trees &amp; Binary Trees: Node Topologies, Height vs. Depth, Full vs. Complete vs. Perfect Trees</div>
+            <div>48. Binary Search Trees (BST): BST Invariants, Search, Insertion, In-Order Predecessor/Successor Deletions</div>
+            <div>49. Tree Traversals: Recursive vs. Iterative Depth-First Search (Pre/In/Post-Order) &amp; Morris In-Order Traversal</div>
+            <div>50. Breadth-First Search (BFS): Level-Order Queue Traversals, Serialization &amp; Zigzag Traversals</div>
+            <div>51. Self-Balancing Trees 1: AVL Trees, Balance Factors, Single/Double Tree Rotations</div>
+            <div>52. Self-Balancing Trees 2: Red-Black Trees, 5 Invariants, Black-Height, Color-Flipping &amp; Fixup Rotations</div>
+            <div>53. Tries (Prefix Trees): Array-Based vs. Hash-Based Children, Insert, Search, Prefix Matching</div>
+            <div>54. Advanced Prefix Structures: Compressed Radix Trees (Patricia Tries), Suffix Trees &amp; Suffix Arrays</div>
+            <div>55. Priority Queues &amp; Binary Heaps: Min/Max Heaps, Flat-Array Complete Tree Math ($2i+1, 2i+2$)</div>
+            <div>56. Heap Algorithms: Heapify Down/Up, $O(N)$ Linear-Time Build-Heap Mathematical Induction Proof</div>
+            <div>57. Advanced Heaps: D-ary Heaps, Fibonacci Heaps, Binomial Heaps, Indexable Heaps (Dijkstra Optimization)</div>
+            <div>58. Disjoint Set Union (DSU / Union-Find): Representative Nodes, Path Compression, Union-by-Rank/Size</div>
+            <div>59. Range Query Data Structures 1: Segment Trees (Array Layout, Range Queries, Point Updates)</div>
+            <div>60. Range Query Data Structures 2: Segment Trees with Lazy Propagation &amp; Range Update Optimization</div>
         </div>
     </div>
 
-    <!-- PHASE 3 -->
+    <!-- VOLUME III -->
     <div class="toc-block">
-        <div class="toc-phase">Dynamic Programming &amp; Optimization</div>
+        <div class="toc-phase">Volume III: Algorithmic Mastery, SDE Sheet Patterns &amp; Optimization</div>
         <div class="toc-chapters">
-            <div>51. DP Foundations: Memoization vs. Tabulation</div>
-            <div>52. 1D Dynamic Programming Patterns</div>
-            <div>53. 2D DP: Grids, LCS &amp; Edit Distance</div>
-            <div>54. Knapsack DP: 0/1, Unbounded &amp; Bounded</div>
-            <div>55. Interval DP &amp; Matrix Chain Multiplication</div>
-            <div>56. Bitmask DP &amp; State Compression</div>
-            <div>57. Tree DP &amp; Subtree Aggregations</div>
-            <div>58. Digit Dynamic Programming</div>
-            <div>59. Dynamic Programming on DAGs</div>
-            <div>60. Backtracking Systems: Subsets &amp; Permutations</div>
-            <div>61. Constraint Satisfaction: N-Queens &amp; Sudoku</div>
-            <div>62. Greedy Choice &amp; Matroid Theory</div>
-            <div>63. Segment Trees &amp; Lazy Propagation</div>
-            <div>64. Binary Indexed Trees (Fenwick Trees)</div>
-            <div>65. SkipLists, Bloom Filters &amp; HyperLogLog</div>
+            <div>61. Range Query Data Structures 3: Binary Indexed Trees (Fenwick Trees), Lowest Set Bit (x &amp; -x) Mechanics</div>
+            <div>62. Probabilistic Data Structures 1: SkipLists (Layered Pointers, Probabilistic Heights, $O(\log N)$ Traversal)</div>
+            <div>63. Probabilistic Data Structures 2: Bloom Filters (Multiple Hash Functions, False Positive Math, Counting Filters)</div>
+            <div>64. Probabilistic Data Structures 3: HyperLogLog (Cardinality Estimation, Leading Zeros Math, Harmonic Mean)</div>
+            <div>65. Probabilistic Data Structures 4: Count-Min Sketch, Heavy Hitters &amp; Sliding Window Frequency</div>
+            <div>66. Two-Pointer Algorithms: Opposite-Direction Convergence, Same-Direction Sliding, Fast/Slow Pointers</div>
+            <div>67. Fast &amp; Slow Pointer Patterns: Floyd's Cycle Detection Algorithm, Cycle Start Node Math Proof</div>
+            <div>68. Sliding Window Framework: Fixed-Size Windows, Dynamic-Size Windows with Auxiliary State Tables</div>
+            <div>69. Prefix Sum Patterns: 1D Prefix Arrays, 2D Prefix Matrices, Subarray Sum Equals $K$ (Hashmap Accumulation)</div>
+            <div>70. Difference Arrays: $O(1)$ Range Increments, Range Add Operations, Sweep Line Interval Reconstruction</div>
+            <div>71. Prefix XOR Patterns: Bitwise Range XOR Queries, Subarrays with XOR $K$ Hashmap Frequencies</div>
+            <div>72. Matrix Transformations: In-Place Set Matrix Zeroes ($O(1)$ Space State Markers)</div>
+            <div>73. 2D Array Transformations: In-Place $90^\circ$ Matrix Rotation (Transpose + Row Reversal)</div>
+            <div>74. 2D Searching: Binary Search on Row/Column Sorted Matrices vs. Flattened Virtual Binary Search</div>
+            <div>75. Partitioning Invariants: The Dutch National Flag Algorithm (0s, 1s, 2s 3-Pointer Sorting)</div>
+            <div>76. Voting Invariants: Boyer-Moore Majority Voting Algorithm ($>N/2$) &amp; Extended Boyer-Moore ($>N/3$)</div>
+            <div>77. Divide-and-Conquer Sorting: Merge Sort Recursion Trees, Hoare vs. Lomuto Quicksort Partitioning</div>
+            <div>78. Inversion Counting: Modified Merge Sort for Inversion Pairs &amp; Reverse Pairs ($a[i] > 2 \cdot a[j]$)</div>
+            <div>79. Non-Comparison Sorting: Counting Sort, Radix Sort (LSD vs. MSD), Bucket Sort Math Bounds</div>
+            <div>80. Interval Scheduling: Interval Intersection, Non-Overlapping Intervals, Meeting Rooms &amp; Sweep Line Algorithms</div>
+            <div>81. Binary Search Deep-Dive: Lower Bound, Upper Bound, Rotated Sorted Arrays, Search in Infinite Streams</div>
+            <div>82. Binary Search on Solution Spaces: Monotonic Predicates, Koko Eating Bananas, Capacity to Ship Packages</div>
+            <div>83. String Matching Algorithms 1: Knuth-Morris-Pratt (KMP) &amp; The Longest Prefix Suffix (LPS) Table</div>
+            <div>84. String Matching Algorithms 2: Rabin-Karp Rolling Hash, Polynomial Hashing &amp; Collision Verification</div>
+            <div>85. String Matching Algorithms 3: Z-Algorithm, Aho-Corasick Multi-Pattern Automata</div>
+            <div>86. Graph Representations: Adjacency Matrix, Adjacency List, Compressed Sparse Row (CSR), Forward Star</div>
+            <div>87. Graph Search Mastery: Multi-Source BFS, Bidirectional BFS, Cycle Detection in Directed/Undirected Graphs</div>
+            <div>88. Topological Sorting: Kahn’s Algorithm (In-Degree Queue), DFS Post-Order Reversal, Cycle Identification</div>
+            <div>89. Single-Source Shortest Paths: Dijkstra (Min-Heap vs. Indexed Heap) vs. Bellman-Ford (Negative Weight Cycles)</div>
+            <div>90. All-Pairs Shortest Paths &amp; MST: Floyd-Warshall DP, Johnson's Reweighting, Kruskal's (DSU) &amp; Prim's Algorithm</div>
         </div>
     </div>
 
-    <!-- PHASE 4 -->
+    <!-- VOLUME IV -->
     <div class="toc-block">
-        <div class="toc-phase">Low-Level Systems &amp; OS Internals</div>
+        <div class="toc-phase">Volume IV: Dynamic Programming, Graph Theory &amp; Backtracking</div>
         <div class="toc-chapters">
-            <div>66. CPU Hardware Architecture &amp; ISAs</div>
-            <div>67. Instruction Pipelining &amp; Out-of-Order Execution</div>
-            <div>68. Hardware Branch Prediction &amp; Speculation</div>
-            <div>69. Cache Line Mechanics &amp; MESI Coherence</div>
-            <div>70. False Sharing &amp; Cache Line Bouncing</div>
-            <div>71. SIMD &amp; Vector Registers (AVX / NEON)</div>
-            <div>72. Virtual Memory Architecture &amp; Paging</div>
-            <div>73. TLBs, HugePages &amp; MMU Lookups</div>
-            <div>74. Kernel vs. User Space &amp; System Calls</div>
-            <div>75. Process Internals, fork &amp; Copy-On-Write</div>
-            <div>76. Threads, TCBs &amp; OS Scheduling</div>
-            <div>77. Linux Process Schedulers (CFS) &amp; Pinning</div>
-            <div>78. Memory Allocators: malloc, jemalloc &amp; Arenas</div>
-            <div>79. Garbage Collection: Mark-Sweep &amp; Tri-Color</div>
-            <div>80. Generational GC Mechanics &amp; LOH Compaction</div>
-            <div>81. Managed Runtime Object Layouts &amp; SyncBlocks</div>
-            <div>82. File Systems Architecture: Inodes &amp; Ext4/XFS</div>
-            <div>83. OS Page Cache, Dirty Pages &amp; Direct I/O</div>
-            <div>84. Synchronous vs. Asynchronous I/O &amp; epoll</div>
-            <div>85. Linux io_uring &amp; Kernel Bypass</div>
-            <div>86. Inter-Process Communication (IPC) &amp; Sockets</div>
-            <div>87. POSIX Signals &amp; Async-Signal-Safety</div>
-            <div>88. Binary File Formats (ELF/PE) &amp; Dynamic Linking</div>
-            <div>89. Binary Exploitation Defenses: ASLR, DEP &amp; ROP</div>
-            <div>90. Unsafe Memory, Pointers &amp; Interop</div>
-            <div>91. Memory-Mapped I/O (MMIO) &amp; Interrupts</div>
-            <div>92. Direct Memory Access (DMA), NVMe &amp; SPDK</div>
+            <div>91. Advanced Graph Topology: Tarjan’s Strongly Connected Components (SCC), Low-Link Values &amp; Discovery Times</div>
+            <div>92. Graph Vulnerability Analysis: Articulation Points (Cut Vertices) &amp; Bridges in Critical Infrastructure</div>
+            <div>93. Network Flow Theory: Residual Graphs, Augmenting Paths, Ford-Fulkerson &amp; Edmonds-Karp Algorithms</div>
+            <div>94. High-Performance Flow: Dinic’s Blocking Flow Algorithm, Level Graphs &amp; Bipartite Matching</div>
+            <div>95. Dynamic Programming Foundations: Optimal Substructure, Overlapping Subproblems, Top-Down vs. Bottom-Up</div>
+            <div>96. 1D State Transitions: Climbing Stairs, House Robber, Coin Change, Maximum Subarray (Kadane's Algorithm)</div>
+            <div>97. 2D Grid Dynamic Programming: Unique Paths, Minimum Path Sum, Obstacle Matrices, Triangle Paths</div>
+            <div>98. Sequence Dynamic Programming: Longest Increasing Subsequence ($O(N \log N)$ Patience Sorting Binary Search)</div>
+            <div>99. String Dynamic Programming: Longest Common Subsequence (LCS), Edit Distance (Levenshtein), Distinct Subsequences</div>
+            <div>100. Knapsack Variations 1: 0/1 Knapsack (1D Memory Compression Invariant: Backward Traversal)</div>
+            <div>101. Knapsack Variations 2: Unbounded Knapsack (Forward Traversal), Bounded Knapsack with Binary Splitting</div>
+            <div>102. Interval Dynamic Programming: Matrix Chain Multiplication, Burst Balloons, Minimum Cost to Merge Stones</div>
+            <div>103. Bitmask Dynamic Programming 1: State Compression Invariants, Traveling Salesperson Problem (TSP)</div>
+            <div>104. Bitmask Dynamic Programming 2: Submask Enumeration Formula ((sub - 1) &amp; m) &amp; $O(3^N)$ Total State Space Proof</div>
+            <div>105. Tree Dynamic Programming: Subtree Size Aggregations, Tree Diameter, Maximum Path Sum, All-Node Distance Queries</div>
+            <div>106. Digit Dynamic Programming: Range Digit Queries, State Tracking (Index, Tight Constraint, Leading Zeroes)</div>
+            <div>107. Dynamic Programming on Directed Acyclic Graphs (DAGs): Longest Paths, Total Distinct Paths, Probability Transitions</div>
+            <div>108. Advanced DP Optimization: Divide and Conquer Optimization, Knuth’s Optimization</div>
+            <div>109. Convex Hull Trick (CHT) &amp; Li Chao Trees for Dynamic Programming Slope Optimization</div>
+            <div>110. Backtracking Systems 1: Search Space Tree Construction, State Restoration, Subsets &amp; Combinations</div>
+            <div>111. Backtracking Systems 2: Permutations with Duplicates (Sorting &amp; Sibling Pruning Invariants)</div>
+            <div>112. Constraint Satisfaction 1: N-Queens Problem (Row/Column/Diagonal Bitmask Accelerations)</div>
+            <div>113. Constraint Satisfaction 2: Sudoku Solvers, Word Search II (Backtracking Integrated with Tries)</div>
+            <div>114. Exact Cover Problems: Knuth’s Algorithm X, Torus Circular Doubly Linked Lists &amp; Dancing Links (DLX)</div>
+            <div>115. Greedy Choice Theory: Matroids, Greedy-Choice Property, Proof of Correctness via Exchange Arguments</div>
+            <div>116. Classic Greedy Patterns: Activity Selection, Jump Game, Gas Station Circular Route Invariants</div>
+            <div>117. Huffman Coding: Frequency Trees, Prefix-Free Binary Bitstreams, Greedy Encoding Mechanics</div>
+            <div>118. Computational Geometry 1: Cross Product Orientation Tests, Convex Hull (Graham Scan, Monotone Chain)</div>
+            <div>119. Computational Geometry 2: Line Segment Intersection, Closest Pair of Points (Divide-and-Conquer Sweep Line)</div>
+            <div>120. Algorithmic Complexity Rigor: Master Theorem, Akra-Bazzi Method, Formal Asymptotic Bounds ($O, \Omega, \Theta$)</div>
         </div>
     </div>
 
-    <!-- PHASE 5 -->
+    <!-- VOLUME V -->
     <div class="toc-block">
-        <div class="toc-phase">Concurrency, Lock-Free &amp; Parallelism</div>
+        <div class="toc-phase">Volume V: Operating Systems, Kernel Internals &amp; Memory Architecture</div>
         <div class="toc-chapters">
-            <div>93. Hardware Memory Models: TSO &amp; Weak Ordering</div>
-            <div>94. Memory Barriers &amp; Acquire-Release Semantics</div>
-            <div>95. Atomic Operations &amp; LOCK Bus Prefixes</div>
-            <div>96. Compare-And-Swap (CAS) &amp; the ABA Problem</div>
-            <div>97. Spinlocks, Ticket Locks &amp; MCS Locks</div>
-            <div>98. Linux Futex &amp; Two-Phase Locking</div>
-            <div>99. Shared vs. Exclusive Reader-Writer Locks</div>
-            <div>100. Coffman Conditions &amp; Deadlock Hierarchies</div>
-            <div>101. Livelock, Starvation &amp; Priority Inversion</div>
-            <div>102. Condition Variables, Monitors &amp; Signalling</div>
-            <div>103. Bounded Buffers &amp; Dining Philosophers</div>
-            <div>104. Lock-Free Treiber Stack Algorithm</div>
-            <div>105. Lock-Free Michael-Scott Queue</div>
-            <div>106. LMAX Disruptor Architecture &amp; Ring Buffers</div>
-            <div>107. Wait-Free Synchronization &amp; Consensus</div>
-            <div>108. Memory Reclamation: EBR &amp; RCU</div>
-            <div>109. Work-Stealing Pools &amp; Chase-Lev Deques</div>
-            <div>110. Asynchronous Continuations &amp; Event Loops</div>
-            <div>111. async/await Compiler State Machines</div>
-            <div>112. Coroutines, Fibers &amp; Green Threads</div>
-            <div>113. Reactive Streams &amp; Backpressure Propagation</div>
-            <div>114. Software Transactional Memory (STM)</div>
-            <div>115. The Actor Model &amp; Message Passing</div>
-            <div>116. Fork-Join Frameworks &amp; Parallel Streams</div>
-            <div>117. GPU Computing Foundations &amp; CUDA</div>
-            <div>118. CPU-GPU Shared Virtual Memory</div>
+            <div>121. CPU Hardware Topologies: Multi-Core Architecture, Socket Interconnects (QPI/UPI, Infinity Fabric), SMT</div>
+            <div>122. The Physical Memory Hierarchy: Register Files, L1I/L1D, L2, Inclusive vs. Exclusive L3 Caches, RAM Latencies</div>
+            <div>123. CPU Cache Line Mechanics: 64-Byte Cache Lines, Cache Tags, Index Bits, Offset Bits, $N$-Way Set Associativity</div>
+            <div>124. Cache Coherence Protocols: The MESI Protocol (Modified, Exclusive, Shared, Invalid) &amp; Bus Snooping</div>
+            <div>125. Cache Contention Hazards: False Sharing, Cache Line Bouncing, Cross-Socket Invalidation Penalties &amp; Padding</div>
+            <div>126. Hardware SIMD Vectorization: Intel AVX-512, ARM NEON, Vector Registers, Auto-Vectorization &amp; FMA</div>
+            <div>127. Non-Uniform Memory Access (NUMA): Node Topologies, Local vs. Remote Memory Access Penalties, Thread Pinning</div>
+            <div>128. Virtual Memory Architecture: Flat Address Space Virtualization, Virtual-to-Physical Address Translation</div>
+            <div>129. Multi-Level Paging: Page Directories, Page Table Entries (PTE), 4-Level vs. 5-Level Paging on x86-64</div>
+            <div>130. Translation Lookaside Buffer (TLB): L1/L2 TLBs, TLB Hits, TLB Shootdowns &amp; Performance Overhead</div>
+            <div>131. Large Memory Pages: 4 KB Standard Pages, 2 MB HugePages, 1 GB Transparent HugePages (THP) &amp; TLB Footprints</div>
+            <div>132. Page Fault Mechanics: Minor Page Faults, Major Page Faults (Disk I/O), Demand Paging &amp; Copy-On-Write (COW)</div>
+            <div>133. Kernel Architecture: Ring 0 (Supervisor) vs. Ring 3 (User), CPU Privilege Rings, Hardware Trap Handlers</div>
+            <div>134. System Calls: The syscall / sysenter Assembly Instructions, Context Switch Register Preservation, Overhead</div>
+            <div>135. Process Internals: Process Control Block (PCB), Memory Address Layout (Text, Data, BSS, Heap, Stack, Mappings)</div>
+            <div>136. Process Creation: fork(), vfork(), execve(), Zombie Processes, Orphan Processes, init / systemd Adoption</div>
+            <div>137. Threads vs. Processes: Thread Control Block (TCB), Thread-Local Storage (TLS), Shared Heap vs. Private Stacks</div>
+            <div>138. Linux Process Scheduling: Priority Levels, nice Values, Real-Time FIFO/RR Policies</div>
+            <div>139. The Linux Completely Fair Scheduler (CFS): Red-Black Runqueues, Virtual Runtime (vruntime), Latency Target Math</div>
+            <div>140. Native Memory Allocators 1: Memory Fragmentation (Internal vs. External), Free Lists, Buddy Allocation System</div>
+            <div>141. Native Memory Allocators 2: malloc Internals, Segregated Fits, brk() / sbrk() vs. mmap() Thresholds</div>
+            <div>142. Enterprise Native Allocators: jemalloc &amp; tcmalloc Architecture (Thread Caching, Arenas, Lock Contention)</div>
+            <div>143. Managed Runtime Garbage Collection: Tracing GC, Mark-Sweep-Compact Foundations, Tri-Color Marking Abstraction</div>
+            <div>144. Generational GC Internals: The Weak Generational Hypothesis, Gen 0 Ephemeral Collections, Gen 1, Gen 2 Full GC</div>
+            <div>145. Large Object Heap (LOH): Allocation Thresholds (85,000+ Bytes), LOH Fragmentation Hazards &amp; On-Demand Compaction</div>
+            <div>146. GC Pauses &amp; Low-Latency Tuning: Stop-The-World Phases, Background Concurrent GC, Server GC vs. Workstation GC</div>
+            <div>147. Managed Object Memory Layout: 64-Bit Object Headers, SyncBlock Indexes, MethodTable / Type Pointers, Alignment</div>
+            <div>148. File System Architecture: Inodes, Superblocks, Data Blocks, Directory Entries (dentries), Ext4 vs. XFS</div>
+            <div>149. OS Page Cache Mechanics: Read-Ahead Prefetching, Dirty Pages, Flush Daemons (pdflush/flusher), Writeback Thrashing</div>
+            <div>150. Direct Storage Access: Direct I/O (O_DIRECT), Memory-Mapped Files (mmap), Unbuffered High-Throughput Storage</div>
         </div>
     </div>
 
-    <!-- PHASE 6 -->
+    <!-- VOLUME VI -->
     <div class="toc-block">
-        <div class="toc-phase">Networking, Sockets &amp; Web Architecture</div>
+        <div class="toc-phase">Volume VI: I/O Models, POSIX, Assembly &amp; Binary Exploitation</div>
         <div class="toc-chapters">
-            <div>119. Ethernet Framing, MAC &amp; MTU/Jumbo Frames</div>
-            <div>120. IPv4/IPv6 Headers &amp; CIDR Subnetting</div>
-            <div>121. IP Routing: BGP, OSPF &amp; Anycast</div>
-            <div>122. TCP Handshake, Teardown &amp; State Machine</div>
-            <div>123. TCP Flow Control &amp; Sliding Windows</div>
-            <div>124. TCP Congestion Control (CUBIC, BBR)</div>
-            <div>125. TCP Performance Tuning &amp; Nagle's Algorithm</div>
-            <div>126. UDP Datagrams, Checksums &amp; Multicast</div>
-            <div>127. QUIC Transport Protocol &amp; Migration</div>
-            <div>128. BSD Network Socket Programming API</div>
-            <div>129. High-Throughput I/O Multiplexing (Reactor)</div>
-            <div>130. Domain Name System (DNS) &amp; DNSSEC</div>
-            <div>131. Cryptography &amp; TLS 1.3 Handshakes</div>
-            <div>132. HTTP/1.1 Framing &amp; Chunked Transfer</div>
-            <div>133. HTTP/2 Multiplexing, Streams &amp; HPACK</div>
-            <div>134. HTTP/3 over QUIC &amp; QPACK Compression</div>
-            <div>135. WebSockets, SSE &amp; WebRTC Protocols</div>
-            <div>136. gRPC, Protocol Buffers &amp; Binary Formats</div>
-            <div>137. RESTful Architecture &amp; Idempotency Keys</div>
-            <div>138. OAuth 2.0 &amp; PKCE Security Architecture</div>
-            <div>139. OpenID Connect (OIDC) &amp; JWT Verification</div>
-            <div>140. Web Security: CORS, CSRF, XSS &amp; CSP</div>
+            <div>151. Classical I/O Models: Blocking Synchronous I/O, Non-Blocking Polling, I/O Multiplexing</div>
+            <div>152. Synchronous I/O Multiplexing: select() ($O(N)$ Bitmap Limits) &amp; poll() ($O(N)$ Pollfd Array Limits)</div>
+            <div>153. Linux epoll Mastery: epoll_create, epoll_ctl, epoll_wait, Red-Black Tree Descriptors &amp; Ready Lists</div>
+            <div>154. epoll Triggering Modes: Level-Triggered (LT) vs. Edge-Triggered (ET), Drain Loops &amp; EAGAIN / EWOULDBLOCK</div>
+            <div>155. BSD kqueue &amp; Windows I/O Completion Ports (IOCP): Async Completion-Based Event Dispatching</div>
+            <div>156. Modern Linux Asynchronous I/O: io_uring Architecture, Submission Queue (SQ), Completion Queue (CQ), Polling</div>
+            <div>157. Inter-Process Communication (IPC) 1: Anonymous Pipes, Named Pipes (FIFOs), Circular Kernel Buffers</div>
+            <div>158. Inter-Process Communication (IPC) 2: POSIX Shared Memory (shm_open, mmap), Mutex Sharing Across Processes</div>
+            <div>159. Inter-Process Communication (IPC) 3: Unix Domain Sockets (UDS), Passing File Descriptors (SCM_RIGHTS)</div>
+            <div>160. POSIX Signal Architecture: Signal Numbers, Kernel Interruption, Signal Frames, Default Handlers vs. sigaction</div>
+            <div>161. Async-Signal-Safety: Reentrant Functions, Signal-Safe System Calls, Deadlocks Inside Signal Handlers</div>
+            <div>162. Executable Binary Formats: The ELF Specification (ELF Header, Program Header Table, Section Header Table)</div>
+            <div>163. Windows PE/COFF Format: MS-DOS Stub, PE Header, Optional Header, Import/Export Address Tables (IAT / EAT)</div>
+            <div>164. Dynamic Linking Architecture: Static vs. Shared Libraries (.so, .dll), Dynamic Linker (ld.so), Lazy Binding</div>
+            <div>165. Symbol Resolution Internals: Procedure Linkage Table (PLT) &amp; Global Offset Table (GOT) Redirection</div>
+            <div>166. Binary Vulnerabilities 1: Stack Buffer Overflows, Return Address Overwriting, Smashing the Stack</div>
+            <div>167. Binary Defenses 1: Stack Canaries (GS / SSP), Random Cookies, Detection Mechanisms</div>
+            <div>168. Binary Defenses 2: Address Space Layout Randomization (ASLR), Position-Independent Executables (PIE)</div>
+            <div>169. Binary Defenses 3: Data Execution Prevention (DEP / NX Bit), W^X (Write XOR Execute) Memory Pages</div>
+            <div>170. Advanced Binary Exploitation: Return-Oriented Programming (ROP Chains), Gadget Discovery &amp; Execution</div>
+            <div>171. Hardware Device Interfacing: Memory-Mapped I/O (MMIO), Port I/O (in/out instructions), Interrupt Request Lines (IRQs)</div>
+            <div>172. Interrupt Handling: Top-Half Handlers (HardIRQs) vs. Bottom-Half Handlers (SoftIRQs, Tasklets, Workqueues)</div>
+            <div>173. Direct Memory Access (DMA): Bus-Mastering DMA, Scatter-Gather Lists, Physical Memory Ring Descriptors</div>
+            <div>174. NVMe Storage Architecture: PCIe Lanes, NVMe Command Submission/Completion Queues, Doorbell Registers</div>
+            <div>175. High-Performance Storage Drivers: Storage Performance Development Kit (SPDK), Kernel Bypass Polling</div>
+            <div>176. Unsafe Managed Memory: Pointer Arithmetic, Struct Pinning (fixed), Unmanaged Allocations (Marshal.AllocHGlobal)</div>
+            <div>177. Native Foreign Function Interfaces (FFI): P/Invoke, JNI, Native Interoperability Marshalling Overhead</div>
+            <div>178. Hardware Performance Counters: PMU (Performance Monitoring Unit), Cache Misses, Branch Mispredictions, IPC</div>
+            <div>179. CPU Profiling Tools: Linux perf, Profiling Sampling Frequencies, Stack Trace Unwinding (Frame Pointers vs. DWARF)</div>
+            <div>180. Flamegraph Analysis: On-CPU vs. Off-CPU Flamegraphs, Identifying CPU Saturation vs. Blocking Lock Contentions</div>
         </div>
     </div>
 
-    <!-- PHASE 7 -->
+    <!-- VOLUME VII -->
     <div class="toc-block">
-        <div class="toc-phase">Database Internals &amp; Storage Engines</div>
+        <div class="toc-phase">Volume VII: Multithreading, Lock-Free Concurrency &amp; Memory Models</div>
         <div class="toc-chapters">
-            <div>141. Relational Model &amp; Database Normalization</div>
-            <div>142. ACID Guarantees &amp; Hardware Realities</div>
-            <div>143. Transaction Isolation Levels</div>
-            <div>144. Concurrency Anomalies &amp; Write Skew</div>
-            <div>145. MVCC, Undo Logs &amp; Snapshot Isolation</div>
-            <div>146. Lock Escalation &amp; Two-Phase Locking (2PL)</div>
-            <div>147. Disk Storage Page Layout &amp; Slotted Pages</div>
-            <div>148. Row vs. Column Storage: OLTP vs. OLAP</div>
-            <div>149. B-Tree &amp; B+ Tree Storage Engines</div>
-            <div>150. LSM-Trees, MemTables &amp; SSTables</div>
-            <div>151. Write-Ahead Logging &amp; ARIES Recovery</div>
-            <div>152. Clustered vs. Non-Clustered Indexes</div>
-            <div>153. Composite Indexes &amp; Leftmost Prefix Rule</div>
-            <div>154. Inverted, Bitmap &amp; Sparse Indexes</div>
-            <div>155. Spatial &amp; Vector Indexing (HNSW)</div>
-            <div>156. Volcano Query Execution Engines</div>
-            <div>157. Query Optimizers: CBO &amp; RBO</div>
-            <div>158. Join Algorithms: Hash, Merge &amp; Nested Loop</div>
-            <div>159. Partitioning Strategies &amp; Partition Pruning</div>
-            <div>160. Sharding &amp; Cross-Shard Routing</div>
-            <div>161. Database Replication Topologies</div>
-            <div>162. Replication Lag &amp; Consistency Anomalies</div>
-            <div>163. NoSQL Paradigms: KV, Document &amp; Column</div>
-            <div>164. Time-Series Databases &amp; Gorilla Compression</div>
-            <div>165. Graph Databases &amp; Index-Free Adjacency</div>
-            <div>166. Distributed SQL: Spanner &amp; CockroachDB</div>
+            <div>181. Hardware Memory Models 1: Sequential Consistency (SC), The Illusion vs. Physical Silicon Reality</div>
+            <div>182. Hardware Memory Models 2: Total Store Order (TSO on x86-64), Store-Load Reordering, Write Buffers</div>
+            <div>183. Hardware Memory Models 3: Weak Memory Models (ARM64), Aggressive Load-Load / Store-Store Reorderings</div>
+            <div>184. Compiler Reordering vs. CPU Reordering: The volatile Keyword, Compiler Optimization Barriers</div>
+            <div>185. Hardware Memory Fences: Store Fences, Load Fences, Full Memory Barriers (MFENCE, DMB, DSB)</div>
+            <div>186. C++11 / C# Memory Models: Acquire-Release Semantics, Synchronizes-With Relationships, Sequential Consistency</div>
+            <div>187. Atomic Operations: The x86 LOCK Bus Prefix, Read-Modify-Write Cycles, Atomic Increment/Add</div>
+            <div>188. Compare-And-Swap (CAS): Hardware CAS Loops, Multi-Word CAS (MCAS), Failure Spurious Loops</div>
+            <div>189. The ABA Problem: Pointer Recycling, Tagged/Versioned Pointers, Hazard Pointers</div>
+            <div>190. User-Space Spinlocks: Test-And-Set (TAS), Test-and-Test-and-Set (TTAS), Exponential Backoff Spinloops</div>
+            <div>191. Advanced Hardware Locks: Ticket Locks (Fair FIFO), MCS Locks (Queue-Based Local Cache Line Spin)</div>
+            <div>192. Linux Futex (Fast Userspace Mutex): User-Space Atomic Fast-Path vs. Kernel Sleep Slow-Path (sys_futex)</div>
+            <div>193. Operating System Mutexes: Critical Sections, Two-Phase Hybrid Mutexes (Spin-then-Sleep Mechanics)</div>
+            <div>194. Reader-Writer Locks: Shared vs. Exclusive Locks, Reader Starvation vs. Writer Starvation, Fair RW-Locks</div>
+            <div>195. Deadlock Foundations: The 4 Coffman Conditions (Mutual Exclusion, Hold &amp; Wait, No Preemption, Circular Wait)</div>
+            <div>196. Deadlock Mitigation: Resource Allocation Graphs, Lock Ordering Hierarchies, Try-Lock with Backoff</div>
+            <div>197. Concurrency Pathologies: Livelock, Thread Starvation, Priority Inversion &amp; Priority Inheritance Protocols</div>
+            <div>198. Thread Synchronization Primitives: Semaphores (Counting vs. Binary), Auto/Manual Reset Events, CountDownLatch, Barriers</div>
+            <div>199. Monitors &amp; Condition Variables: Wait(), Pulse() / notify(), PulseAll(), Lost Wakeups &amp; Spurious Wakeups</div>
+            <div>200. Classic Concurrency Problem 1: The Bounded Producer-Consumer Queue (Thread-Safe Ring Buffer with Conditions)</div>
+            <div>201. Classic Concurrency Problem 2: The Dining Philosophers (Resource Hierarchy vs. Arbitrator Solutions)</div>
+            <div>202. Classic Concurrency Problem 3: The Readers-Writers Problem (Fair Phase Fair Solutions)</div>
+            <div>203. Lock-Free Data Structures 1: The Treiber Stack Algorithm (CAS Top Replacement &amp; Memory Reclaim)</div>
+            <div>204. Lock-Free Data Structures 2: The Michael-Scott Queue (Linked List Head/Tail CAS &amp; Helper Advance)</div>
+            <div>205. Lock-Free Ring Buffers: The LMAX Disruptor Architecture, Sequence Numbers, Sequence Barriers, Cache Line Padding</div>
+            <div>206. Wait-Free Synchronization: Wait-Free Enqueue, Universal Wait-Free Constructions, Consensus Numbers</div>
+            <div>207. Safe Memory Reclamation (SMR) 1: Epoch-Based Reclamation (EBR) (Global Epochs, Thread Pinning, Retirement Lists)</div>
+            <div>208. Safe Memory Reclamation (SMR) 2: Read-Copy-Update (RCU) Internals (Grace Periods, Read Critical Sections)</div>
+            <div>209. Thread Pool Architecture: Task Queues, Global Injection Queues, Local Work-Stealing Queues (Chase-Lev Deques)</div>
+            <div>210. Thread Pool Starvation: Synchronous Blocking on Async Code (.Result / .Wait()), Injection Lag, Sizing Math</div>
         </div>
     </div>
 
-    <!-- PHASE 8 -->
+    <!-- VOLUME VIII -->
     <div class="toc-block">
-        <div class="toc-phase">Distributed Systems, Consensus &amp; Cloud</div>
+        <div class="toc-phase">Volume VIII: Asynchronous Engines, Network Protocols &amp; Sockets</div>
         <div class="toc-chapters">
-            <div>167. Fallacies of Distributed Computing</div>
-            <div>168. CAP Theorem &amp; PACELC Trade-offs</div>
-            <div>169. Physical Clocks, NTP &amp; Drift Anomalies</div>
-            <div>170. Lamport Timestamps &amp; Vector Clocks</div>
-            <div>171. Hybrid Logical Clocks (HLC) &amp; TrueTime</div>
-            <div>172. Failure Detectors &amp; Gossip Protocols (SWIM)</div>
-            <div>173. Distributed Messaging &amp; Idempotent Delivery</div>
-            <div>174. Distributed Locks &amp; Fencing Tokens</div>
-            <div>175. Two-Phase Commit &amp; Distributed Transactions</div>
-            <div>176. The Saga Pattern &amp; Outbox Workflows</div>
-            <div>177. Consensus Theory &amp; FLP Impossibility</div>
-            <div>178. Paxos Consensus: Multi-Paxos &amp; Leases</div>
-            <div>179. Raft Consensus: Election &amp; Log Matching</div>
-            <div>180. Byzantine Fault Tolerance (BFT) &amp; PBFT</div>
-            <div>181. Kafka Streaming Logs &amp; Zero-Copy Pipelines</div>
-            <div>182. Event Sourcing &amp; CQRS Architecture</div>
-            <div>183. Distributed Caching &amp; Consistent Hashing</div>
-            <div>184. Redis Architecture &amp; Cluster Topology</div>
-            <div>185. Layer 4 vs. Layer 7 Load Balancing</div>
-            <div>186. API Gateways &amp; Dynamic Routing</div>
-            <div>187. Distributed Rate Limiting Algorithms</div>
-            <div>188. Resiliency: Circuit Breakers &amp; Full Jitter</div>
-            <div>189. Service Discovery &amp; Health Probing</div>
-            <div>190. Service Mesh, Envoy &amp; mTLS</div>
-            <div>191. Distributed Tracing &amp; OpenTelemetry</div>
-            <div>192. Container Internals: Namespaces &amp; Cgroups</div>
-            <div>193. OCI Container Runtimes &amp; Isolation</div>
-            <div>194. Kubernetes Control Plane Architecture</div>
-            <div>195. Kubernetes Networking &amp; CNI Plugins</div>
-            <div>196. MicroVMs &amp; Serverless Architectures</div>
-            <div>197. Infrastructure as Code &amp; State Engines</div>
-            <div>198. GitOps, Blue-Green &amp; Canary Deploys</div>
+            <div>211. Asynchronous Foundations: Non-Blocking Continuations, Callback Hell, Futures, Promises &amp; Event Loops</div>
+            <div>212. The async/await Compiler Machinery: Hoisting Local Variables, Struct State Machines, MoveNext() Dispatch</div>
+            <div>213. Asynchronous Synchronization Contexts: UI Dispatchers, ASP.NET Core Synchronization Free Context, ConfigureAwait(false)</div>
+            <div>214. ValueTasks &amp; Allocation-Free Async: Task&lt;T&gt; (Heap Object) vs. ValueTask&lt;T&gt; (Stack Struct) &amp; Re-await Rules</div>
+            <div>215. Coroutines 1: Stackful Coroutines, Fibers, Context Switching Cost, User-Space Stack Allocation</div>
+            <div>216. Coroutines 2: Stackless Coroutines, Yield Generators, Compiler Transformation to Heap Iterators</div>
+            <div>217. Go-Style Green Threads: $M:N$ Threading Schedulers (G, M, P Model), Preemptive Scheduling &amp; Network Poller</div>
+            <div>218. Reactive Programming: Reactive Streams Specification, Observer Pattern, Push-Based Streaming Pipelines</div>
+            <div>219. Backpressure Mechanics: Reactive Pull, Buffer Overflow Strategies (Drop Oldest, Drop Latest, Block)</div>
+            <div>220. Software Transactional Memory (STM): Optimistic In-Memory Transactions, Write-Logs, Commit Validation &amp; Rollback</div>
+            <div>221. The Actor Model 1: Single-Threaded Mailboxes, Asynchronous Message Passing, State Isolation Invariants</div>
+            <div>222. The Actor Model 2: Supervision Trees, Actor Lifecycles, Fault Tolerance ("Let It Crash" Philosophy)</div>
+            <div>223. Parallel Computing Frameworks: Fork-Join Pools, Work-Stealing Scheduling, Parallel Loop Partitioning</div>
+            <div>224. Data Link Layer Mechanics: Ethernet Frame Anatomy (Preamble, SFD, MACs, EtherType, CRC), MTU, Jumbo Frames</div>
+            <div>225. Address Resolution Protocol (ARP): ARP Requests/Replies, ARP Caching, ARP Spoofing &amp; Gratuitous ARP</div>
+            <div>226. Internet Protocol Layer: IPv4 Header (TTL, ToS/DSCP, Fragmentation Offsets), CIDR Subnet Math, IPv6 Fixed Headers</div>
+            <div>227. Global Routing: Autonomous Systems (AS), Border Gateway Protocol (BGP Path Vector), OSPF (Link-State), Anycast DNS</div>
+            <div>228. Transmission Control Protocol (TCP) 1: The 3-Way Handshake (SYN, SYN-ACK, ACK), SYN Floods &amp; SYN Cookies</div>
+            <div>229. TCP Connection Teardown: 4-Way FIN/ACK Handshake, Half-Closed States, The TIME_WAIT State (2MSL Duration)</div>
+            <div>230. TCP Connection Anomalies: RST Packets, CLOSE_WAIT Socket Leaks, Socket Exhaustion &amp; Ephemeral Port Limits</div>
+            <div>231. TCP Flow Control: Sliding Windows, Window Size Advertisements, Zero-Window Probing, Silly Window Syndrome</div>
+            <div>232. TCP Reliability: Sequence Numbers, Cumulative ACKs, Selective ACKs (SACK), Retransmission Timers (RTO Calculation)</div>
+            <div>233. TCP Congestion Control 1: AIMD, Slow Start Threshold (ssthresh), Fast Retransmit</div>
+            <div>234. TCP Congestion Control 2: Loss-Based (CUBIC) vs. Delay/Bandwidth-Based (Google BBR), Bufferbloat Mitigations</div>
+            <div>235. TCP Socket Performance Tuning: TCP_NODELAY (Disabling Nagle's Algorithm), Delayed ACKs, SO_REUSEPORT, Buffer Sizing</div>
+            <div>236. User Datagram Protocol (UDP): Connectionless Datagrams, Header Footprint (8 Bytes), Checksums, Multicast/Broadcast</div>
+            <div>237. QUIC Protocol Architecture: UDP Encapsulation, Connection IDs (Surviving IP Hopping), 0-RTT Handshakes</div>
+            <div>238. QUIC Transport Mastery: Stream Multiplexing without TCP Head-of-Line Blocking, Built-in TLS 1.3 Encryption</div>
+            <div>239. BSD Network Socket Programming: socket(), bind(), listen(), accept(), connect(), Non-Blocking Flags</div>
+            <div>240. High-Throughput Network Server Patterns: Single-Thread Reactor, Multi-Thread Worker Pool Reactor, Proactor Pattern</div>
         </div>
     </div>
 
-    <!-- PHASE 9 -->
+    <!-- VOLUME IX -->
     <div class="toc-block">
-        <div class="toc-phase">High-Performance, Compilers &amp; Staff+</div>
+        <div class="toc-phase">Volume IX: Web Protocols, Application Security &amp; Framework Internals</div>
         <div class="toc-chapters">
-            <div>199. CPU Profiling, Flamegraphs &amp; PMU Counters</div>
-            <div>200. Memory Profiling, Dumps &amp; Leak Diagnosis</div>
-            <div>201. Zero-Allocation Spans &amp; Memory Pooling</div>
-            <div>202. Low-Latency Trading &amp; DPDK Bypasses</div>
-            <div>203. High-Performance Binary Serialization</div>
-            <div>204. Compiler Front-End: Lexing &amp; Parsing</div>
-            <div>205. ASTs, Symbol Tables &amp; SSA Form</div>
-            <div>206. Compiler Optimizations &amp; Inlining</div>
-            <div>207. Tiered JIT Compilation &amp; OSR</div>
-            <div>208. Linux eBPF Sandboxing &amp; XDP Bypasses</div>
-            <div>209. Domain-Driven Design (DDD) Core</div>
-            <div>210. Clean &amp; Hexagonal Architecture</div>
-            <div>211. System Design: URL Shorteners &amp; Rate Limiters</div>
-            <div>212. System Design: Collaborative Editors &amp; Chat</div>
-            <div>213. System Design: Video Streaming &amp; Ride-Share</div>
-            <div>214. System Design: Distributed Checkout Engines</div>
-            <div>215. SRE, Error Budgets &amp; Staff+ Leadership</div>
+            <div>241. Domain Name System (DNS): Root Nameservers, TLDs, Authoritative DNS, Recursive Resolvers, Record Types</div>
+            <div>242. Secure DNS: DNS Caching Hierarchies, DNS Amplification Attacks, DNSSEC Cryptographic Signatures</div>
+            <div>243. Cryptography Foundations: Symmetric (AES-GCM, ChaCha20) vs. Asymmetric (RSA, ECC, Curve25519) Encryption</div>
+            <div>244. TLS 1.3 Handshake Protocol: Ephemeral Diffie-Hellman Key Exchange (ECDHE), Perfect Forward Secrecy (PFS), 1-RTT Setup</div>
+            <div>245. Public Key Infrastructure (PKI): X.509 Certificates, Certificate Authorities (CA), Certificate Chains, OCSP Stapling</div>
+            <div>246. HTTP/1.1 Protocol: Text Framing, Keep-Alive Persistent Connections, Pipeline Failures, Chunked Transfer Encoding</div>
+            <div>247. HTTP/2 Architecture: Binary Framing Layer, Frames, Messages, Concurrent Streams, Stream Prioritization</div>
+            <div>248. HTTP/2 Performance: HPACK Header Compression (Static/Dynamic Tables, Huffman Coding), Server Push Mechanics</div>
+            <div>249. HTTP/3 over QUIC: QPACK Header Compression, Stream Isolation, Resolving TCP-Level Packet Loss Stalls</div>
+            <div>250. Real-Time Web Protocols: WebSockets (RFC 6455 Handshake Upgrade, Binary/Text Frames), Server-Sent Events (SSE)</div>
+            <div>251. Peer-to-Peer &amp; Media: WebRTC Architecture, SDP Offer/Answer, ICE Candidate Gathering, STUN/TURN NAT Traversal</div>
+            <div>252. Remote Procedure Calls (RPC): gRPC Framework, HTTP/2 Transport Mapping, Deadlines, Cancellation Propagation</div>
+            <div>253. Binary Serialization: Protocol Buffers (Varint Encoding, Field Tags, Wire Types), FlatBuffers (Zero-Copy Traversal)</div>
+            <div>254. RESTful Architecture Constraints: Statelessness, Uniform Interface, Cacheability, HATEOAS, Idempotency Semantics</div>
+            <div>255. API Idempotency Key Design: Storage Layer Mutexes, Atomic Result Caching, Network Retry Deduplication</div>
+            <div>256. Distributed Authentication: OAuth 2.0 Roles (Resource Owner, Client, Auth Server, Resource Server), Grant Types</div>
+            <div>257. OAuth 2.0 Security: Authorization Code Flow with PKCE, State Parameters, Client Credentials Flow</div>
+            <div>258. Federated Identity: OpenID Connect (OIDC), ID Tokens vs. Access Tokens, UserInfo Endpoints, Single Sign-On (SSO)[cite: 3]</div>
+            <div>259. JSON Web Tokens (JWT) Deep-Dive: Header, Payload, Signature Anatomy, Base64URL Encoding, Validation[cite: 3]</div>
+            <div>260. Enterprise JWT Architecture: RS256 Asymmetric Signing, JWKS Endpoints, Key ID (kid) Dynamic Rotation[cite: 3]</div>
+            <div>261. JWT Security Mitigations: "alg: none" Exploits, Short Expiry Windows, Refresh Token Rotation, Redis Denylists[cite: 3]</div>
+            <div>262. Web Application Security 1: Cross-Origin Resource Sharing (CORS), Preflight OPTIONS Requests, Allowed Headers[cite: 3]</div>
+            <div>263. Web Application Security 2: Cross-Site Scripting (XSS), Content Security Policy (CSP) Headers[cite: 3]</div>
+            <div>264. Web Application Security 3: Cross-Site Request Forgery (CSRF), Anti-CSRF Tokens, Cookie Attributes (SameSite)[cite: 3]</div>
+            <div>265. Web Application Security 4: Clickjacking (X-Frame-Options), MIME Sniffing (X-Content-Type-Options), HSTS[cite: 3]</div>
+            <div>266. Framework Internals (.NET Core): ASP.NET Core Request Pipeline, Custom Middleware Chaining, Short-Circuiting Rules</div>
+            <div>267. Framework Internals (.NET Core): Action Filters, Exception Filters, Resource Filters vs. Middleware Ordering</div>
+            <div>268. Framework Internals (.NET Core): Dependency Injection Lifetimes (Transient, Scoped, Singleton) &amp; Captive Dependencies</div>
+            <div>269. Framework Internals (Java/Spring): Servlet Filter Chain, DelegatingFilterProxy, SecurityContextHolder ThreadLocals[cite: 3]</div>
+            <div>270. Framework Internals (V8 / Node.js): V8 Engine Heap Layout, Call Stack, Microtask Queue vs. Macrotask Queue</div>
         </div>
     </div>
 
+    <!-- VOLUME X -->
+    <div class="toc-block">
+        <div class="toc-phase">Volume X: Database Internals, Storage Engines &amp; Query Optimization</div>
+        <div class="toc-chapters">
+            <div>271. Relational Data Foundations: Relational Algebra (Selection, Projection, Join), Normal Forms (1NF, 2NF, 3NF, BCNF)</div>
+            <div>272. Database ACID Guarantees: Atomicity, Consistency, Isolation, Durability &amp; The Underlying Silicon Realities</div>
+            <div>273. Database Crash Recovery: Write-Ahead Logging (WAL), Log Sequence Numbers (LSN), The ARIES Recovery Algorithm</div>
+            <div>274. Transaction Isolation Levels: Read Uncommitted, Read Committed, Repeatable Read, Serializable</div>
+            <div>275. Concurrency Anomalies: Dirty Reads, Non-Repeatable Reads, Phantom Reads, Lost Updates, Write Skew</div>
+            <div>276. Multi-Version Concurrency Control (MVCC) 1: Snapshot Isolation, Read Views, Tuple Visibility Rules, Undo Logs</div>
+            <div>277. Multi-Version Concurrency Control (MVCC) 2: Rollback Segments, Long-Running Bloat, PostgreSQL VACUUM vs. MySQL Purge</div>
+            <div>278. Relational Locking Engines 1: Shared (S) vs. Exclusive (X) Locks, Intent Locks (IS, IX, SIX), Lock Escalation</div>
+            <div>279. Relational Locking Engines 2: Two-Phase Locking (2PL), Strict 2PL, Conservative 2PL, Deadlock Graph Cycles</div>
+            <div>280. Physical Page Storage: Slotted Page Architecture, Page Headers, Row Directory Offsets, Variable-Length Tuples</div>
+            <div>281. Row-Oriented vs. Column-Oriented Storage: OLTP vs. OLAP (Columnar Parquet, ORC), Dictionary Encoding, RLE</div>
+            <div>282. Storage Engines 1 (B+ Trees): Leaf Node Doubly Linked Chains, Non-Leaf Routing Nodes, Fanout Math, Cache Alignment</div>
+            <div>283. B+ Tree Operations: Search, Insertion Page Splits, Deletion Merges/Redistributions, Fill Factor Configuration</div>
+            <div>284. Storage Engines 2 (LSM-Trees): Log-Structured Merge-Trees, Write Amplification, Read Amplification, Space Amplification</div>
+            <div>285. LSM-Tree Internals: In-Memory MemTables (SkipLists), Disk SSTables (Sorted String Tables), Sparse Indexes</div>
+            <div>286. LSM Compaction Strategies: Size-Tiered Compaction (STCS) vs. Leveled Compaction (LCS), Bloom Filter Lookups</div>
+            <div>287. Indexing Foundations: Clustered Indexes (Primary Key Table Layout) vs. Non-Clustered Indexes (Secondary Lookups)</div>
+            <div>288. Index Optimization: Covering Indexes (INCLUDE Clauses), Index Lookups vs. Index Scans vs. Table Scans</div>
+            <div>289. Composite Indexes: Multi-Column Ordering, The Leftmost Prefix Rule, Range Query Column Placement Traps</div>
+            <div>290. Specialized Indexing: Inverted Indexes (Full-Text Search, Posting Lists), Bitmap Indexes for Low-Cardinality Data</div>
+            <div>291. Spatial &amp; Vector Indexing: Spatial Trees (R-Trees, QuadTrees), Uber H3 Hexagonal Hierarchical Spatial Indexing</div>
+            <div>292. Vector Embeddings &amp; AI Search: Approximate Nearest Neighbor (ANN), HNSW Graphs, IVFFlat</div>
+            <div>293. Query Execution Engines: The Volcano Iterator Model (Open(), Next(), Close()), Vectorized Block Execution</div>
+            <div>294. Query Optimizers 1: Rule-Based Optimizer (RBO) vs. Cost-Based Optimizer (CBO), Cardinality Estimation</div>
+            <div>295. Query Optimizers 2: Database Statistics, Dynamic Sampling, Histograms, Parameter Sniffing Hazards</div>
+            <div>296. Physical Join Algorithms: Nested Loop Join, Block Nested Loop, Sort-Merge Join, Grace Hash Join</div>
+            <div>297. Database Partitioning: Range Partitioning, Hash Partitioning, List Partitioning, Static vs. Dynamic Partition Pruning</div>
+            <div>298. Database Sharding: Horizontal Sharding Architectures, Shard Key Selection (Hotspots vs. Scatter-Gather), Resharding</div>
+            <div>299. Database Replication Topologies: Single-Leader, Multi-Leader, Leaderless (Dynamo-Style Quorum: $R + W > N$)</div>
+            <div>300. Replication Anomalies: Replication Lag, Read-Your-Own-Writes Consistency, Monotonic Read Consistency</div>
+        </div>
+    </div>
+
+    <!-- VOLUME XI -->
+    <div class="toc-block">
+        <div class="toc-phase">Volume XI: Distributed Systems, Consensus, Cloud Native &amp; Data Engineering</div>
+        <div class="toc-chapters">
+            <div>301. The 8 Fallacies of Distributed Computing: Networks are Unreliable, Latency is Non-Zero, Bandwidth is Finite</div>
+            <div>302. Distributed Consistency Models: Strict, Linearizability, Sequential, Causal, Eventual Consistency</div>
+            <div>303. The CAP &amp; PACELC Theorems: Consistency vs. Availability vs. Partition Tolerance Trade-offs</div>
+            <div>304. Time in Distributed Systems 1: Physical Clock Skew, NTP Sync, Monotonic vs. Wall-Clock Timers</div>
+            <div>305. Time in Distributed Systems 2: Lamport Logical Timestamps, Causal Partial Ordering, Vector Clocks</div>
+            <div>306. Hybrid Time: Hybrid Logical Clocks (HLC) &amp; Google TrueTime (Atomic Clocks + GPS Drift Uncertainty Windows)</div>
+            <div>307. Failure Detectors: Heartbeating Topologies, $\Phi$-Accrual Failure Detectors, Gossip Protocols (SWIM Protocol)</div>
+            <div>308. Distributed Locking: Redlock Algorithm, ZooKeeper Ephemeral Nodes, Etcd Leases, Fencing Tokens</div>
+            <div>309. Distributed Transactions: Two-Phase Commit (2PC: Prepare &amp; Commit Phases, Coordinator Failures), 3PC</div>
+            <div>310. Eventual Consistency Workflows: The Saga Pattern (Orchestration vs. Choreography), Transactional Outbox</div>
+            <div>311. Consensus Theory: Crash Fault Tolerant (CFT) Consensus, Quorum Math ($Q = \lfloor N/2 \rfloor + 1$), FLP Impossibility</div>
+            <div>312. Paxos Consensus: Single-Decree Paxos, Multi-Paxos, Phase 1 (Prepare/Promise), Phase 2 (Accept/Accepted), Leases</div>
+            <div>313. Raft Consensus 1: Leader Election (Randomized Heartbeat Timers), Term Numbers, RequestVote RPC</div>
+            <div>314. Raft Consensus 2: Log Replication, The Log Matching Invariant, Leader Append-Only Invariant, AppendEntries RPC</div>
+            <div>315. Raft Consensus 3: Cluster Membership Changes (Joint Consensus), Log Compaction &amp; Snapshotting</div>
+            <div>316. Byzantine Fault Tolerance (BFT): Malicious Actors, PBFT Algorithm ($3f+1$ Node Minimums), Pre-Prepare/Prepare/Commit</div>
+            <div>317. Distributed Caching Architecture: Cache-Aside, Write-Through, Write-Behind, Refresh-Ahead</div>
+            <div>318. Cache Eviction &amp; Stampedes: LRU, LFU, ARC Eviction, Thundering Herd Mutexes, Probabilistic Early Expiration (XFetch)</div>
+            <div>319. Redis Architecture: Single-Threaded Event Loop Engine (ae.c), In-Memory Allocators, SDS String Layouts</div>
+            <div>320. Redis High Availability: RDB Snapshotting vs. AOF (fsync options), Redis Sentinel Failover, Redis Cluster (16384 Slots)</div>
+            <div>321. Load Balancing: Layer 4 (Transport TCP/UDP NAT, Maglev Hashing) vs. Layer 7 (Application Reverse Proxying)</div>
+            <div>322. Distributed Rate Limiting: Token Bucket, Leaky Bucket, Sliding Window Counter via Redis Lua Scripts</div>
+            <div>323. Resiliency Engineering: Circuit Breakers (Closed, Open, Half-Open State Machines), Bulkheads, Jittered Backoff</div>
+            <div>324. Service Discovery &amp; Mesh: Consul/Eureka Topologies, Envoy Sidecar Proxying, Istio Control Plane, mTLS[cite: 3]</div>
+            <div>325. Distributed Observability: OpenTelemetry, W3C TraceContext Propagation, Distributed Spans, Metrics, Log Aggregation</div>
+            <div>326. Container Internals: Linux Namespaces (PID, Mount, Net, IPC, UTS, User), Cgroups v1/v2 (CFS Quotas, OOM Kills), OverlayFS</div>
+            <div>327. Container Runtimes: OCI Specification, Low-Level (runc), High-Level (containerd, CRI-O), MicroVMs (Firecracker)</div>
+            <div>328. Kubernetes Control Plane: kube-apiserver, etcd Raft Storage, kube-scheduler Filters, kube-controller-manager</div>
+            <div>329. Kubernetes Workloads: Pod Lifecycles, Deployments, ReplicaSets, StatefulSets (Persistent Volume Claims), DaemonSets</div>
+            <div>330. Kubernetes Networking: Container Network Interface (CNI: Calico, Flannel), Cilium eBPF Packet Routing, kube-proxy</div>
+            <div>331. Continuous Delivery: GitOps Paradigm, ArgoCD Reconciliation Engine, Blue-Green Deployments, Canary Deployments</div>
+            <div>332. Enterprise ETL Pipelines: Batch vs. Real-Time Streaming (Lambda vs. Kappa), Data Warehouses (Snowflake, BigQuery)</div>
+            <div>333. Incremental Data Ingestion: Change Data Capture (CDC via Debezium), High-Watermark Tracking, Idempotent DWH Merges</div>
+            <div>334. Apache Kafka Core Architecture: Broker Clusters, Topic Partitions, Commit Logs, Zero-Copy OS sendfile()</div>
+            <div>335. Kafka Reliability &amp; Guarantees: Producer acks=all, linger.ms, batch.size, Consumer Groups, Exactly-Once Semantics (EOS)</div>
+        </div>
+    </div>
+
+    <!-- VOLUME XII -->
+    <div class="toc-block">
+        <div class="toc-phase">Volume XII: High-Scale System Design, Production Triage &amp; Staff+ Leadership</div>
+        <div class="toc-chapters">
+            <div>336. High-Scale System Design 1: Global URL Shortener &amp; Analytics (Base62 Encoding, Snowflake IDs, DynamoDB, 301 vs. 302)</div>
+            <div>337. High-Scale System Design 2: Multi-Channel Notification Engine (SNS Topic Fan-Out, Per-Channel SQS, SLA Isolation)</div>
+            <div>338. High-Scale System Design 3: Distributed Global Rate Limiter (Edge Gateway vs. App Layer, Redis Atomic Lua Scripts)</div>
+            <div>339. High-Scale System Design 4: 1 Million Concurrent User Login Spike (Thundering Herd Defense, Edge JWT Validation)</div>
+            <div>340. High-Scale System Design 5: Flight/Seat Reservation Engine (Zero Double-Booking, Distributed Locks with Fencing, OCC)</div>
+            <div>341. High-Scale System Design 6: Real-Time Collaborative Document Editor (Operational Transformation vs. CRDTs, WebSocket Mesh)</div>
+            <div>342. High-Scale System Design 7: Global Video Streaming Platform (Video Transcoding Pipelines, HLS/DASH Chunking, CDN Caching)</div>
+            <div>343. High-Scale System Design 8: Real-Time Ride-Sharing Dispatch (Uber H3 Spatial Hexagons, High-Frequency MQTT/WebSocket)</div>
+            <div>344. High-Scale System Design 9: Distributed Payment &amp; Checkout Engine (Saga Orchestration, Financial Idempotency Keys, Ledgers)</div>
+            <div>345. High-Scale System Design 10: IoT Real-Time Monitoring Dashboard (High-Throughput MQTT, TSDB Rollups, Virtualized UI)</div>
+            <div>346. Production Incident Triage 1: Diagnosing API Latency Degradation from 200ms &rarr; 900ms under Load (Tracing, EXPLAIN ANALYZE)</div>
+            <div>347. Production Incident Triage 2: Diagnosing Sudden Cache Hit Rate Collapse from 92% &rarr; 60% (Key Collisions, Serialization Bloat)</div>
+            <div>348. Production Incident Triage 3: Diagnosing Intermittent Memory Leaks (OOM Kills under Traffic Spikes) via Heap Dumps &amp; GC Roots</div>
+            <div>349. Production Incident Triage 4: Reconciling Conflicting Metrics (Team A 1.5M vs. Team B 1.1M Users) via Event Pipeline Audits</div>
+            <div>350. High-Throughput Write Bottlenecks: Scaling Database Write Throughput from 10,000 &rarr; 50,000 writes/sec (LSM Engines, Queues)</div>
+            <div>351. Legacy Modernization Playbook: The 90-Day Strategy for Inheriting an Untested, Undocumented 10M Req/Day Monolith</div>
+            <div>352. Distributed Failure Modes: Worker Node Crashes Mid-Batch (60% Progress), Checkpointing Strategies, Split-Brain Quorums</div>
+            <div>353. Architecture Financial Analysis: Total Cost of Ownership (TCO) Models (Evaluating $50K Build + $30K/yr vs. $120K Build + $10K/yr)</div>
+            <div>354. SRE &amp; Incident Postmortems: Blameless Root Cause Analysis (5 Whys), Quantifying Downtime Business Impact, SLOs, SLIs</div>
+            <div>355. Frontend Performance Systems: Virtualized Windowing for 50,000+ DOM Nodes, Critical Rendering Path, SSR vs. SSG vs. ISR</div>
+            <div>356. AI Engineering 1: Large Language Model (LLM) Integration, Tokenization, Prompt Engineering vs. Fine-Tuning vs. RAG</div>
+            <div>357. AI Engineering 2: Building Enterprise Evaluation Harnesses for LLM Features (Ground Truth Benchmarks, ROUGE/BLEU, LLM Judges)</div>
+            <div>358. AI Engineering 3: Testing for Hallucinations in RAG Pipelines (Faithfulness Metrics, Context Relevance, Vector Chunking)</div>
+            <div>359. AI Engineering 4: AI Safety Red-Teaming (Prompt Injection Defenses, PII Masking Filters, Jailbreak Detection)</div>
+            <div>360. Test Engineering Architecture: Test Pyramid, Flaky Test Quarantine Strategies, Test Acceleration (Parallel Execution, Mocking)</div>
+            <div>361. Staff+ Leadership 1: Authoring Request for Comments (RFCs) &amp; Architecture Decision Records (ADRs)</div>
+            <div>362. Staff+ Leadership 2: Technical Consensus Building, Navigating Stakeholder Pushback, Resolving Cross-Team Deadlocks</div>
+            <div>363. Staff+ Leadership 3: Engineering Mentorship, Code Review Standards, Driving Technical Excellence Across Organizations</div>
+            <div>364. Full Systems Synthesis: The Complete Transistor-to-Cloud Distributed Execution Trace</div>
+            <div>365. The Staff Engineer's Capstone Verification: Whiteboard System Design &amp; Architecture Defense under Pressure</div>
+        </div>
+    </div>
 
     <!-- ============ HOW TO USE THIS PDF ============ -->
     <h2 class="fm-title section-break">How to Use This PDF</h2>
-    <p class="fm-body fm-lead">This book is built to be written on, annotated, and benchmarked, not just read, ask
-        Gemini about it.
-    </p>
+    <p class="fm-body fm-lead">This book is built by an AI, though annotated and content farmed by me.</p>
 
-    <h3 class="fm-sub">The Margin</h3>
-    <p class="fm-body">Every page is designed with generous margin space. Use it actively: summarize complex invariants
-        in your own words, trace pointer mutations with custom memory diagrams, and jot down performance hypotheses next
-        to algorithms.</p>
+    <h3 class="fm-sub">The Whiteboard Pages</h3>
+    <p class="fm-body">Every even-numbered page is a pure, solid white workspace. Use it to trace memory addresses, sketch failure state machines (e.g., worker failover, split-brain quorums), and write down your spoken whiteboard answers before checking the technical keys.</p>
 
     <h3 class="fm-sub">Color Legend</h3>
     <div class="legend-item">
         <div class="legend-dot" style="background:#4F46E5;"></div>
-        <div><strong>Indigo, Key Idea:</strong> The foundational hardware contract or algorithmic invariant. If you
-            remember one core concept from a section, remember this.</div>
+        <div><strong>Indigo, Key Idea:</strong> The foundational hardware contract, invariant, or architectural pattern.</div>
     </div>
     <div class="legend-item">
         <div class="legend-dot" style="background:#EA580C;"></div>
-        <div><strong>Orange, Common Misconception:</strong> Latent performance pitfalls, memory leaks, and flawed
-            assumptions that trip up engineers. Pay extra attention here.</div>
+        <div><strong>Orange, Common Misconception:</strong> Latent performance traps, race conditions, memory leaks, and flawed architectural assumptions.</div>
     </div>
     <div class="legend-item">
         <div class="legend-dot" style="background:#DB2777;"></div>
-        <div><strong>Pink, Interview Angle:</strong> How this exact mechanism is tested during FAANG and high-frequency
-            trading technical screenings.</div>
+        <div><strong>Pink, Interview Angle:</strong> How this exact mechanism is tested during FAANG, HFT, and senior backend technical rounds.</div>
     </div>
     <div class="legend-item">
         <div class="legend-dot" style="background:#059669;"></div>
-        <div><strong>Green, Tip / Interview-Ready Answer:</strong> Production takeaways, zero-allocation
-            micro-optimizations, and crisp whiteboard answers.</div>
+        <div><strong>Green, Tip / Interview-Ready Answer:</strong> Production takeaways, zero-allocation micro-optimizations, and crisp whiteboard phrasing.</div>
     </div>
     <div class="legend-item">
         <div class="legend-dot" style="background:#7C3AED;"></div>
-        <div><strong>Violet, Quiz &amp; Verification:</strong> Deep-dive self-assessment quizzes with comprehensive
-            multiple-choice, writing prompts, and answer keys.</div>
+        <div><strong>Violet, Quiz &amp; Verification:</strong> Deep-dive self-assessment quizzes with comprehensive multiple-choice, writing prompts, and answer keys.</div>
     </div>
-
-    <h3 class="fm-sub">Quizzes &amp; Synthesis Challenges</h3>
-    <p class="fm-body">A rigorous quiz concludes every chapter, and an intensive synthesis challenge closes every phase.
-        Dedicated writing lines are provided below each question. Force yourself to write out the physical hardware
-        mechanics and algorithmic invariants by hand before consulting the small-print answer keys at the bottom.</p>
-
-    <h3 class="fm-sub">Pace &amp; Verification Discipline</h3>
-    <p class="fm-body">There is no artificial timeline. Work through the 215 chapters sequentially. Whenever an assembly
-        instruction or memory allocation is discussed, verify it independently using tools like Godbolt Compiler
-        Explorer, SharpLab.io, and BenchmarkDotNet. Consistency and depth always beat speed.</p>
 
     <!-- ============ HOW TO TAKE NOTES ============ -->
     <h2 class="fm-title section-break">How to Take Notes</h2>
-    <p class="fm-body fm-lead">I can't write this entire PDF myself so sorry for AI jargons</p>
+    <p class="fm-body fm-lead">The whiteboards are not for rewriting what is printed. They are for synthesizing mechanics.</p>
 
     <div class="callout key">
         <div class="callout-title">Restate the Physical Invariant</div>
-        If a section explains CPU cache line false sharing, do not just copy the definition. Sketch the two CPU cores
-        and annotate the single 64-byte cache line bouncing between their L1 caches in your own handwriting.
+        If a section explains CPU cache line false sharing or Raft log matching, sketch the multi-core or cluster topology yourself. Trace where the contention or quorum partition occurs.
     </div>
 
     <div class="callout warn">
-        <div class="callout-title">Mark Latent Edge Cases &amp; Gaps</div>
-        Whenever an algorithmic invariant or lock-free edge case feels non-obvious, place a prominent question mark in
-        the margin. Re-read the chapter after writing out the step-by-step state transitions until the concept is
-        crystal clear.
+        <div class="callout-title">Mark Failure Modes &amp; Gaps</div>
+        Whenever an invariant or edge case feels non-obvious (e.g., a node failing mid-transaction with an uncommitted write), place a prominent <code>?</code> on the whiteboard page. Re-verify the step-by-step state transitions.
     </div>
 
     <div class="callout tip">
-        <div class="callout-title">Cross-Reference Across Phases</div>
-        When studying database storage engines in Phase 7, cross-reference back to B-Tree cache line alignment in Phase
-        4 and asynchronous I/O in Phase 4. Elite software engineering is about connecting low-level primitives to
-        high-level distributed systems.
+        <div class="callout-title">Cross-Reference Across Volumes</div>
+        When studying database storage engines in Volume X, cross-reference back to B-Tree cache line alignment in Volume II and asynchronous I/O in Volume VI. Senior systems engineering connects low-level primitives to high-level distributed systems.
     </div>
 
     <div class="callout interview">
         <div class="callout-title">Rehearse Spoken Explanations</div>
-        Answer the Pink Interview boxes out loud without looking at notes. Write your exact spoken explanation in the
-        margin. If you cannot articulate the systems trade-offs cleanly out loud, you do not fully own the concept yet.
+        Answer the Pink Interview boxes out loud without looking at notes. Write your exact spoken explanation on the whiteboard page. If you cannot articulate the trade-offs cleanly out loud, you do not fully own the concept yet.
     </div>
 
 </body>
