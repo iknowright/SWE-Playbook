@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="common.css">
+<title>Chapter 6: The Classical 5-Stage CPU Pipeline</title>
+</head>
+<body class="chapter-six">
+
+<!-- ==========================================================================
+     PAGE 1: THE PRE-PIPELINE ERA & MIPS ORIGINS
+     ========================================================================== -->
+<div class="page-container content-flow">
+  <div>
+    <div class="phase-label">Volume I &middot; Silicon, Machine Architecture &amp; Low-Level Math</div>
+    <div class="chapter-number">Chapter 6 (Day 6)</div>
+    <h1 class="chapter-title">The Classical 5-Stage CPU Pipeline: Fetch, Decode, Execute, Memory, Write-back</h1>
+
+    <h2>6.0 The Single-Cycle Epoch &amp; The RISC Revolution</h2>
+    <p>To appreciate the absolute mechanical brilliance of the modern CPU pipeline, we must examine the physical constraints of early microprocessors. In the late 1970s and early 1980s, processors like the Intel 8086 utilized a <strong>Single-Cycle Architecture</strong> (or un-pipelined multi-cycle architecture). In a strict single-cycle datapath, one instruction is fetched, decoded, executed, memory-accessed, and written back to the register file entirely within a single, continuous clock cycle.</p>
+    
+    <p>This design created a catastrophic physical bottleneck known as the <em>Critical Path Dilemma</em>. The duration of the clock period ($T_{clk}$) cannot be dynamic; it must be fixed to accommodate the absolute slowest, most complex instruction in the entire Instruction Set Architecture (ISA). If a simple <code>ADD</code> takes $20\text{ ns}$, but a complex <code>LOAD</code> from memory takes $100\text{ ns}$, the motherboard oscillator must be throttled to a $100\text{ ns}$ period ($10\text{ MHz}$). During the <code>ADD</code> instruction, the CPU spends $20\text{ ns}$ doing math and $80\text{ ns}$ doing absolutely nothing, bleeding thermal energy while waiting for the clock edge.</p>
+
+    <h3>The MIPS Project (1981)</h3>
+    <p>In 1981, John Hennessy and his team at Stanford University initiated the <strong>MIPS (Microprocessor without Interlocked Pipelined Stages)</strong> project. Concurrently, David Patterson at UC Berkeley launched the <strong>RISC (Reduced Instruction Set Computer)</strong> project. They observed that 80% of software execution spent its time running only 20% of the available instructions (the 80/20 rule).</p>
+
+    <p>Instead of building massively complex, slow processors to handle every edge case, they proposed stripping the CPU down to a minimal, uniform instruction set where every instruction was exactly 32 bits long and did exactly one thing. This uniformity allowed them to slice the physical execution path into five discrete hardware islands separated by D-Flip Flops. By applying Henry Ford's factory assembly-line mechanics directly to silicon, they birthed the <strong>Classical 5-Stage Pipeline</strong>, forever altering the trajectory of Moore's Law and enabling the Gigahertz era.</p>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 2: WHITEBOARD 1
+     ========================================================================== -->
+<div class="page-container">
+  <div class="whiteboard-page">
+    <div class="wb-header">
+      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+      <div class="wb-ref">REF: CH06_SINGLE_CYCLE_VS_MIPS</div>
+    </div>
+    <div class="wb-invariants">
+      <div><b>The RISC vs CISC War:</b> Intel's x86 is a Complex Instruction Set Computer (CISC). Instructions range from 1 byte to 15 bytes. To survive the pipelining revolution, Intel had to build invisible decoders inside the CPU to dynamically translate clunky CISC x86 assembly into elegant, uniform RISC micro-operations ($\mu\text{ops}$) that the internal pipeline could actually digest.</div>
+    </div>
+    <div class="wb-canvas"></div>
+    <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 2</span></div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 3: LATENCY VS THROUGHPUT
+     ========================================================================== -->
+<div class="page-container content-flow">
+  <div>
+    <h2>6.1 Latency vs. Throughput: The Core Engineering Distinction</h2>
+    <p>To mathematically analyze pipelining, you must forcefully separate two metrics that high-level software engineers routinely conflate: Latency and Throughput.</p>
+
+    <ul>
+      <li><strong>Latency (Execution Time / Response Time):</strong> The absolute physical time it takes for one specific instruction to clear the processor from the moment it is fetched to the moment its result is written.</li>
+      <li><strong>Throughput (Bandwidth / Execution Rate):</strong> The total volume of instructions completing per unit of time (e.g., Instructions Per Cycle, or IPC).</li>
+    </ul>
+
+    <div class="callout warn">
+      <div class="callout-title">The Pipelining Paradox (Orange)</div>
+      Pipelining a CPU does <strong>not</strong> decrease the latency of an individual instruction. In fact, latency slightly <em>increases</em> in a pipelined CPU. Between every stage, hardware engineers must insert Pipeline Registers (D-Flip Flops) to hold the state. These flip-flops introduce setup time ($T_{setup}$) and clock-to-Q ($T_{cq}$) propagation delays. Pipelining sacrifices individual instruction latency to massively inflate overall execution throughput.
+    </div>
+
+    <h3>The Assembly Line Analogy</h3>
+    <p>Consider a car manufacturing plant. It takes 50 hours to build one car from scratch (Latency). In a non-pipelined factory, a team of workers builds one car completely before starting the next. <strong>Throughput: 1 car per 50 hours.</strong></p>
+    
+    <p>In a pipelined factory, the process is sliced into 5 distinct stations (Chassis, Engine, Paint, Interior, Testing), each taking 10 hours. The total Latency is still 50 hours per car. However, as soon as Car A leaves the Chassis station and enters the Engine station, Car B enters the Chassis station. Once the pipeline is "primed" (full), a completed car rolls off the Testing line every 10 hours. <strong>Throughput: 1 car per 10 hours (a 5x increase).</strong></p>
+
+    <p>In silicon, if a 5-stage pipeline is perfectly saturated, the CPU retires exactly one instruction every single clock cycle ($IPC = 1.0$), despite each instruction physically taking 5 clock cycles to travel from end to end.</p>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 4: WHITEBOARD 2
+     ========================================================================== -->
+<div class="page-container">
+  <div class="whiteboard-page">
+    <div class="wb-header">
+      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+      <div class="wb-ref">REF: CH06_LATENCY_THROUGHPUT_PARADOX</div>
+    </div>
+    <div class="wb-invariants">
+      <div><b>Network Architecture Isomorphism:</b> This exact same latency vs. throughput trade-off applies to network packet routing. Sending a 1GB file over a TCP socket involves slicing it into 1500-byte MTU packets (pipelining). The overall throughput of the network increases via multiplexing, even if the absolute latency of the first byte arriving is identical.</div>
+    </div>
+    <div class="wb-canvas"></div>
+    <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 4</span></div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 5: STAGE 1 - FETCH (IF)
+     ========================================================================== -->
+<div class="page-container content-flow">
+  <div>
+    <h2>6.2 Stage 1: Instruction Fetch (IF)</h2>
+    <p>The 5-stage classic RISC pipeline breaks execution into five discrete physical hardware islands. The first island is the Instruction Fetch (IF) unit. Its singular goal is to pull raw binary opcodes from memory and feed the beast.</p>
+
+    <h3>The Program Counter (`RIP` / `PC`)</h3>
+    <p>The CPU maintains a dedicated architectural register pointing to the virtual memory address of the next instruction. In x86-64, this is the <code>RIP</code> (Instruction Pointer). In ARM, it is the <code>PC</code>.</p>
+    
+    <p>During the IF stage, the CPU asserts the <code>RIP</code> address onto the internal bus connected to the <strong>L1 Instruction Cache (L1i)</strong>. The L1i cache does not return a single instruction; it returns an entire 64-byte Cache Line block. This ensures that sequential instructions are buffered immediately, eliminating future fetch delays.</p>
+
+    <h3>Instruction Alignment &amp; Pre-Decoding</h3>
+    <p>In a strict RISC architecture (like ARM), every instruction is exactly 4 bytes (32 bits) long. The Fetch unit simply grabs the 4 bytes, increments the <code>PC</code> by 4, and sends the data to the Decode stage. It is mechanically trivial.</p>
+
+    <p>In an x86-64 CISC architecture, instructions are variable-length. An <code>inc eax</code> might be 2 bytes. A <code>vfmadd231ps</code> (AVX-512 Fused Multiply-Add) might be 7 bytes. The Fetch unit has no physical way of knowing where one instruction ends and the next begins just by looking at a 64-byte block of RAM. Modern Intel and AMD chips employ heavy <strong>Pre-Decoders</strong> in the IF stage. These circuits scan the byte stream looking for specific instruction prefixes (like the REX prefix or VEX payload) to mark instruction boundaries before passing them to the actual Decoder.</p>
+
+    <div class="callout tip">
+      <div class="callout-title">The Branch Target Buffer (BTB)</div>
+      If the Fetch unit blindly increments the <code>RIP</code> sequentially, it will fetch the wrong code whenever a <code>for</code> loop repeats or an <code>if</code> statement jumps. The IF stage contains a highly specialized SRAM called the Branch Target Buffer (BTB). It caches the destination addresses of previously executed jumps. If the Fetch unit sees a jump instruction, it queries the BTB to instantly teleport the <code>RIP</code> to the correct address without waiting for the ALU to evaluate the jump mathematically.
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 6: WHITEBOARD 3
+     ========================================================================== -->
+<div class="page-container">
+  <div class="whiteboard-page">
+    <div class="wb-header">
+      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+      <div class="wb-ref">REF: CH06_FETCH_L1I_BTB</div>
+    </div>
+    <div class="wb-invariants">
+      <div><b>Code Alignment Hazards:</b> If a hot loop's starting instruction straddles the boundary between two 64-byte cache lines, the Fetch unit must spend two clock cycles pulling both cache lines to assemble the instruction, causing a recurring micro-stall. C++ compilers routinely pad assembly with <code>NOP</code> (No Operation) bytes specifically to 16-byte or 64-byte align the targets of jump instructions.</div>
+    </div>
+    <div class="wb-canvas"></div>
+    <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 6</span></div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 7: STAGE 2 - DECODE (ID)
+     ========================================================================== -->
+<div class="page-container content-flow">
+  <div>
+    <h2>6.3 Stage 2: Instruction Decode &amp; Register Read (ID)</h2>
+    <p>The raw binary bytes retrieved by the Fetch unit are meaningless noise until they are routed through the decoders. The ID stage is the semantic brain of the CPU pipeline.</p>
+
+    <h3>Micro-operation ($\mu\text{ops}$) Translation</h3>
+    <p>To sustain a 5-stage pipeline, the flow of instructions must be uniform. Because x86 assembly is wildly non-uniform (some instructions touch memory, registers, and the ALU simultaneously), the Decoder acts as a real-time hardware compiler. It intercepts complex x86 instructions and shatters them into tiny, RISC-like operations called micro-operations ($\mu\text{ops}$).</p>
+    
+    <p>Example: The CISC instruction <code>add [rbx], eax</code> (Read memory at RBX, add EAX to it, write the result back to memory at RBX) is impossible to execute in a single pass of a standard 5-stage pipeline. The Decoder violently cracks it into three $\mu\text{ops}$:</p>
+    <ol>
+      <li><code>LOAD temp_reg, [rbx]</code></li>
+      <li><code>ADD temp_reg, eax</code></li>
+      <li><code>STORE [rbx], temp_reg</code></li>
+    </ol>
+    <p>The remainder of the pipeline executes these $\mu\text{ops}$, completely oblivious to the original x86 assembly code.</p>
+
+    <h3>The Register File (RF) &amp; Sign Extension</h3>
+    <p>Once translated, the ID stage must fetch the necessary operands. It sends read requests to the <strong>Register File</strong>, an ultra-fast array of SRAM flip-flops holding the architectural state (RAX, RBX, etc.).</p>
+    
+    <p>If the instruction includes an immediate constant (e.g., <code>add rax, -5</code>), the `-5` is encoded as a small 8-bit integer in the binary stream to save disk space. The ID stage routes this byte through a <strong>Sign-Extension Unit</strong>, which copies the Most Significant Bit (the sign bit, $1$) across the remaining 56 bits, converting it into a full 64-bit Two's Complement integer ($0\text{xFFFFFFFFFFFFFFFB}$) before pushing it into the Execute stage. Without sign extension, adding an 8-bit negative to a 64-bit positive would corrupt the mathematics entirely.</p>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 8: WHITEBOARD 4
+     ========================================================================== -->
+<div class="page-container">
+  <div class="whiteboard-page">
+    <div class="wb-header">
+      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+      <div class="wb-ref">REF: CH06_DECODE_MICRO_OPS</div>
+    </div>
+    <div class="wb-invariants">
+      <div><b>The Micro-Op Cache ($\mu\text{op}$ Cache):</b> Decoding complex x86 instructions consumes massive amounts of power and latency. Modern Intel/AMD chips bypass this by storing previously decoded $\mu\text{ops}$ in a dedicated L0 Micro-Op Cache. If a loop repeats, the CPU powers down the complex decoders and fetches the pre-digested $\mu\text{ops}$ directly, saving watts and cycles.</div>
+    </div>
+    <div class="wb-canvas"></div>
+    <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 8</span></div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 9: STAGE 3 - EXECUTE (EX)
+     ========================================================================== -->
+<div class="page-container content-flow">
+  <div>
+    <h2>6.4 Stage 3: Execute (EX)</h2>
+    <p>The Execute stage is where the actual computational work happens. The voltages representing the operands arrive from the ID stage and are routed into highly specialized execution units.</p>
+
+    <h3>The Execution Ports</h3>
+    <p>A modern CPU is <strong>Superscalar</strong>, meaning it does not have just one ALU. The Execute stage is a massive array of parallel execution ports. A typical core might have:</p>
+    <ul>
+      <li><strong>Port 0:</strong> Vector Math (AVX-512 Fused Multiply-Add) and Branch Execution.</li>
+      <li><strong>Port 1:</strong> Standard Integer ALU (Carry-Lookahead Adders, Bitwise XOR/AND).</li>
+      <li><strong>Port 2 &amp; 3:</strong> Address Generation Units (AGU) for Load/Store operations.</li>
+    </ul>
+
+    <h3>Effective Address Generation (AGU)</h3>
+    <p>If the instruction interacts with memory (e.g., <code>mov rax, [rbp + rdi*8 + 0x10]</code>), the Execute stage does <em>not</em> fetch the data. It calculates the physical pointer. The AGU takes the Base pointer (`RBP`), multiplies the Index (`RDI`) by the Scale ($8$), adds the Displacement ($0\text{x}10$), and outputs the final 64-bit memory address. This calculation happens in 1 clock cycle using dedicated bit-shifters and adders.</p>
+
+    <h3>Branch Evaluation &amp; Mispredictions</h3>
+    <p>If the instruction is a conditional jump (<code>jne</code> - Jump if Not Equal), the ALU evaluates the condition by checking the Zero Flag (`ZF`) in the <code>RFLAGS</code> register. If the Fetch unit (Stage 1) predicted the branch would be Taken, but the Execute unit (Stage 3) mathematically proves it should be Not Taken, a <strong>Branch Misprediction</strong> has occurred.</p>
+    
+    <p>The EX stage instantly asserts a <code>FLUSH</code> signal wire across the entire CPU die. The instructions currently sitting in the Fetch and Decode stages (which were speculatively loaded from the wrong path) are violently aborted, their flip-flops zeroed out. The Fetch unit is redirected to the correct address, and the pipeline sits empty (stalled) for several cycles until the new instructions reach the EX stage.</p>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 10: WHITEBOARD 5
+     ========================================================================== -->
+<div class="page-container">
+  <div class="whiteboard-page">
+    <div class="wb-header">
+      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+      <div class="wb-ref">REF: CH06_EXECUTE_AGU_BRANCH</div>
+    </div>
+    <div class="wb-invariants">
+      <div><b>Branchless Programming:</b> This EX-stage flush penalty is why elite C++ developers use bitwise math (e.g., <code>val = (x ^ y) & -(x < y);</code>) instead of <code>if-else</code> blocks in hot loops. Bitwise math consumes 3 ALU cycles perfectly deterministically. An <code>if</code> statement might consume 1 cycle, or it might trigger a 15-cycle pipeline flush if predicted incorrectly.</div>
+    </div>
+    <div class="wb-canvas"></div>
+    <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 10</span></div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 11: STAGE 4 - MEMORY (MEM)
+     ========================================================================== -->
+<div class="page-container content-flow">
+  <div>
+    <h2>6.5 Stage 4: Memory Access (MEM)</h2>
+    <p>The MEM stage is exclusively responsible for interacting with the L1 Data Cache (L1d) and the Memory Management Unit (MMU). It uses the 64-bit pointer calculated by the AGU in the previous stage.</p>
+
+    <h3>VIPT Caching &amp; The TLB Parallel Lookup</h3>
+    <p>When the CPU accesses memory, it is using a Virtual Address (e.g., `0x00007FF...`). The L1d cache requires a Physical Address in RAM. Translating Virtual to Physical requires querying the Translation Lookaside Buffer (TLB) and potentially walking the OS Page Tables—a massive latency sink.</p>
+    
+    <p>To do this in exactly 1 clock cycle, modern CPUs use <strong>VIPT (Virtually Indexed, Physically Tagged)</strong> caches. The MEM stage splits the virtual address in half. It uses the lower bits (which are identical in both virtual and physical addresses due to 4KB page alignment) to immediately begin indexing into the L1d SRAM array. Simultaneously, in parallel, it sends the upper bits to the TLB for physical translation. By the time the SRAM array returns the candidate data, the TLB has finished translating the physical tag, which is then compared to verify a cache hit. Parallelization saves the cycle.</p>
+
+    <h3>Load &amp; Store Buffers</h3>
+    <ul>
+      <li><strong>Loads:</strong> If the data is in the L1d cache (Hit), it is routed to the next stage. If it is missing (Miss), the pipeline halts, and the Memory Controller reaches out to the L2/L3 cache, causing a severe stall.</li>
+      <li><strong>Stores:</strong> If writing data to memory, the CPU does not wait for the RAM to accept it. It dumps the value into a <strong>Store Buffer</strong> and moves on. The cache coherence protocol flushes the buffer to L1d asynchronously in the background.</li>
+    </ul>
+
+    <div class="callout tip">
+      <div class="callout-title">The Pass-Through Invariant (Emerald)</div>
+      What happens if the instruction is just <code>add eax, 5</code>? It does not touch memory at all. In a strict synchronous pipeline, instructions cannot "skip" stages, or they would crash into instructions ahead of them. Non-memory instructions simply <strong>pass through</strong> the MEM stage. The data voltages physically travel through the MEM flip-flops, doing absolutely nothing for one clock cycle, purely to maintain the synchronized marching rhythm.
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 12: WHITEBOARD 6
+     ========================================================================== -->
+<div class="page-container">
+  <div class="whiteboard-page">
+    <div class="wb-header">
+      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+      <div class="wb-ref">REF: CH06_MEM_VIPT_TLB</div>
+    </div>
+    <div class="wb-canvas"></div>
+    <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 12</span></div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 13: STAGE 5 - WRITE-BACK (WB)
+     ========================================================================== -->
+<div class="page-container content-flow">
+  <div>
+    <h2>6.6 Stage 5: Write-Back (WB) &amp; Retirement</h2>
+    <p>The pipeline finishes here. The resulting data—whether mathematically calculated by the ALU in the EX stage, or fetched from the L1d cache in the MEM stage—is physically routed back to the Register File.</p>
+
+    <h3>Architectural State Commitment</h3>
+    <p>When the clock edge hits in the WB stage, the hardware overwrites the target register (e.g., <code>RAX</code>) with the final value. This is the moment the <strong>Architectural State</strong> of the CPU is officially updated. Before this picosecond, the instruction was a "ghost"—a speculative voltage flowing through the silicon.</p>
+
+    <h3>Precise Exceptions &amp; Interrupt Handling</h3>
+    <p>Why wait until the absolute last stage to write the register? Why not have the ALU write to `RAX` immediately in Stage 3?</p>
+    
+    <p>Imagine the instruction is <code>div eax, ebx</code>, but <code>EBX = 0</code>. The ALU triggers a Hardware Divide-by-Zero Exception. If the CPU had eagerly written intermediate results to the registers, the architectural state would be permanently corrupted. The operating system kernel would panic trying to resolve a fractured state.</p>
+    
+    <p>By strictly delaying all register updates until the WB stage, the CPU achieves <strong>Precise Exceptions</strong>. When the ALU faults in Stage 3, the hardware simply flags the instruction as "poisoned" and lets it flow silently through MEM and WB without writing anything. The architectural state remains perfectly pristine, exactly as it was before the instruction began, allowing the OS kernel to step in, run the exception handler, and potentially resume execution flawlessly.</p>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 14: WHITEBOARD 7
+     ========================================================================== -->
+<div class="page-container">
+  <div class="whiteboard-page">
+    <div class="wb-header">
+      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+      <div class="wb-ref">REF: CH06_WRITEBACK_PRECISE_EXCEPTIONS</div>
+    </div>
+    <div class="wb-invariants">
+      <div><b>Retirement vs. Execution:</b> In modern Out-of-Order CPUs, instructions execute chaotically out of sequence. However, they are collected in a Reorder Buffer (ROB) and forced to Retire (Write-Back) in the exact strict sequence the software developer wrote them. Chaos in execution; perfect order in retirement.</div>
+    </div>
+    <div class="wb-canvas"></div>
+    <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 14</span></div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 15: PIPELINE HAZARDS: STRUCTURAL & CONTROL
+     ========================================================================== -->
+<div class="page-container content-flow">
+  <div>
+    <h2>6.7 Pipeline Hazards: Structural &amp; Control</h2>
+    <p>Because five instructions are flowing through the physical hardware simultaneously, physics and logic inevitably collide. These collisions are called <strong>Hazards</strong>. If not mitigated, the CPU must halt the pipeline (injecting "Bubbles" or <code>NOPs</code>), destroying the IPC throughput.</p>
+
+    <h3>1. Structural Hazards</h3>
+    <p>A structural hazard occurs when two instructions attempt to use the exact same physical hardware circuit at the exact same picosecond. </p>
+    <p><strong>Example:</strong> Instruction 1 is in the MEM stage, trying to read a variable from RAM. Instruction 4 is in the IF stage, trying to fetch an opcode from RAM. If the CPU only has one memory bus, they crash. <br>
+    <strong>Resolution:</strong> Hardware duplication. This is exactly why the L1 Cache is physically split into L1i (Instruction) and L1d (Data). By providing two distinct physical SRAM arrays, IF and MEM can execute simultaneously without resource contention.</p>
+
+    <h3>2. Control Hazards</h3>
+    <p>Control hazards are caused by branch instructions (<code>jmp</code>, <code>je</code>, <code>call</code>). The IF stage needs to fetch the next instruction every single clock cycle. But if it encounters an <code>if</code> statement, it doesn't know which path to fetch until the EX stage evaluates the condition 2 cycles later.</p>
+    <p><strong>Resolution: Branch Prediction.</strong> The CPU refuses to wait. It uses machine learning algorithms (Branch History Tables and 2-Bit Saturating Counters) to guess whether the branch will be Taken or Not Taken. It speculatively fetches down the guessed path. If the guess is correct (which modern predictors achieve 95%+ of the time), there is zero delay. If the guess is wrong, a pipeline flush occurs, discarding the speculative work.</p>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 16: WHITEBOARD 8
+     ========================================================================== -->
+<div class="page-container">
+  <div class="whiteboard-page">
+    <div class="wb-header">
+      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+      <div class="wb-ref">REF: CH06_STRUCTURAL_CONTROL_HAZARDS</div>
+    </div>
+    <div class="wb-canvas"></div>
+    <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 16</span></div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 17: PIPELINE HAZARDS: DATA (RAW) & FORWARDING
+     ========================================================================== -->
+<div class="page-container content-flow">
+  <div>
+    <h2>6.8 Pipeline Hazards: Data Dependencies</h2>
+    <p>Data hazards occur when an instruction depends on the mathematical result of an instruction currently in-flight ahead of it in the pipeline.</p>
+
+    <h3>Read-After-Write (RAW) / True Dependency</h3>
+    <pre><code>Inst 1: add eax, 5       // EX computes eax + 5
+Inst 2: sub ebx, eax     // Needs the new 'eax'</code></pre>
+    
+    <p>Let's map this in the 5-stage pipeline. In Cycle 3, Instruction 2 is in the <strong>Decode (ID)</strong> stage trying to read the physical voltage of <code>EAX</code> from the Register File. However, Instruction 1 is currently in the <strong>Execute (EX)</strong> stage. It will not write the answer into <code>EAX</code> until the <strong>Write-Back (WB)</strong> stage at Cycle 5.</p>
+    
+    <p>If unmitigated, the hardware must stall Instruction 2 for two complete clock cycles (inserting bubbles) until the WB stage finishes.</p>
+
+    <h3>The Resolution: Operand Forwarding (Bypassing)</h3>
+    <p>CPU architects cannot afford to stall 2 cycles for every sequential math operation. They solve this using a physical wiring hack called <strong>Operand Forwarding</strong> or Bypassing.</p>
+    
+    <p>Engineers solder physical copper wires from the output pins of the ALU directly back into the input multiplexers of the ALU. As soon as Instruction 1 computes the answer in the EX stage, the voltage is physically routed backwards across the die. On the very next clock cycle, when Instruction 2 enters the EX stage, the multiplexer ignores the stale value from the Register File and instead consumes the "bypassed" value directly from the ALU output. The RAW hazard is resolved with zero stalled cycles.</p>
+
+    <div class="callout warn">
+      <div class="callout-title">The Load-Use Stall (Amber)</div>
+      Forwarding cannot solve everything. If Instruction 1 is <code>load eax, [mem]</code> and Instruction 2 is <code>add ebx, eax</code>, the data isn't retrieved from the L1d cache until the MEM stage. The ALU in the EX stage cannot time-travel into the future to get data from the MEM stage. This is a <strong>Load-Use Hazard</strong>. The pipeline MUST physically stall for 1 cycle to allow the MEM stage to forward the data backwards to the EX stage.
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 18: WHITEBOARD 9
+     ========================================================================== -->
+<div class="page-container">
+  <div class="whiteboard-page">
+    <div class="wb-header">
+      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+      <div class="wb-ref">REF: CH06_DATA_HAZARDS_FORWARDING</div>
+    </div>
+    <div class="wb-canvas"></div>
+    <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 18</span></div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 19: ADVANCED HAZARDS (WAR/WAW) & REGISTER RENAMING
+     ========================================================================== -->
+<div class="page-container content-flow">
+  <div>
+    <h2>6.9 Advanced Hazards &amp; Register Renaming</h2>
+    <p>While classical 5-stage scalar pipelines only suffer from RAW hazards, modern Superscalar Out-of-Order (OoO) CPUs execute multiple instructions chaotically. This introduces False Dependencies.</p>
+
+    <h3>Write-After-Read (WAR) / Anti-Dependency</h3>
+    <pre><code>Inst 1: add ebx, eax     // Needs to read EAX
+Inst 2: mov eax, 10      // Writes to EAX</code></pre>
+    <p>If the Out-of-Order engine decides to execute Inst 2 <em>before</em> Inst 1 (because Inst 1 is waiting on EBX from a cache miss), it will overwrite EAX. When Inst 1 finally executes, it reads the wrong value ($10$).</p>
+
+    <h3>Write-After-Write (WAW) / Output Dependency</h3>
+    <pre><code>Inst 1: mov eax, 5
+Inst 2: mov eax, 10</code></pre>
+    <p>If Inst 2 executes first, Inst 1 will overwrite the final architectural state with $5$, corrupting the program.</p>
+
+    <h3>The Resolution: Register Renaming (RAT)</h3>
+    <p>WAR and WAW are not true mathematical dependencies; they are artificial bottlenecks caused by the fact that the x86 architecture only has 16 general-purpose registers (RAX, RBX, etc.). The compiler is forced to aggressively reuse them.</p>
+    
+    <p>Hardware solves this by decoupling the <em>Architectural Registers</em> (the 16 registers the software sees) from the <em>Physical Register File (PRF)</em>. A modern Intel core actually has over <strong>160 physical registers</strong> hidden in silicon. </p>
+    <p>The <strong>Register Alias Table (RAT)</strong> intercepts the assembly instructions. When it sees <code>mov eax, 10</code>, it dynamically assigns physical register <code>P45</code> to act as EAX. When it sees the next <code>mov eax, 20</code>, it assigns physical register <code>P82</code> to act as EAX. The instructions now write to two completely different hardware locations, instantly eliminating all WAR and WAW hazards and allowing the CPU to execute them simultaneously.</p>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 20: WHITEBOARD 10
+     ========================================================================== -->
+<div class="page-container">
+  <div class="whiteboard-page">
+    <div class="wb-header">
+      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+      <div class="wb-ref">REF: CH06_WAW_WAR_REGISTER_RENAMING</div>
+    </div>
+    <div class="wb-invariants">
+      <div><b>Tomasulo's Algorithm:</b> The dynamic scheduling and register renaming logic used in all modern CPUs is derived from Tomasulo's Algorithm, invented at IBM in 1967 for the System/360 Model 91 floating-point unit.</div>
+    </div>
+    <div class="wb-canvas"></div>
+    <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 20</span></div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 21: PIPELINE MATHEMATICS (SPEEDUP & CPI)
+     ========================================================================== -->
+<div class="page-container content-flow">
+  <div>
+    <h2>6.10 Pipeline Mathematics (Speedup &amp; CPI)</h2>
+    <p>As engineers, we must mathematically quantify the exact throughput improvements of pipelining.</p>
+
+    <ul>
+      <li>In a single-cycle processor, 1 instruction takes 1 massive cycle. <strong>CPI = 1.0</strong>.</li>
+      <li>In an ideal 5-stage pipeline, it takes 5 cycles for the <em>first</em> instruction to finish. However, after the pipeline is full, one instruction retires every single clock cycle. The average CPI approaches $1.0$, but the clock frequency can be driven 5 times higher because the logic paths are 5 times shorter.</li>
+    </ul>
+
+    <h3>The Speedup Formula</h3>
+    <p>Let $k$ be the number of pipeline stages (e.g., 5). Let $N$ be the number of instructions to execute. Let $\tau$ be the clock period (duration of one stage).</p>
+    
+    <p>Time without pipelining (sequential):<br>
+    $T_{non\_pipeline} = N \cdot (k \cdot \tau)$</p>
+    
+    <p>Time with pipelining:<br>
+    It takes $k$ cycles to push the first instruction out, and $N-1$ cycles for the remaining instructions.<br>
+    $T_{pipeline} = (k + N - 1) \cdot \tau$</p>
+
+    <p><strong>Total Theoretical Speedup ($S$):</strong><br>
+    $$S = \frac{T_{non\_pipeline}}{T_{pipeline}} = \frac{N \cdot k}{k + N - 1}$$</p>
+
+    <div class="callout key">
+      <div class="callout-title">The Asymptotic Limit (Indigo)</div>
+      As the number of instructions $N$ approaches infinity (a program running for more than a microsecond), the formula simplifies dramatically:
+      $$\lim_{N \to \infty} \frac{N \cdot k}{N} = k$$
+      The maximum theoretical speedup of a pipeline is exactly equal to the number of stages ($k$). A 5-stage pipeline makes the CPU 5 times faster.
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 22: WHITEBOARD 11
+     ========================================================================== -->
+<div class="page-container">
+  <div class="whiteboard-page">
+    <div class="wb-header">
+      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+      <div class="wb-ref">REF: CH06_PIPELINE_SPEEDUP_MATH</div>
+    </div>
+    <div class="wb-invariants">
+      <div><b>The Pentium 4 Failure:</b> If $k$ stages yield a $k$-times speedup, why not build a 500-stage pipeline? Intel tried this with the Pentium 4 "Prescott" architecture, building an absurd 31-stage pipeline. The flip-flop latching overhead ate all the performance gains, and branch mispredictions required 31-cycle flushes, destroying overall throughput. Modern architectures (Apple M-series, AMD Zen) stabilized around 14 to 19 stages.</div>
+    </div>
+    <div class="wb-canvas"></div>
+    <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 22</span></div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 23: SOFTWARE RELEVANCY & ILP
+     ========================================================================== -->
+<div class="page-container content-flow">
+  <div>
+    <h2>6.11 Software Relevancy: Instruction-Level Parallelism (ILP)</h2>
+    <p>A pipelined CPU relies entirely on <strong>Instruction-Level Parallelism (ILP)</strong>. ILP is the measure of how many operations in a computer program can be performed simultaneously. If code contains strict sequential data dependencies (RAW hazards), the pipeline will violently stall (injecting bubbles), reducing the IPC from an ideal $1.0$ down to $0.2$.</p>
+
+    <h3>Code Optimization: Breaking Dependency Chains</h3>
+    <p>Let's look at how C++ and Rust compilers physically rearrange your code to hide pipeline latencies.</p>
+
+    <pre><code>// Poor ILP (Strict Data Dependency Chain)
+int x = data[0];       // Cycle 1: MEM Load 
+x = x * 5;             // Cycle 2: Wait for Load, then Multiply
+x = x + 10;            // Cycle 3: Wait for Multiply, then Add
+data[0] = x;           // Cycle 4: Store</code></pre>
+
+    <p>In the above code, every instruction relies precisely on the output of the previous instruction. The Execute stage sits empty while the Memory stage fetches, and the Memory stage sits empty while the ALU computes. The compiler cannot overlap these instructions.</p>
+
+    <p>Compilers use an optimization called <strong>Instruction Scheduling</strong> to interleave independent math between high-latency memory fetches:</p>
+
+    <pre><code>// High ILP (Interleaved Execution)
+int x = data[0];       // MEM stage begins fetch for X
+int y = data[1];       // MEM stage begins fetch for Y (Independent)
+
+// The CPU inserts independent math while waiting for memory
+int z = independent_counter * 5; 
+
+x = x * 5;             // X arrives, EX stage multiplies
+y = y * 5;             // EX stage multiplies Y 
+data[0] = x;
+data[1] = y;</code></pre>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 24: WHITEBOARD 12
+     ========================================================================== -->
+<div class="page-container">
+  <div class="whiteboard-page">
+    <div class="wb-header">
+      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+      <div class="wb-ref">REF: CH06_ILP_AND_SCHEDULING</div>
+    </div>
+    <div class="wb-invariants">
+      <div><b>Loop Unrolling:</b> The most common ILP optimization is Loop Unrolling. Loops introduce control hazards (the <code>jmp</code> back to the start). By copy-pasting the loop body multiple times inside the compilation phase, the compiler removes the branches entirely, allowing the CPU to load massive chunks of data sequentially into the pipeline without worrying about branch mispredictions.</div>
+    </div>
+    <div class="wb-canvas"></div>
+    <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 24</span></div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 25: VERIFICATION CHECKLIST
+     ========================================================================== -->
+<div class="page-container content-flow">
+  <div>
+    <h2>6.12 Chapter Verification, Checklist &amp; Quiz</h2>
+
+    <div class="checklist">
+      <h3>Verification Checklist</h3>
+      <div class="check-item"><div class="checkbox"></div><div>I can distinguish Latency (execution time of 1 instruction) from Throughput (instructions retired over time).</div></div>
+      <div class="check-item"><div class="checkbox"></div><div>I understand why Pipelining increases throughput but actually increases individual instruction latency.</div></div>
+      <div class="check-item"><div class="checkbox"></div><div>I can name and describe the 5 stages of the classical RISC pipeline (IF, ID, EX, MEM, WB).</div></div>
+      <div class="check-item"><div class="checkbox"></div><div>I can explain how the Instruction Fetch (IF) stage interacts with the Program Counter (RIP) and the BTB.</div></div>
+      <div class="check-item"><div class="checkbox"></div><div>I understand the Decode (ID) stage's role in breaking complex x86 assembly into micro-ops ($\mu\text{ops}$).</div></div>
+      <div class="check-item"><div class="checkbox"></div><div>I can identify Effective Address Generation (EAG) as a component of the Execute (EX) stage.</div></div>
+      <div class="check-item"><div class="checkbox"></div><div>I understand the Pass-Through principle for non-memory instructions in the MEM stage.</div></div>
+      <div class="check-item"><div class="checkbox"></div><div>I can define a Read-After-Write (RAW) data hazard and explain Operand Forwarding (Bypassing).</div></div>
+      <div class="check-item"><div class="checkbox"></div><div>I understand how Register Renaming and the RAT solve Write-After-Write (WAW) hazards.</div></div>
+      <div class="check-item"><div class="checkbox"></div><div>I can calculate pipeline Speedup $S = \frac{N \cdot k}{k + N - 1}$ and explain the asymptotic limit $k$.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 26: WHITEBOARD 13
+     ========================================================================== -->
+<div class="page-container">
+  <div class="whiteboard-page">
+    <div class="wb-header">
+      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+      <div class="wb-ref">REF: CH06_CHECKLIST_NOTES</div>
+    </div>
+    <div class="wb-canvas"></div>
+    <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 26</span></div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 27: QUIZ PART 1
+     ========================================================================== -->
+<div class="page-container content-flow">
+  <div>
+    <h3>Comprehensive Examination</h3>
+
+    <div class="quiz-section">
+      <div class="quiz-question">
+        <p>1. Which of the following statements perfectly captures the mathematical consequence of converting a single-cycle processor into a 5-stage pipelined processor?</p>
+        <div class="quiz-option">A) The latency of every individual instruction decreases by a factor of 5.</div>
+        <div class="quiz-option">B) The latency of individual instructions increases due to flip-flop latching overhead between stages, but overall instruction throughput increases dramatically.</div>
+        <div class="quiz-option">C) The processor executes 5 distinct software threads concurrently.</div>
+        <div class="quiz-option">D) The CPU avoids branch misprediction penalties by executing all paths simultaneously.</div>
+      </div>
+
+      <div class="quiz-question">
+        <p>2. During the Execute (EX) stage, an instruction calculates a physical memory address (`[rbp + rcx*4]`). In which pipeline stage is the data actually fetched from the L1 Data Cache?</p>
+        <div class="quiz-option">A) Decode (ID)</div>
+        <div class="quiz-option">B) Execute (EX)</div>
+        <div class="quiz-option">C) Memory Access (MEM)</div>
+        <div class="quiz-option">D) Write-Back (WB)</div>
+      </div>
+
+      <div class="quiz-question">
+        <p>3. If a 10-stage pipeline executes a massive, infinite loop of instructions, what is the maximum theoretical speedup compared to a non-pipelined processor running the exact same clock period logic?</p>
+        <div class="quiz-option">A) Infinite</div>
+        <div class="quiz-option">B) 5x</div>
+        <div class="quiz-option">C) 10x</div>
+        <div class="quiz-option">D) It depends on the size of the L1 cache.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 28: WHITEBOARD 14
+     ========================================================================== -->
+<div class="page-container">
+  <div class="whiteboard-page">
+    <div class="wb-header">
+      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+      <div class="wb-ref">REF: CH06_QUIZ_SCRATCHPAD_1</div>
+    </div>
+    <div class="wb-canvas"></div>
+    <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 28</span></div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 29: QUIZ PART 2 & PROMPTS
+     ========================================================================== -->
+<div class="page-container content-flow">
+  <div>
+    <div class="quiz-section" style="margin-top: 0;">
+      <div class="quiz-question">
+        <p>4. An instruction sequence is defined as follows: <code>Instruction 1: mul eax, 5</code> followed immediately by <code>Instruction 2: add ebx, eax</code>. What specific hardware hazard does this create, and how is it mechanically resolved without stalling?</p>
+        <div class="quiz-option">A) Control Hazard; resolved via Branch Prediction.</div>
+        <div class="quiz-option">B) Structural Hazard; resolved by splitting L1i and L1d caches.</div>
+        <div class="quiz-option">C) Read-After-Write (RAW) Data Hazard; resolved by Operand Forwarding (bypassing the register file and routing the ALU output directly back to the ALU input).</div>
+        <div class="quiz-option">D) Write-After-Write (WAW) Hazard; resolved by Register Renaming.</div>
+      </div>
+
+      <div class="quiz-question">
+        <p>5. Why does the Intel Pentium 4 architecture's massive 31-stage pipeline represent an architectural failure in maximizing throughput?</p>
+        <div class="quiz-option">A) The flip-flop setup times ($T_{setup}$) exceeded the clock period.</div>
+        <div class="quiz-option">B) The 31 stages generated excessive static leakage power.</div>
+        <div class="quiz-option">C) Branch mispredictions forced the CPU to flush 31 stages of speculative work, obliterating IPC (Instructions Per Cycle) and exposing the massive latency penalties.</div>
+        <div class="quiz-option">D) It required the L1 cache to be unified instead of split.</div>
+      </div>
+
+      <div class="quiz-question">
+        <p>6. When executing a simple <code>mov eax, 10</code> instruction, what physically happens to the data during the Memory Access (MEM) stage of the classical 5-stage pipeline?</p>
+        <div class="quiz-option">A) It writes the value 10 to the L1d cache.</div>
+        <div class="quiz-option">B) It skips the stage entirely and moves to Write-Back.</div>
+        <div class="quiz-option">C) The value `10` passes through the MEM stage flip-flops doing absolutely nothing, maintaining synchronous pipeline rhythm to prevent colliding with other instructions.</div>
+        <div class="quiz-option">D) It updates the Program Counter (`RIP`).</div>
+      </div>
+
+      <h3 style="margin-top: 24px;">Systems Writing Prompts</h3>
+      
+      <p style="font-weight: 700; margin-bottom: 4px; font-size: 9.5pt;">Prompt 1: Analyzing ILP and Dependency Chains</p>
+      <p style="font-size: 9pt;">Given the following pseudocode, analyze the execution throughput of Loop A vs. Loop B on a 5-stage pipelined processor. Specifically reference the Execute (EX) stage, Data Hazards, and Instruction-Level Parallelism (ILP).</p>
+      <pre style="margin-top: 6px; margin-bottom: 6px;"><code>// Loop A
+for(int i=0; i&lt;N; i++) { sum = sum + A[i]; }
+
+// Loop B
+for(int i=0; i&lt;N; i+=2) { 
+    sum1 = sum1 + A[i]; 
+    sum2 = sum2 + A[i+1]; 
+}</code></pre>
+
+      <p style="font-weight: 700; margin-top: 14px; margin-bottom: 4px; font-size: 9.5pt;">Prompt 2: The Stage 5 Architectural Commitment</p>
+      <p style="font-size: 9pt;">Explain the critical role of the Write-Back (WB) stage in handling hardware interrupts (like a Divide-by-Zero exception or a Page Fault). Why does delaying the update of the target register (`RAX`) until the absolute final stage protect the CPU's architectural state from corruption?</p>
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 30: ANSWER KEY + FINAL WHITEBOARD
+     ========================================================================== -->
+<div class="page-container">
+  <div class="litmus-box" style="margin-top: 0; margin-bottom: 12px; padding: 12px 14px; font-size: 7.5pt; line-height: 1.45;">
+    <div style="font-weight: 800; color: #4338CA; text-transform: uppercase; margin-bottom: 6px; font-size: 8.5pt;">Chapter 6 Technical Answer Key</div>
+    <div style="margin-bottom: 4px;"><b>1. (B)</b> Pipelining inherently adds intermediate latches (flip-flops) between logic blocks, slightly increasing the absolute latency of a single instruction. However, by overlapping execution, the overall throughput is massively multiplied.</div>
+    <div style="margin-bottom: 4px;"><b>2. (C)</b> The Execute (EX) stage features an Address Generation Unit (AGU) that calculates the 64-bit mathematical pointer location. It does not fetch data. The generated address is passed to the Memory Access (MEM) stage, which actually queries the L1d cache.</div>
+    <div style="margin-bottom: 4px;"><b>3. (C)</b> Using the asymptotic limit formula $\lim_{N \to \infty} \frac{N \cdot k}{k + N - 1}$, as $N$ approaches infinity, the denominator simplifies to $N$, yielding $N \cdot k / N = k$. A 10-stage pipeline offers a maximum theoretical 10x speedup.</div>
+    <div style="margin-bottom: 4px;"><b>4. (C)</b> Instruction 2 requires `EAX` in the Decode stage, but Instruction 1 hasn't written `EAX` to the register file yet. This RAW hazard is solved via Operand Forwarding, which wires the output of the EX stage ALU directly back into the input multiplexer of the EX stage for the very next cycle.</div>
+    <div style="margin-bottom: 4px;"><b>5. (C)</b> Deep pipelines rely on keeping the pipeline full. A branch instruction forces the CPU to guess the path. When a 31-stage pipeline guesses wrong, it has fetched 30 invalid instructions that must be mathematically aborted. The CPU stalls, obliterating the theoretical IPC gains.</div>
+    <div style="margin-bottom: 8px;"><b>6. (C)</b> To maintain the strict synchronous rhythm of the pipeline, instructions cannot jump stages. Non-memory instructions simply pass their data through the MEM flip-flops harmlessly, arriving at the WB stage exactly on schedule.</div>
+    <div style="margin-bottom: 4px;"><b>Prompt 1:</b> Loop A forces a strict Read-After-Write (RAW) data dependency chain. The ALU cannot compute the next <code>sum</code> until the previous iteration writes the result. The pipeline stalls. Loop B computes <code>sum1</code> and <code>sum2</code> independently. The Execute (EX) stage can interleave these calculations perfectly (or execute them concurrently in a superscalar architecture), saturating Instruction-Level Parallelism (ILP) and nearly doubling the throughput IPC.</div>
+    <div><b>Prompt 2:</b> If an instruction triggers a fault (e.g., dividing by zero in the EX stage), the CPU must abort the instruction. If the CPU had eagerly written intermediate results to the Register File during EX or MEM, the architectural state would be permanently corrupted. By strictly delaying register updates until the WB stage, the CPU can simply drop the instruction mid-pipeline, ensuring the software environment remains perfectly deterministic and uncorrupted (Precise Exceptions).</div>
+  </div>
+
+  <div class="whiteboard-page wb-split">
+    <div class="wb-header">
+      <div class="wb-title">Whiteboard &amp; Synthesis Workspace</div>
+      <div class="wb-ref">REF: CH06_FINAL_SYNTHESIS</div>
+    </div>
+    <div class="wb-canvas"></div>
+    <div class="wb-footer"><span>GIT GOOD &middot; CHAPTER 6 COMPLETE</span><span>PAGE 30</span></div>
+  </div>
+</div>
+
+</body>
+</html>
