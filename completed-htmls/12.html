@@ -1,49 +1,70 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-<meta charset="utf-8">
-<link rel="stylesheet" href="common.css">
-<title>Chapter 12: General Purpose Registers & Architectural Sizing</title>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="common.css">
+  <title>Chapter 12: General Purpose Registers & Architectural Sizing</title>
 </head>
+
 <body class="chapter-twelve">
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 1: SRAM PHYSICS & REGISTER FILE ARCHITECTURE
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <div class="phase-label">Volume II &middot; Microarchitectural Exploits &amp; Low-Level Design (LLD)</div>
-    <div class="chapter-number">Chapter 12 (Part 1)</div>
-    <h1 class="chapter-title">General Purpose Registers, Sizing &amp; The Zero-Extension Invariant</h1>
+  <div class="page-container content-flow">
+    <div>
+      <div class="phase-label">Volume II &middot; Microarchitectural Exploits &amp; Low-Level Design (LLD)</div>
+      <div class="chapter-number">Chapter 12 (Part 1)</div>
+      <h1 class="chapter-title">General Purpose Registers, Sizing &amp; The Zero-Extension Invariant</h1>
 
-    <h2>12.0 The Physics of the Register File (SRAM Multi-Porting)</h2>
-    <p>Before analyzing the x86-64 register set, we must understand the physical hardware that constitutes a register. The <strong>Register File</strong> is not Main Memory (DRAM), nor is it Cache (standard SRAM). It is a hyper-specialized, multi-ported SRAM array sitting directly inside the Execution Core, operating at the exact frequency of the CPU (e.g., 5.0 GHz).</p>
+      <h2>12.0 The Physics of the Register File (SRAM Multi-Porting)</h2>
+      <p>Before analyzing the x86-64 register set, we must understand the physical hardware that constitutes a register.
+        The <strong>Register File</strong> is not Main Memory (DRAM), nor is it Cache (standard SRAM). It is a
+        hyper-specialized, multi-ported SRAM array sitting directly inside the Execution Core, operating at the exact
+        frequency of the CPU (e.g., 5.0 GHz).</p>
 
-    <h3>The Multi-Porting Dilemma</h3>
-    <p>A standard L1 Cache SRAM cell has 1 Read port and 1 Write port. However, a modern Superscalar CPU might issue four instructions per clock cycle. Consider four concurrent <code>ADD</code> instructions. Each <code>ADD</code> requires two source operands and one destination operand. To execute them simultaneously, the Register File must support <strong>8 simultaneous Reads and 4 simultaneous Writes</strong> in a single 0.2-nanosecond clock cycle.</p>
-    
-    <p>Building an SRAM bitcell with 12 physical access ports requires a massive amount of silicon real estate and wire routing. The physical wiring capacitance grows quadratically with the number of ports ($O(N^2)$). This physics constraint is why CPUs have historically maintained very small architectural register files (16 in x86-64, 31 in ARM64) compared to gigabytes of main memory.</p>
+      <h3>The Multi-Porting Dilemma</h3>
+      <p>A standard L1 Cache SRAM cell has 1 Read port and 1 Write port. However, a modern Superscalar CPU might issue
+        four instructions per clock cycle. Consider four concurrent <code>ADD</code> instructions. Each <code>ADD</code>
+        requires two source operands and one destination operand. To execute them simultaneously, the Register File must
+        support <strong>8 simultaneous Reads and 4 simultaneous Writes</strong> in a single 0.2-nanosecond clock cycle.
+      </p>
 
-    <h2>12.1 Register Evolution: The Backward-Compatibility Chains</h2>
-    <p>The x86-64 architecture is a 45-year evolutionary chain of unbroken backward compatibility. The registers grew sequentially, layering on top of each other.</p>
+      <p>Building an SRAM bitcell with 12 physical access ports requires a massive amount of silicon real estate and
+        wire routing. The physical wiring capacitance grows quadratically with the number of ports ($O(N^2)$). This
+        physics constraint is why CPUs have historically maintained very small architectural register files (16 in
+        x86-64, 31 in ARM64) compared to gigabytes of main memory.</p>
 
-    <ul>
-      <li><strong>1978 (Intel 8086 - 16-Bit):</strong> Introduced the original registers: <code>AX</code> (Accumulator), <code>BX</code> (Base), <code>CX</code> (Count), and <code>DX</code> (Data). These were 16-bit wide hardware arrays.</li>
-      <li><strong>1985 (Intel 386 - 32-Bit):</strong> Expanded to 32 bits for Protected Mode. To preserve 16-bit binaries, Intel prefixed the names with "E" (Extended): <code>EAX</code>, <code>EBX</code>, <code>ECX</code>, <code>EDX</code>. <code>AX</code> remained a valid target, mapping directly to the lower 16 bits of <code>EAX</code>.</li>
-      <li><strong>2003 (AMD Opteron - 64-Bit):</strong> AMD expanded the ISA to 64 bits (Long Mode). They prefixed the legacy registers with "R" (<code>RAX</code>, <code>RBX</code>) and introduced 8 entirely new extended registers: <code>R8</code> through <code>R15</code>.</li>
-    </ul>
+      <h2>12.1 Register Evolution: The Backward-Compatibility Chains</h2>
+      <p>The x86-64 architecture is a 45-year evolutionary chain of unbroken backward compatibility. The registers grew
+        sequentially, layering on top of each other.</p>
+
+      <ul>
+        <li><strong>1978 (Intel 8086 - 16-Bit):</strong> Introduced the original registers: <code>AX</code>
+          (Accumulator), <code>BX</code> (Base), <code>CX</code> (Count), and <code>DX</code> (Data). These were 16-bit
+          wide hardware arrays.</li>
+        <li><strong>1985 (Intel 386 - 32-Bit):</strong> Expanded to 32 bits for Protected Mode. To preserve 16-bit
+          binaries, Intel prefixed the names with "E" (Extended): <code>EAX</code>, <code>EBX</code>, <code>ECX</code>,
+          <code>EDX</code>. <code>AX</code> remained a valid target, mapping directly to the lower 16 bits of
+          <code>EAX</code>.</li>
+        <li><strong>2003 (AMD Opteron - 64-Bit):</strong> AMD expanded the ISA to 64 bits (Long Mode). They prefixed the
+          legacy registers with "R" (<code>RAX</code>, <code>RBX</code>) and introduced 8 entirely new extended
+          registers: <code>R8</code> through <code>R15</code>.</li>
+      </ul>
+    </div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 2: SUB-REGISTER ALIASING & PARTIAL REGISTER STALLS
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <h2>12.2 Sub-Register Aliasing &amp; Microarchitectural Hazards</h2>
-    <p>A modern x86-64 CPU exposes 16 General Purpose Registers (GPRs). However, due to its evolutionary history, the legacy registers support fractional, overlapping sub-registers.</p>
+  <div class="page-container content-flow">
+    <div>
+      <h2>12.2 Sub-Register Aliasing &amp; Microarchitectural Hazards</h2>
+      <p>A modern x86-64 CPU exposes 16 General Purpose Registers (GPRs). However, due to its evolutionary history, the
+        legacy registers support fractional, overlapping sub-registers.</p>
 
-    <pre>|---------------------------------------------------------------|
+      <pre>|---------------------------------------------------------------|
 |                         RAX (64-bit)                          |
 |---------------------------------------|-------|---------------+
 |                                       | EAX   |               |
@@ -52,90 +73,132 @@
 |                                               | (16)  | AH/AL |
 |-----------------------------------------------|-------| (8)   |</pre>
 
-    <p>This overlapping structure—where <code>AL</code> (8-bit), <code>AX</code> (16-bit), <code>EAX</code> (32-bit), and <code>RAX</code> (64-bit) physically alias the exact same silicon SRAM cells—creates one of the most severe bottlenecks in Superscalar design: <strong>The Partial Register Stall</strong>.</p>
+      <p>This overlapping structure—where <code>AL</code> (8-bit), <code>AX</code> (16-bit), <code>EAX</code> (32-bit),
+        and <code>RAX</code> (64-bit) physically alias the exact same silicon SRAM cells—creates one of the most severe
+        bottlenecks in Superscalar design: <strong>The Partial Register Stall</strong>.</p>
 
-    <h3>The Partial Register Stall (P6 Architecture)</h3>
-    <p>In Out-of-Order (OoO) execution, the CPU uses the Register Alias Table (RAT) to map architectural registers (<code>RAX</code>) to hidden Physical Registers (<code>P1</code>, <code>P2</code>). In older microarchitectures like the Intel Pentium Pro (P6), the RAT tracked dependencies at the <em>full 32-bit register level</em>.</p>
+      <h3>The Partial Register Stall (P6 Architecture)</h3>
+      <p>In Out-of-Order (OoO) execution, the CPU uses the Register Alias Table (RAT) to map architectural registers
+        (<code>RAX</code>) to hidden Physical Registers (<code>P1</code>, <code>P2</code>). In older microarchitectures
+        like the Intel Pentium Pro (P6), the RAT tracked dependencies at the <em>full 32-bit register level</em>.</p>
 
-    <pre><code>; The Partial Register Hazard
+      <pre><code>; The Partial Register Hazard
 mov al, 0x5      ; Write to low 8 bits (AL)
 add eax, 10      ; Read the full 32-bit register (EAX)</code></pre>
 
-    <p>When the CPU fetched <code>mov al, 0x5</code>, it updated the lower 8 bits. But when it fetched <code>add eax, 10</code>, the OoO scheduler realized that <code>EAX</code> was now fractured. The upper 24 bits belonged to the old physical register, and the lower 8 bits belonged to the new physical register. The CPU artificially halted the pipeline, invoking a microcode routine to manually execute a Read-Modify-Write (RMW) merge of the two physical registers into a single cohesive state before the <code>ADD</code> could execute. This hardware stall devastated Instruction-Level Parallelism (ILP).</p>
+      <p>When the CPU fetched <code>mov al, 0x5</code>, it updated the lower 8 bits. But when it fetched
+        <code>add eax, 10</code>, the OoO scheduler realized that <code>EAX</code> was now fractured. The upper 24 bits
+        belonged to the old physical register, and the lower 8 bits belonged to the new physical register. The CPU
+        artificially halted the pipeline, invoking a microcode routine to manually execute a Read-Modify-Write (RMW)
+        merge of the two physical registers into a single cohesive state before the <code>ADD</code> could execute. This
+        hardware stall devastated Instruction-Level Parallelism (ILP).</p>
 
-    <h3>The Sandy Bridge Resolution (Merging $\mu\text{ops}$)</h3>
-    <p>Modern CPUs (Intel Sandy Bridge onwards, AMD Zen) solved this by dynamically tracking sub-registers separately in the RAT. If the CPU detects a partial register read, it seamlessly injects a hidden "Blending $\mu\text{op}$" into the pipeline to merge the states in 1 clock cycle without a hard stall. However, compilers still aggressively avoid mixing register sizes to prevent this blending penalty.</p>
+      <h3>The Sandy Bridge Resolution (Merging $\mu\text{ops}$)</h3>
+      <p>Modern CPUs (Intel Sandy Bridge onwards, AMD Zen) solved this by dynamically tracking sub-registers separately
+        in the RAT. If the CPU detects a partial register read, it seamlessly injects a hidden "Blending $\mu\text{op}$"
+        into the pipeline to merge the states in 1 clock cycle without a hard stall. However, compilers still
+        aggressively avoid mixing register sizes to prevent this blending penalty.</p>
+    </div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 3: THE AMD64 32-BIT ZERO-EXTENSION RULE
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <h2>12.3 The 32-Bit Zero-Extension Invariant</h2>
-    <p>When AMD engineered the x86-64 ISA specification in 1999, they established a profound hardware invariant regarding 32-bit register operations. This rule mathematically diverges from how 16-bit and 8-bit registers behave.</p>
+  <div class="page-container content-flow">
+    <div>
+      <h2>12.3 The 32-Bit Zero-Extension Invariant</h2>
+      <p>When AMD engineered the x86-64 ISA specification in 1999, they established a profound hardware invariant
+        regarding 32-bit register operations. This rule mathematically diverges from how 16-bit and 8-bit registers
+        behave.</p>
 
-    <div class="callout key">
-      <div class="callout-title">The Zero-Extension Rule (AMD64 Vol. 3)</div>
-      In x86-64 Long Mode, <strong>any instruction that writes to a 32-bit sub-register (e.g., <code>EAX</code>, <code>EBX</code>, <code>R8D</code>) automatically zero-extends the upper 32 bits of the full 64-bit architectural register (<code>RAX</code>, <code>RBX</code>, <code>R8</code>).</strong>
-    </div>
+      <div class="callout key">
+        <div class="callout-title">The Zero-Extension Rule (AMD64 Vol. 3)</div>
+        In x86-64 Long Mode, <strong>any instruction that writes to a 32-bit sub-register (e.g., <code>EAX</code>,
+          <code>EBX</code>, <code>R8D</code>) automatically zero-extends the upper 32 bits of the full 64-bit
+          architectural register (<code>RAX</code>, <code>RBX</code>, <code>R8</code>).</strong>
+      </div>
 
-    <p>Consider the following x86-64 assembly execution state:</p>
-    <pre><code>mov rax, 0x123456789ABCDEF0   ; RAX holds a full 64-bit value
+      <p>Consider the following x86-64 assembly execution state:</p>
+      <pre><code>mov rax, 0x123456789ABCDEF0   ; RAX holds a full 64-bit value
 mov eax, 5                    ; Write the value 5 into the 32-bit EAX register</code></pre>
 
-    <p>What is the exact architectural state of <code>RAX</code> after the second instruction? <br>
-    It is <strong>NOT</strong> <code>0x1234567800000005</code>. Because <code>EAX</code> is a 32-bit target, the hardware forcefully clears the upper half of the register. The final value of <code>RAX</code> is strictly <strong><code>0x0000000000000005</code></strong>.</p>
+      <p>What is the exact architectural state of <code>RAX</code> after the second instruction? <br>
+        It is <strong>NOT</strong> <code>0x1234567800000005</code>. Because <code>EAX</code> is a 32-bit target, the
+        hardware forcefully clears the upper half of the register. The final value of <code>RAX</code> is strictly
+        <strong><code>0x0000000000000005</code></strong>.</p>
 
-    <h3>Why Did AMD Hardwire This Rule?</h3>
-    <p>In legacy 32-bit x86 architectures, compilers exclusively performed pointer arithmetic and loop counters using 32-bit registers (<code>EAX</code>, <code>ECX</code>). When migrating to 64-bit environments, pointers expanded to 64 bits. If AMD had designed the ISA such that writing to <code>EAX</code> left the upper 32 bits untouched (containing random dirty data from previous operations), any 32-bit math operation that was later used as a 64-bit memory pointer would crash the system with a Segmentation Fault.</p>
-    
-    <p>The compiler would be forced to explicitly issue <code>movsxd</code> (Move with Sign-Extension) or bit-clearing instructions every single time it transitioned from 32-bit math to 64-bit addressing. This would heavily bloat compiled binary sizes and destroy L1 Instruction Cache density. By hardwiring 32-bit writes to auto-zero the upper half, legacy 32-bit math became instantly safe to use as 64-bit pointers without any extra software instructions.</p>
+      <h3>Why Did AMD Hardwire This Rule?</h3>
+      <p>In legacy 32-bit x86 architectures, compilers exclusively performed pointer arithmetic and loop counters using
+        32-bit registers (<code>EAX</code>, <code>ECX</code>). When migrating to 64-bit environments, pointers expanded
+        to 64 bits. If AMD had designed the ISA such that writing to <code>EAX</code> left the upper 32 bits untouched
+        (containing random dirty data from previous operations), any 32-bit math operation that was later used as a
+        64-bit memory pointer would crash the system with a Segmentation Fault.</p>
+
+      <p>The compiler would be forced to explicitly issue <code>movsxd</code> (Move with Sign-Extension) or bit-clearing
+        instructions every single time it transitioned from 32-bit math to 64-bit addressing. This would heavily bloat
+        compiled binary sizes and destroy L1 Instruction Cache density. By hardwiring 32-bit writes to auto-zero the
+        upper half, legacy 32-bit math became instantly safe to use as 64-bit pointers without any extra software
+        instructions.</p>
+    </div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 4: 16-BIT / 8-BIT EXCEPTIONS & COMPILER BEHAVIOR
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <h2>12.4 The 16-Bit &amp; 8-Bit Write Preservation Exception</h2>
-    <p>Crucially, <strong>the zero-extension rule does NOT apply to 16-bit or 8-bit writes.</strong></p>
+  <div class="page-container content-flow">
+    <div>
+      <h2>12.4 The 16-Bit &amp; 8-Bit Write Preservation Exception</h2>
+      <p>Crucially, <strong>the zero-extension rule does NOT apply to 16-bit or 8-bit writes.</strong></p>
 
-    <pre><code>mov rax, 0x123456789ABCDEF0   ; RAX holds arbitrary 64-bit value
+      <pre><code>mov rax, 0x123456789ABCDEF0   ; RAX holds arbitrary 64-bit value
 mov ax, 0x1111                ; Write into 16-bit AX register
 mov al, 0x22                  ; Write into 8-bit AL register</code></pre>
 
-    <p>After executing <code>mov ax, 0x1111</code>, the upper 48 bits of <code>RAX</code> (bits 16 through 63) are <strong>completely preserved and untouched</strong>. The resulting value of <code>RAX</code> becomes <code>0x123456789ABCD1111</code>. Executing <code>mov al, 0x22</code> results in <code>0x123456789ABCD122</code>.</p>
-    
-    <p>If a Low-Level C/C++ developer or reverse-engineer assumes writing to a 16-bit sub-register clears the upper bits, they will introduce silent, catastrophic mathematical corruption when those upper bits are later evaluated in a 64-bit context.</p>
+      <p>After executing <code>mov ax, 0x1111</code>, the upper 48 bits of <code>RAX</code> (bits 16 through 63) are
+        <strong>completely preserved and untouched</strong>. The resulting value of <code>RAX</code> becomes
+        <code>0x123456789ABCD1111</code>. Executing <code>mov al, 0x22</code> results in
+        <code>0x123456789ABCD122</code>.</p>
 
-    <h3>Compiler Type Casting (Sign vs. Zero Extension)</h3>
-    <p>When high-level languages like C# and C++ cast narrower data types to wider data types, the JIT/AOT compiler must translate the software intent into specific hardware extensions.</p>
+      <p>If a Low-Level C/C++ developer or reverse-engineer assumes writing to a 16-bit sub-register clears the upper
+        bits, they will introduce silent, catastrophic mathematical corruption when those upper bits are later evaluated
+        in a 64-bit context.</p>
 
-    <pre><code>// C# Casting Behavior
+      <h3>Compiler Type Casting (Sign vs. Zero Extension)</h3>
+      <p>When high-level languages like C# and C++ cast narrower data types to wider data types, the JIT/AOT compiler
+        must translate the software intent into specific hardware extensions.</p>
+
+      <pre><code>// C# Casting Behavior
 int signedInt = -5;         // 32-bit (0xFFFFFFFB)
 long signedLong = signedInt; // 64-bit (-5, 0xFFFFFFFFFFFFFFFB)
 
 uint unsignedInt = 5;       // 32-bit (0x00000005)
 ulong unsignedLong = unsignedInt; // 64-bit (5, 0x0000000000000005)</code></pre>
 
-    <p><strong>Sign-Extension (<code>movsxd</code>):</strong> To cast a signed 32-bit integer to a 64-bit integer, the compiler <em>must not</em> use the 32-bit zero-extension rule, because extending <code>0xFFFFFFFB</code> (-5) with zeros yields <code>0x00000000FFFFFFFB</code> (+4,294,967,291). The compiler explicitly emits <code>movsxd rax, eax</code> (Move with Sign-Extension), which copies the Most Significant Bit (the sign bit) across the entire upper 32-bit plane.</p>
+      <p><strong>Sign-Extension (<code>movsxd</code>):</strong> To cast a signed 32-bit integer to a 64-bit integer, the
+        compiler <em>must not</em> use the 32-bit zero-extension rule, because extending <code>0xFFFFFFFB</code> (-5)
+        with zeros yields <code>0x00000000FFFFFFFB</code> (+4,294,967,291). The compiler explicitly emits
+        <code>movsxd rax, eax</code> (Move with Sign-Extension), which copies the Most Significant Bit (the sign bit)
+        across the entire upper 32-bit plane.</p>
 
-    <p><strong>Zero-Extension (<code>movzx</code> or Implicit):</strong> To cast an unsigned 8-bit <code>byte</code> to a 32-bit <code>int</code>, the compiler uses <code>movzx eax, byte ptr [mem]</code> (Move with Zero-Extension). To cast an unsigned 32-bit <code>uint</code> to a 64-bit <code>ulong</code>, the compiler simply executes standard 32-bit math (e.g., <code>mov eax, ecx</code>), relying entirely on the AMD64 hardware invariant to zero-extend the upper bounds for free.</p>
+      <p><strong>Zero-Extension (<code>movzx</code> or Implicit):</strong> To cast an unsigned 8-bit <code>byte</code>
+        to a 32-bit <code>int</code>, the compiler uses <code>movzx eax, byte ptr [mem]</code> (Move with
+        Zero-Extension). To cast an unsigned 32-bit <code>uint</code> to a 64-bit <code>ulong</code>, the compiler
+        simply executes standard 32-bit math (e.g., <code>mov eax, ecx</code>), relying entirely on the AMD64 hardware
+        invariant to zero-extend the upper bounds for free.</p>
+    </div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 5: ZEROING IDIOMS & DEPENDENCY BREAKING
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <h2>12.5 Assembly Optimization Idioms: Zeroing Registers</h2>
-    <p>One of the most frequent operations in compiled code is initializing variables to zero. You will almost never see an optimized compiler use <code>mov rax, 0</code>. Instead, compilers exclusively emit <code>xor eax, eax</code> or <code>sub eax, eax</code>.</p>
+  <div class="page-container content-flow">
+    <div>
+      <h2>12.5 Assembly Optimization Idioms: Zeroing Registers</h2>
+      <p>One of the most frequent operations in compiled code is initializing variables to zero. You will almost never
+        see an optimized compiler use <code>mov rax, 0</code>. Instead, compilers exclusively emit
+        <code>xor eax, eax</code> or <code>sub eax, eax</code>.</p>
 
-    <pre><code>; Method A: Immediate Move to 64-bit Register
+      <pre><code>; Method A: Immediate Move to 64-bit Register
 mov rax, 0        ; Opcode: 48 C7 C0 00 00 00 00 (7 bytes)
 
 ; Method B: Immediate Move to 32-bit Register
@@ -144,285 +207,461 @@ mov eax, 0        ; Opcode: B8 00 00 00 00 (5 bytes, auto-zero-extends RAX)
 ; Method C: The XOR Zeroing Idiom
 xor eax, eax      ; Opcode: 31 C0 (2 bytes, auto-zero-extends RAX)</code></pre>
 
-    <h3>The Microarchitectural Dependency Breaker</h3>
-    <p>Method C is dominant for two reasons. First, Code Density: consuming only 2 bytes drastically improves L1i Cache hit rates. Second, and far more importantly, is <strong>Hardware Dependency Breaking</strong>.</p>
-    
-    <p>In an Out-of-Order execution core, instructions cannot execute until their source operands are computed by older instructions. If you execute <code>mov eax, 0</code>, the CPU scheduler must track the previous state of <code>EAX</code> to ensure accurate architectural retirement. </p>
-    
-    <p>However, modern Intel and AMD Decoders contain dedicated <strong>Zero-Idiom Recognizers</strong>. When the decoder sees an instruction XORing a register against itself (<code>xor eax, eax</code>), the mathematical outcome is guaranteed to be 0, regardless of what the register previously held. The Register Alias Table (RAT) intercepts this. It assigns a fresh Physical Register initialized to 0, completely severs the dependency chain on the old <code>EAX</code>, and marks the register as <em>Ready</em> instantly. The instruction doesn't even need to be dispatched to the ALU execution ports—it is resolved entirely in the rename stage, saving massive pipeline bandwidth.</p>
-  </div>
-</div>
+      <h3>The Microarchitectural Dependency Breaker</h3>
+      <p>Method C is dominant for two reasons. First, Code Density: consuming only 2 bytes drastically improves L1i
+        Cache hit rates. Second, and far more importantly, is <strong>Hardware Dependency Breaking</strong>.</p>
 
-<!-- ==========================================================================
+      <p>In an Out-of-Order execution core, instructions cannot execute until their source operands are computed by
+        older instructions. If you execute <code>mov eax, 0</code>, the CPU scheduler must track the previous state of
+        <code>EAX</code> to ensure accurate architectural retirement. </p>
+
+      <p>However, modern Intel and AMD Decoders contain dedicated <strong>Zero-Idiom Recognizers</strong>. When the
+        decoder sees an instruction XORing a register against itself (<code>xor eax, eax</code>), the mathematical
+        outcome is guaranteed to be 0, regardless of what the register previously held. The Register Alias Table (RAT)
+        intercepts this. It assigns a fresh Physical Register initialized to 0, completely severs the dependency chain
+        on the old <code>EAX</code>, and marks the register as <em>Ready</em> instantly. The instruction doesn't even
+        need to be dispatched to the ALU execution ports—it is resolved entirely in the rename stage, saving massive
+        pipeline bandwidth.</p>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
      PAGE 6: EXTENDED REGISTERS & REX PREFIX OVERHEAD
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <h2>12.6 Extended Registers (R8-R15) &amp; The REX Prefix</h2>
-    <p>The AMD64 architecture provided a massive performance boost by introducing 8 new general-purpose registers: <code>R8</code> through <code>R15</code>. This doubled the register pool, allowing modern C# and C++ compilers to keep heavily used local variables entirely in the CPU core rather than "Spilling" them to the slow physical RAM stack.</p>
+  <div class="page-container content-flow">
+    <div>
+      <h2>12.6 Extended Registers (R8-R15) &amp; The REX Prefix</h2>
+      <p>The AMD64 architecture provided a massive performance boost by introducing 8 new general-purpose registers:
+        <code>R8</code> through <code>R15</code>. This doubled the register pool, allowing modern C# and C++ compilers
+        to keep heavily used local variables entirely in the CPU core rather than "Spilling" them to the slow physical
+        RAM stack.</p>
 
-    <h3>The Encoding Complexity</h3>
-    <p>Because the original x86 <code>ModR/M</code> byte only allocated 3 bits to identify a register, it could mathematically only address 8 registers ($2^3 = 8$). To address 16 registers, AMD had to inject an extra bit.</p>
-    
-    <p>They achieved this by inventing the <strong>REX Prefix</strong> (byte values <code>0x40</code> to <code>0x4F</code>). When the compiler wants to use an extended register like <code>R8</code>, it prepends the REX byte to the instruction.</p>
+      <h3>The Encoding Complexity</h3>
+      <p>Because the original x86 <code>ModR/M</code> byte only allocated 3 bits to identify a register, it could
+        mathematically only address 8 registers ($2^3 = 8$). To address 16 registers, AMD had to inject an extra bit.
+      </p>
 
-    <ul>
-      <li><code>REX.W (Bit 3)</code>: Promotes the operation from 32-bit to 64-bit width.</li>
-      <li><code>REX.R (Bit 2)</code>: Extends the ModR/M <code>Reg</code> field to access R8-R15.</li>
-      <li><code>REX.X (Bit 1)</code>: Extends the SIB <code>Index</code> field to access R8-R15.</li>
-      <li><code>REX.B (Bit 0)</code>: Extends the ModR/M <code>R/M</code> (Base) field to access R8-R15.</li>
-    </ul>
+      <p>They achieved this by inventing the <strong>REX Prefix</strong> (byte values <code>0x40</code> to
+        <code>0x4F</code>). When the compiler wants to use an extended register like <code>R8</code>, it prepends the
+        REX byte to the instruction.</p>
 
-    <h3>The REX Byte Tax</h3>
-    <p>While utilizing <code>R8-R15</code> drastically reduces memory latency by eliminating Stack Spills, it incurs a subtle <strong>Code Density Tax</strong>. Every single instruction that interacts with an extended register requires the 1-byte REX prefix. </p>
-    <pre><code>add eax, ebx       ; 01 D8 (2 bytes)
+      <ul>
+        <li><code>REX.W (Bit 3)</code>: Promotes the operation from 32-bit to 64-bit width.</li>
+        <li><code>REX.R (Bit 2)</code>: Extends the ModR/M <code>Reg</code> field to access R8-R15.</li>
+        <li><code>REX.X (Bit 1)</code>: Extends the SIB <code>Index</code> field to access R8-R15.</li>
+        <li><code>REX.B (Bit 0)</code>: Extends the ModR/M <code>R/M</code> (Base) field to access R8-R15.</li>
+      </ul>
+
+      <h3>The REX Byte Tax</h3>
+      <p>While utilizing <code>R8-R15</code> drastically reduces memory latency by eliminating Stack Spills, it incurs a
+        subtle <strong>Code Density Tax</strong>. Every single instruction that interacts with an extended register
+        requires the 1-byte REX prefix. </p>
+      <pre><code>add eax, ebx       ; 01 D8 (2 bytes)
 add r8d, r9d       ; 45 01 C8 (3 bytes - REX.R and REX.B bits set)</code></pre>
-    <p>For large monolithic functions, utilizing the extended registers expands the binary executable footprint by roughly 10-15%. Modern compilers like LLVM intentionally prioritize assigning variables to legacy registers (<code>RAX-RDI</code>) first, only allocating to <code>R8-R15</code> when the primary pool is exhausted, dynamically balancing Stack Spill penalties against Instruction Cache density limits.</p>
+      <p>For large monolithic functions, utilizing the extended registers expands the binary executable footprint by
+        roughly 10-15%. Modern compilers like LLVM intentionally prioritize assigning variables to legacy registers
+        (<code>RAX-RDI</code>) first, only allocating to <code>R8-R15</code> when the primary pool is exhausted,
+        dynamically balancing Stack Spill penalties against Instruction Cache density limits.</p>
+    </div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 7: VECTOR REGISTERS (SIMD) & VZEROUPPER PENALTIES
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <h2>12.7 Vector Register Evolution (XMM, YMM, ZMM)</h2>
-    <p>General Purpose Registers handle scalar math (one operation per instruction). Modern high-performance software (game engines, machine learning, cryptography) relies on <strong>SIMD (Single Instruction, Multiple Data)</strong> execution, utilizing massive, parallel Vector Register Files.</p>
+  <div class="page-container content-flow">
+    <div>
+      <h2>12.7 Vector Register Evolution (XMM, YMM, ZMM)</h2>
+      <p>General Purpose Registers handle scalar math (one operation per instruction). Modern high-performance software
+        (game engines, machine learning, cryptography) relies on <strong>SIMD (Single Instruction, Multiple
+          Data)</strong> execution, utilizing massive, parallel Vector Register Files.</p>
 
-    <ul>
-      <li><strong>SSE (Streaming SIMD Extensions):</strong> Introduced 16 physical 128-bit registers (<code>XMM0</code>-<code>XMM15</code>).</li>
-      <li><strong>AVX (Advanced Vector Extensions):</strong> Widened the registers to 256 bits (<code>YMM0</code>-<code>YMM15</code>). The lower 128 bits map perfectly to the XMM registers.</li>
-      <li><strong>AVX-512:</strong> Widened the registers to 512 bits (<code>ZMM0</code>-<code>ZMM31</code>) and doubled the total register count to 32.</li>
-    </ul>
+      <ul>
+        <li><strong>SSE (Streaming SIMD Extensions):</strong> Introduced 16 physical 128-bit registers
+          (<code>XMM0</code>-<code>XMM15</code>).</li>
+        <li><strong>AVX (Advanced Vector Extensions):</strong> Widened the registers to 256 bits
+          (<code>YMM0</code>-<code>YMM15</code>). The lower 128 bits map perfectly to the XMM registers.</li>
+        <li><strong>AVX-512:</strong> Widened the registers to 512 bits (<code>ZMM0</code>-<code>ZMM31</code>) and
+          doubled the total register count to 32.</li>
+      </ul>
 
-    <h3>The AVX-SSE Transition Penalty &amp; <code>VZEROUPPER</code></h3>
-    <p>Because the 128-bit <code>XMM</code> registers perfectly alias the lower half of the 256-bit <code>YMM</code> registers, a severe microarchitectural state hazard exists.</p>
+      <h3>The AVX-SSE Transition Penalty &amp; <code>VZEROUPPER</code></h3>
+      <p>Because the 128-bit <code>XMM</code> registers perfectly alias the lower half of the 256-bit <code>YMM</code>
+        registers, a severe microarchitectural state hazard exists.</p>
 
-    <p>If a program executes a 256-bit AVX instruction (leaving dirty data in the upper 128 bits of <code>YMM0</code>) and then subsequently calls an older, legacy 128-bit SSE instruction (e.g., compiled in an external C++ DLL), the CPU enters a panic state. The hardware cannot know if the legacy SSE code expects the upper 128 bits to be preserved or discarded.</p>
-    
-    <p>To safely switch states, the CPU forcibly halts the execution pipeline for ~70 clock cycles. It manually copies the upper 128 bits of all 16 YMM registers into a hidden internal buffer, executes the SSE instruction, and then copies them back. This <strong>AVX Transition Penalty</strong> completely destroys the performance benefits of vectorization.</p>
+      <p>If a program executes a 256-bit AVX instruction (leaving dirty data in the upper 128 bits of <code>YMM0</code>)
+        and then subsequently calls an older, legacy 128-bit SSE instruction (e.g., compiled in an external C++ DLL),
+        the CPU enters a panic state. The hardware cannot know if the legacy SSE code expects the upper 128 bits to be
+        preserved or discarded.</p>
 
-    <pre><code>// Compiler output to avoid the transition penalty
+      <p>To safely switch states, the CPU forcibly halts the execution pipeline for ~70 clock cycles. It manually copies
+        the upper 128 bits of all 16 YMM registers into a hidden internal buffer, executes the SSE instruction, and then
+        copies them back. This <strong>AVX Transition Penalty</strong> completely destroys the performance benefits of
+        vectorization.</p>
+
+      <pre><code>// Compiler output to avoid the transition penalty
 vaddps ymm0, ymm1, ymm2  ; 256-bit AVX Vector Math
 vzeroupper               ; The required state-clearing instruction
 call legacy_sse_function ; Safe 128-bit call</code></pre>
 
-    <p>To prevent this massive stall, compilers aggressively inject the <code>vzeroupper</code> instruction before calling unknown external functions or returning from AVX-heavy blocks. <code>vzeroupper</code> explicitly zeroes the upper 128 bits of all YMM registers, proving to the hardware that no dirty state needs preserving, allowing an instant, 0-cycle transition to legacy SSE mode.</p>
+      <p>To prevent this massive stall, compilers aggressively inject the <code>vzeroupper</code> instruction before
+        calling unknown external functions or returning from AVX-heavy blocks. <code>vzeroupper</code> explicitly zeroes
+        the upper 128 bits of all YMM registers, proving to the hardware that no dirty state needs preserving, allowing
+        an instant, 0-cycle transition to legacy SSE mode.</p>
+    </div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 8: AVX DOWNCLOCKING & THERMAL THROTTLING
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <h2>12.8 AVX Downclocking &amp; Thermal Limitations</h2>
-    <p>Widening registers from 64 bits to 512 bits is not just a software abstraction; it requires massive, physical 512-bit wide Arithmetic Logic Units (ALUs) executing in silicon.</p>
+  <div class="page-container content-flow">
+    <div>
+      <h2>12.8 AVX Downclocking &amp; Thermal Limitations</h2>
+      <p>Widening registers from 64 bits to 512 bits is not just a software abstraction; it requires massive, physical
+        512-bit wide Arithmetic Logic Units (ALUs) executing in silicon.</p>
 
-    <p>When an Intel Skylake-X or Cascade Lake server CPU executes AVX-512 instructions natively across its execution ports, the transistors draw immense electrical current. The dynamic capacitance of flipping 512 bits simultaneously causes a massive thermal spike on the silicon die.</p>
+      <p>When an Intel Skylake-X or Cascade Lake server CPU executes AVX-512 instructions natively across its execution
+        ports, the transistors draw immense electrical current. The dynamic capacitance of flipping 512 bits
+        simultaneously causes a massive thermal spike on the silicon die.</p>
 
-    <div class="callout warn">
-      <div class="callout-title">The AVX Frequency Offset</div>
-      To prevent the CPU from instantly exceeding its Thermal Design Power (TDP) limit (e.g., 250 Watts) and physically melting, the hardware microcontroller intercepts AVX-512 instructions. It forces an immediate <strong>AVX Downclocking Offset</strong>. A CPU running at 4.0 GHz will instantaneously drop its base clock frequency to 3.0 GHz or even 2.5 GHz the moment heavy AVX-512 workloads hit the execution core.
+      <div class="callout warn">
+        <div class="callout-title">The AVX Frequency Offset</div>
+        To prevent the CPU from instantly exceeding its Thermal Design Power (TDP) limit (e.g., 250 Watts) and
+        physically melting, the hardware microcontroller intercepts AVX-512 instructions. It forces an immediate
+        <strong>AVX Downclocking Offset</strong>. A CPU running at 4.0 GHz will instantaneously drop its base clock
+        frequency to 3.0 GHz or even 2.5 GHz the moment heavy AVX-512 workloads hit the execution core.
+      </div>
+
+      <p>This creates a software engineering paradox: If you vectorize your C# arrays using
+        <code>Vector512&lt;T&gt;</code>, the math executes exponentially faster per cycle, but the <em>entire CPU
+          frequency slows down for all threads sharing that core</em>. For mixed workloads (where some threads are doing
+        scalar web routing while others are doing vector math), heavy vectorization can inadvertently cripple the scalar
+        threads by dragging the core frequency down. Modern Cloud Native applications must heavily profile their AVX
+        utilization to ensure the vectorization throughput actually outpaces the thermal downclocking penalty.</p>
     </div>
-
-    <p>This creates a software engineering paradox: If you vectorize your C# arrays using <code>Vector512&lt;T&gt;</code>, the math executes exponentially faster per cycle, but the <em>entire CPU frequency slows down for all threads sharing that core</em>. For mixed workloads (where some threads are doing scalar web routing while others are doing vector math), heavy vectorization can inadvertently cripple the scalar threads by dragging the core frequency down. Modern Cloud Native applications must heavily profile their AVX utilization to ensure the vectorization throughput actually outpaces the thermal downclocking penalty.</p>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 9: REGISTER ALLOCATION & GRAPH COLORING
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <h2>12.9 JIT Compiler Register Allocation Algorithms</h2>
-    <p>The hardware provides 16 General Purpose Registers. However, a complex C# function might have 40 local variables. The process of mapping infinite software variables into finite hardware registers is a mathematically proven NP-Complete problem known as <strong>Register Allocation</strong>.</p>
+  <div class="page-container content-flow">
+    <div>
+      <h2>12.9 JIT Compiler Register Allocation Algorithms</h2>
+      <p>The hardware provides 16 General Purpose Registers. However, a complex C# function might have 40 local
+        variables. The process of mapping infinite software variables into finite hardware registers is a mathematically
+        proven NP-Complete problem known as <strong>Register Allocation</strong>.</p>
 
-    <h3>Linear Scan Allocation (Tier 0 Fast JIT)</h3>
-    <p>When an application first starts, the .NET JIT or Java JVM must compile MSIL/Bytecode into assembly as fast as possible to minimize startup latency. The JIT uses a <strong>Linear Scan</strong> algorithm. It iterates through the variables sequentially, assigning registers until it runs out (e.g., hitting the 16th variable). Variables 17 through 40 are forcefully "Spilled" to the physical RAM stack. Linear scan is blindingly fast to compile but produces highly sub-optimal, RAM-dependent assembly.</p>
+      <h3>Linear Scan Allocation (Tier 0 Fast JIT)</h3>
+      <p>When an application first starts, the .NET JIT or Java JVM must compile MSIL/Bytecode into assembly as fast as
+        possible to minimize startup latency. The JIT uses a <strong>Linear Scan</strong> algorithm. It iterates through
+        the variables sequentially, assigning registers until it runs out (e.g., hitting the 16th variable). Variables
+        17 through 40 are forcefully "Spilled" to the physical RAM stack. Linear scan is blindingly fast to compile but
+        produces highly sub-optimal, RAM-dependent assembly.</p>
 
-    <h3>Chaitin’s Graph Coloring (Tier 1 Optimized JIT)</h3>
-    <p>Once a method is identified as a "Hot Path," the Tier 1 JIT compiler re-compiles the function using advanced <strong>Graph Coloring</strong>.</p>
-    <ul>
-      <li><strong>Liveness Analysis:</strong> The compiler calculates exactly when a variable is "Live" (holding data that will be read in the future). If Variable A is only used on lines 1-10, and Variable B is used on lines 12-20, their liveness intervals do not intersect.</li>
-      <li><strong>Interference Graph:</strong> The compiler builds an undirected graph. Each variable is a Node. If two variables are live at the exact same time, an Edge connects them.</li>
-      <li><strong>Graph Coloring:</strong> The compiler attempts to "color" the graph using exactly 16 colors (representing the 16 hardware registers), ensuring no two connected nodes share the same color. Because Variable A and Variable B do not intersect, they can be assigned the exact same hardware register (e.g., <code>R8</code>), dynamically reusing the silicon and preventing RAM stack spills entirely.</li>
-    </ul>
+      <h3>Chaitin’s Graph Coloring (Tier 1 Optimized JIT)</h3>
+      <p>Once a method is identified as a "Hot Path," the Tier 1 JIT compiler re-compiles the function using advanced
+        <strong>Graph Coloring</strong>.</p>
+      <ul>
+        <li><strong>Liveness Analysis:</strong> The compiler calculates exactly when a variable is "Live" (holding data
+          that will be read in the future). If Variable A is only used on lines 1-10, and Variable B is used on lines
+          12-20, their liveness intervals do not intersect.</li>
+        <li><strong>Interference Graph:</strong> The compiler builds an undirected graph. Each variable is a Node. If
+          two variables are live at the exact same time, an Edge connects them.</li>
+        <li><strong>Graph Coloring:</strong> The compiler attempts to "color" the graph using exactly 16 colors
+          (representing the 16 hardware registers), ensuring no two connected nodes share the same color. Because
+          Variable A and Variable B do not intersect, they can be assigned the exact same hardware register (e.g.,
+          <code>R8</code>), dynamically reusing the silicon and preventing RAM stack spills entirely.</li>
+      </ul>
+    </div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 10: CHECKLIST
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <h2>12.10 Chapter Verification, Checklist &amp; Massive Exam</h2>
+  <div class="page-container content-flow">
+    <div>
+      <h2>12.10 Chapter Verification, Checklist &amp; Massive Exam</h2>
 
-    <div class="checklist">
-      <h3>Verification Checklist</h3>
-      <div class="check-item"><div class="checkbox"></div><div>I can explain why SRAM multi-porting physical constraints historically limited Register File sizes.</div></div>
-      <div class="check-item"><div class="checkbox"></div><div>I understand how fractional register overlapping (AL, AX, EAX) preserves backward compatibility.</div></div>
-      <div class="check-item"><div class="checkbox"></div><div>I can explain Partial Register Stalls and how Sandy Bridge resolves them via blending $\mu\text{ops}$.</div></div>
-      <div class="check-item"><div class="checkbox"></div><div>I understand the AMD64 32-bit zero-extension rule and why it exists to protect 64-bit memory pointer bounds.</div></div>
-      <div class="check-item"><div class="checkbox"></div><div>I can contrast 32-bit zero-extension against 16-bit/8-bit write preservation behavior.</div></div>
-      <div class="check-item"><div class="checkbox"></div><div>I understand why <code>movsxd</code> is required for signed extension casts, preventing incorrect zero-extension.</div></div>
-      <div class="check-item"><div class="checkbox"></div><div>I can explain why <code>xor eax, eax</code> breaks dependency chains in the Register Alias Table (RAT).</div></div>
-      <div class="check-item"><div class="checkbox"></div><div>I understand the 1-byte REX prefix overhead required to access the extended R8-R15 registers.</div></div>
-      <div class="check-item"><div class="checkbox"></div><div>I can describe the AVX-to-SSE transition state penalty and the purpose of the <code>vzeroupper</code> instruction.</div></div>
-      <div class="check-item"><div class="checkbox"></div><div>I understand the thermal physics behind AVX-512 CPU downclocking offsets.</div></div>
-      <div class="check-item"><div class="checkbox"></div><div>I can explain how JIT Compilers use Graph Coloring algorithms to map infinite variables into 16 hardware registers without stack spilling.</div></div>
+      <div class="checklist">
+        <h3>Verification Checklist</h3>
+        <div class="check-item">
+          <div class="checkbox"></div>
+          <div>I can explain why SRAM multi-porting physical constraints historically limited Register File sizes.</div>
+        </div>
+        <div class="check-item">
+          <div class="checkbox"></div>
+          <div>I understand how fractional register overlapping (AL, AX, EAX) preserves backward compatibility.</div>
+        </div>
+        <div class="check-item">
+          <div class="checkbox"></div>
+          <div>I can explain Partial Register Stalls and how Sandy Bridge resolves them via blending $\mu\text{ops}$.
+          </div>
+        </div>
+        <div class="check-item">
+          <div class="checkbox"></div>
+          <div>I understand the AMD64 32-bit zero-extension rule and why it exists to protect 64-bit memory pointer
+            bounds.</div>
+        </div>
+        <div class="check-item">
+          <div class="checkbox"></div>
+          <div>I can contrast 32-bit zero-extension against 16-bit/8-bit write preservation behavior.</div>
+        </div>
+        <div class="check-item">
+          <div class="checkbox"></div>
+          <div>I understand why <code>movsxd</code> is required for signed extension casts, preventing incorrect
+            zero-extension.</div>
+        </div>
+        <div class="check-item">
+          <div class="checkbox"></div>
+          <div>I can explain why <code>xor eax, eax</code> breaks dependency chains in the Register Alias Table (RAT).
+          </div>
+        </div>
+        <div class="check-item">
+          <div class="checkbox"></div>
+          <div>I understand the 1-byte REX prefix overhead required to access the extended R8-R15 registers.</div>
+        </div>
+        <div class="check-item">
+          <div class="checkbox"></div>
+          <div>I can describe the AVX-to-SSE transition state penalty and the purpose of the <code>vzeroupper</code>
+            instruction.</div>
+        </div>
+        <div class="check-item">
+          <div class="checkbox"></div>
+          <div>I understand the thermal physics behind AVX-512 CPU downclocking offsets.</div>
+        </div>
+        <div class="check-item">
+          <div class="checkbox"></div>
+          <div>I can explain how JIT Compilers use Graph Coloring algorithms to map infinite variables into 16 hardware
+            registers without stack spilling.</div>
+        </div>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 11: QUIZ (MCQs 1-4)
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <h3>Comprehensive Examination (Staff / Principal Architecture)</h3>
+  <div class="page-container content-flow">
+    <div>
+      <h3>Comprehensive Examination (Staff / Principal Architecture)</h3>
 
-    <div class="quiz-section">
-      <div class="quiz-question">
-        <p>1. What is the precise architectural state of <code>RAX</code> after executing <code>mov rax, 0xFFFFFFFFFFFFFFFF</code> followed by <code>mov eax, 0x42</code>?</p>
-        <div class="quiz-option">A) <code>0xFFFFFFFF00000042</code></div>
-        <div class="quiz-option">B) <code>0x0000000000000042</code> (The hardware forcefully zero-extends the upper 32 bits based on the AMD64 32-bit invariant rule).</div>
-        <div class="quiz-option">C) <code>0xFFFFFFFFFFFFFF42</code></div>
-        <div class="quiz-option">D) Undefined behavior due to partial register stalls.</div>
-      </div>
+      <div class="quiz-section">
+        <div class="quiz-question">
+          <p>1. What is the precise architectural state of <code>RAX</code> after executing
+            <code>mov rax, 0xFFFFFFFFFFFFFFFF</code> followed by <code>mov eax, 0x42</code>?</p>
+          <div class="quiz-option">A) <code>0xFFFFFFFF00000042</code></div>
+          <div class="quiz-option">B) <code>0x0000000000000042</code> (The hardware forcefully zero-extends the upper 32
+            bits based on the AMD64 32-bit invariant rule).</div>
+          <div class="quiz-option">C) <code>0xFFFFFFFFFFFFFF42</code></div>
+          <div class="quiz-option">D) Undefined behavior due to partial register stalls.</div>
+        </div>
 
-      <div class="quiz-question">
-        <p>2. Why does writing to a 16-bit sub-register like <code>AX</code> differ fundamentally from writing to <code>EAX</code> in x86-64 Long Mode?</p>
-        <div class="quiz-option">A) 16-bit writes clear the upper 48 bits, whereas 32-bit writes preserve them.</div>
-        <div class="quiz-option">B) 16-bit writes trigger hardware exceptions in Long Mode.</div>
-        <div class="quiz-option">C) 16-bit writes leave the upper 48 bits completely untouched (preserving existing dirty state), whereas 32-bit writes automatically zero-extend the upper 32 bits of the 64-bit register.</div>
-        <div class="quiz-option">D) There is no structural difference; both clear the upper bits.</div>
-      </div>
+        <div class="quiz-question">
+          <p>2. Why does writing to a 16-bit sub-register like <code>AX</code> differ fundamentally from writing to
+            <code>EAX</code> in x86-64 Long Mode?</p>
+          <div class="quiz-option">A) 16-bit writes clear the upper 48 bits, whereas 32-bit writes preserve them.</div>
+          <div class="quiz-option">B) 16-bit writes trigger hardware exceptions in Long Mode.</div>
+          <div class="quiz-option">C) 16-bit writes leave the upper 48 bits completely untouched (preserving existing
+            dirty state), whereas 32-bit writes automatically zero-extend the upper 32 bits of the 64-bit register.
+          </div>
+          <div class="quiz-option">D) There is no structural difference; both clear the upper bits.</div>
+        </div>
 
-      <div class="quiz-question">
-        <p>3. In older microarchitectures (like Pentium Pro), executing <code>mov al, 0x5</code> followed immediately by <code>add eax, 10</code> caused a severe Partial Register Stall. What caused this stall?</p>
-        <div class="quiz-option">A) The 8-bit instruction required the execution of legacy 16-bit microcode.</div>
-        <div class="quiz-option">B) The L1 Data Cache was unable to fetch byte-sized payloads.</div>
-        <div class="quiz-option">C) The Out-of-Order scheduler detected that <code>EAX</code> was fractured across two different physical registers. It artificially halted the pipeline to execute a mandatory Read-Modify-Write merge before the ALU could proceed.</div>
-        <div class="quiz-option">D) The TLB lost the page permissions for the register memory mapping.</div>
-      </div>
+        <div class="quiz-question">
+          <p>3. In older microarchitectures (like Pentium Pro), executing <code>mov al, 0x5</code> followed immediately
+            by <code>add eax, 10</code> caused a severe Partial Register Stall. What caused this stall?</p>
+          <div class="quiz-option">A) The 8-bit instruction required the execution of legacy 16-bit microcode.</div>
+          <div class="quiz-option">B) The L1 Data Cache was unable to fetch byte-sized payloads.</div>
+          <div class="quiz-option">C) The Out-of-Order scheduler detected that <code>EAX</code> was fractured across two
+            different physical registers. It artificially halted the pipeline to execute a mandatory Read-Modify-Write
+            merge before the ALU could proceed.</div>
+          <div class="quiz-option">D) The TLB lost the page permissions for the register memory mapping.</div>
+        </div>
 
-      <div class="quiz-question">
-        <p>4. Why did AMD deliberately architect the 32-bit zero-extension rule when creating the 64-bit instruction set?</p>
-        <div class="quiz-option">A) It was easier to manufacture the silicon datapaths.</div>
-        <div class="quiz-option">B) Legacy 32-bit software exclusively used 32-bit registers for pointer arithmetic. If 32-bit writes preserved dirty data in the upper 32 bits, using those registers as 64-bit memory pointers would cause instant Segmentation Faults. Auto-zeroing allowed legacy 32-bit math to be safely evaluated as 64-bit pointers without bloating binaries with manual clearing instructions.</div>
-        <div class="quiz-option">C) To ensure compatibility with ARM processors.</div>
-        <div class="quiz-option">D) To disable AVX vector instructions during scalar operations.</div>
+        <div class="quiz-question">
+          <p>4. Why did AMD deliberately architect the 32-bit zero-extension rule when creating the 64-bit instruction
+            set?</p>
+          <div class="quiz-option">A) It was easier to manufacture the silicon datapaths.</div>
+          <div class="quiz-option">B) Legacy 32-bit software exclusively used 32-bit registers for pointer arithmetic.
+            If 32-bit writes preserved dirty data in the upper 32 bits, using those registers as 64-bit memory pointers
+            would cause instant Segmentation Faults. Auto-zeroing allowed legacy 32-bit math to be safely evaluated as
+            64-bit pointers without bloating binaries with manual clearing instructions.</div>
+          <div class="quiz-option">C) To ensure compatibility with ARM processors.</div>
+          <div class="quiz-option">D) To disable AVX vector instructions during scalar operations.</div>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 12: QUIZ (MCQs 5-8)
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <div class="quiz-section" style="margin-top:0;">
-      <div class="quiz-question">
-        <p>5. How does the Out-of-Order execution scheduler handle the <code>xor eax, eax</code> instruction differently than a general <code>mov rax, 5</code> instruction?</p>
-        <div class="quiz-option">A) It bypasses the Reorder Buffer (ROB) entirely.</div>
-        <div class="quiz-option">B) It recognizes the XOR-with-itself idiom as completely independent of the register's prior state. It breaks the dependency chain in the Register Alias Table (RAT) and marks the register ready instantly, bypassing ALU execution entirely.</div>
-        <div class="quiz-option">C) It forces a 1-cycle pipeline bubble to flush sub-register aliasing.</div>
-        <div class="quiz-option">D) It routes the operation directly to the L1 Data Cache for permanent storage.</div>
-      </div>
+  <div class="page-container content-flow">
+    <div>
+      <div class="quiz-section" style="margin-top:0;">
+        <div class="quiz-question">
+          <p>5. How does the Out-of-Order execution scheduler handle the <code>xor eax, eax</code> instruction
+            differently than a general <code>mov rax, 5</code> instruction?</p>
+          <div class="quiz-option">A) It bypasses the Reorder Buffer (ROB) entirely.</div>
+          <div class="quiz-option">B) It recognizes the XOR-with-itself idiom as completely independent of the
+            register's prior state. It breaks the dependency chain in the Register Alias Table (RAT) and marks the
+            register ready instantly, bypassing ALU execution entirely.</div>
+          <div class="quiz-option">C) It forces a 1-cycle pipeline bubble to flush sub-register aliasing.</div>
+          <div class="quiz-option">D) It routes the operation directly to the L1 Data Cache for permanent storage.</div>
+        </div>
 
-      <div class="quiz-question">
-        <p>6. What is the microarchitectural "tax" associated with utilizing the extended <code>R8</code> through <code>R15</code> registers in a heavily optimized assembly loop?</p>
-        <div class="quiz-option">A) They cannot be used with SIMD instructions.</div>
-        <div class="quiz-option">B) Every instruction interacting with R8-R15 requires the 1-byte REX prefix. This slightly inflates binary code size, marginally reducing overall L1 Instruction Cache density.</div>
-        <div class="quiz-option">C) They do not support zero-extension rules.</div>
-        <div class="quiz-option">D) They require double the clock cycles to read from the PRF.</div>
-      </div>
+        <div class="quiz-question">
+          <p>6. What is the microarchitectural "tax" associated with utilizing the extended <code>R8</code> through
+            <code>R15</code> registers in a heavily optimized assembly loop?</p>
+          <div class="quiz-option">A) They cannot be used with SIMD instructions.</div>
+          <div class="quiz-option">B) Every instruction interacting with R8-R15 requires the 1-byte REX prefix. This
+            slightly inflates binary code size, marginally reducing overall L1 Instruction Cache density.</div>
+          <div class="quiz-option">C) They do not support zero-extension rules.</div>
+          <div class="quiz-option">D) They require double the clock cycles to read from the PRF.</div>
+        </div>
 
-      <div class="quiz-question">
-        <p>7. When a high-level compiler (like C#) casts a signed 32-bit <code>int</code> (-5) to a 64-bit <code>long</code>, why must it explicitly emit the <code>movsxd</code> instruction instead of relying on standard register movement?</p>
-        <div class="quiz-option">A) C# objects are dynamically sized at runtime.</div>
-        <div class="quiz-option">B) Standard register movement applies the 32-bit zero-extension rule. Zero-extending <code>0xFFFFFFFB</code> (-5) yields <code>0x00000000FFFFFFFB</code> (+4.2 Billion), destroying the mathematical value. <code>movsxd</code> forces true Sign-Extension, propagating the sign bit across the upper bounds.</div>
-        <div class="quiz-option">C) The Garbage Collector requires explicit type boundaries.</div>
-        <div class="quiz-option">D) Standard moves trigger the AVX-SSE transition penalty.</div>
-      </div>
+        <div class="quiz-question">
+          <p>7. When a high-level compiler (like C#) casts a signed 32-bit <code>int</code> (-5) to a 64-bit
+            <code>long</code>, why must it explicitly emit the <code>movsxd</code> instruction instead of relying on
+            standard register movement?</p>
+          <div class="quiz-option">A) C# objects are dynamically sized at runtime.</div>
+          <div class="quiz-option">B) Standard register movement applies the 32-bit zero-extension rule. Zero-extending
+            <code>0xFFFFFFFB</code> (-5) yields <code>0x00000000FFFFFFFB</code> (+4.2 Billion), destroying the
+            mathematical value. <code>movsxd</code> forces true Sign-Extension, propagating the sign bit across the
+            upper bounds.</div>
+          <div class="quiz-option">C) The Garbage Collector requires explicit type boundaries.</div>
+          <div class="quiz-option">D) Standard moves trigger the AVX-SSE transition penalty.</div>
+        </div>
 
-      <div class="quiz-question">
-        <p>8. What severe pipeline hazard does the <code>vzeroupper</code> instruction actively prevent?</p>
-        <div class="quiz-option">A) The Partial Register Stall caused by aliasing <code>AL</code> and <code>RAX</code>.</div>
-        <div class="quiz-option">B) The AVX-to-SSE transition penalty. Mixing 256-bit AVX code with legacy 128-bit SSE code forces the CPU to manually save and restore the upper 128 bits of the YMM registers, causing a massive ~70-cycle hardware stall. <code>vzeroupper</code> explicitly clears the state, bypassing the stall entirely.</div>
-        <div class="quiz-option">C) Thermal throttling and AVX downclocking.</div>
-        <div class="quiz-option">D) L1 Terminal Faults (Foreshadow).</div>
+        <div class="quiz-question">
+          <p>8. What severe pipeline hazard does the <code>vzeroupper</code> instruction actively prevent?</p>
+          <div class="quiz-option">A) The Partial Register Stall caused by aliasing <code>AL</code> and
+            <code>RAX</code>.</div>
+          <div class="quiz-option">B) The AVX-to-SSE transition penalty. Mixing 256-bit AVX code with legacy 128-bit SSE
+            code forces the CPU to manually save and restore the upper 128 bits of the YMM registers, causing a massive
+            ~70-cycle hardware stall. <code>vzeroupper</code> explicitly clears the state, bypassing the stall entirely.
+          </div>
+          <div class="quiz-option">C) Thermal throttling and AVX downclocking.</div>
+          <div class="quiz-option">D) L1 Terminal Faults (Foreshadow).</div>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 13: QUIZ (MCQs 9-10 & PROMPTS)
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <div class="quiz-section" style="margin-top:0;">
-      <div class="quiz-question">
-        <p>9. Why do modern server CPUs implement "AVX Downclocking offsets" when executing heavy AVX-512 workloads?</p>
-        <div class="quiz-option">A) The L1 Cache bandwidth cannot sustain 512-bit reads at 5.0 GHz.</div>
-        <div class="quiz-option">B) Flipping 512 bits simultaneously across massive execution ports draws immense electrical current. To prevent the silicon from exceeding its Thermal Design Power (TDP) limit and physically melting, the hardware dynamically throttles the clock frequency down (e.g., from 4.0 GHz to 3.0 GHz).</div>
-        <div class="quiz-option">C) The Out-of-Order scheduler runs out of physical registers.</div>
-        <div class="quiz-option">D) AVX-512 instructions require 2 cycles to decode.</div>
+  <div class="page-container content-flow">
+    <div>
+      <div class="quiz-section" style="margin-top:0;">
+        <div class="quiz-question">
+          <p>9. Why do modern server CPUs implement "AVX Downclocking offsets" when executing heavy AVX-512 workloads?
+          </p>
+          <div class="quiz-option">A) The L1 Cache bandwidth cannot sustain 512-bit reads at 5.0 GHz.</div>
+          <div class="quiz-option">B) Flipping 512 bits simultaneously across massive execution ports draws immense
+            electrical current. To prevent the silicon from exceeding its Thermal Design Power (TDP) limit and
+            physically melting, the hardware dynamically throttles the clock frequency down (e.g., from 4.0 GHz to 3.0
+            GHz).</div>
+          <div class="quiz-option">C) The Out-of-Order scheduler runs out of physical registers.</div>
+          <div class="quiz-option">D) AVX-512 instructions require 2 cycles to decode.</div>
+        </div>
+
+        <div class="quiz-question">
+          <p>10. During Tier 1 optimized JIT compilation, how does Chaitin's Graph Coloring algorithm assign 40 software
+            variables into only 16 hardware registers without spilling to RAM?</p>
+          <div class="quiz-option">A) It compresses multiple integers into a single SIMD vector register.</div>
+          <div class="quiz-option">B) It calculates Liveness intervals to determine which variables are needed at the
+            same time. Variables whose lifespans never overlap are assigned the exact same hardware register (node
+            color), safely reusing the silicon over time without corrupting active data.</div>
+          <div class="quiz-option">C) It uses a sequential Linear Scan algorithm.</div>
+          <div class="quiz-option">D) It offloads the remaining 24 variables to the L1 Cache directly.</div>
+        </div>
+
+        <h3 style="margin-top: 24px;">Systems Writing Prompts</h3>
+
+        <p style="font-weight: 700; margin-bottom: 4px; font-size: 9.5pt;">Prompt 1: SRAM and Register Files</p>
+        <p style="font-size: 9pt;">Explain the physics constraint of SRAM multi-porting. Why can modern CPUs comfortably
+          cache megabytes of data in L2/L3 caches using single-ported cells, but are restricted to relatively small
+          architectural Register Files (16 to 32 slots) due to the necessity of 10+ access ports per bitcell?</p>
+
+        <p style="font-weight: 700; margin-top: 14px; margin-bottom: 4px; font-size: 9.5pt;">Prompt 2: The Invariant
+          Application</p>
+        <p style="font-size: 9pt;">Write out the exact hexadecimal state of the 64-bit <code>RBX</code> register before
+          and after executing the following three sequential instructions. Clearly define when the Zero-Extension rule
+          applies and when it does not: <br><code>mov rbx, 0x1111111111111111</code>
+          <br><code>mov ebx, 0x22222222</code> <br><code>mov bx, 0x3333</code></p>
+
+        <p style="font-weight: 700; margin-top: 14px; margin-bottom: 4px; font-size: 9.5pt;">Prompt 3: Partial Register
+          Hazards</p>
+        <p style="font-size: 9pt;">Trace the microarchitectural lifecycle of a Partial Register Stall in an older P6
+          pipeline. Explain the Read-Modify-Write (RMW) requirement. How did Intel Sandy Bridge mitigate this penalty by
+          inserting hidden blending $\mu\text{ops}$ during the decode stage?</p>
+
+        <p style="font-weight: 700; margin-top: 14px; margin-bottom: 4px; font-size: 9.5pt;">Prompt 4: Vector Mechanics
+        </p>
+        <p style="font-size: 9pt;">Explain the aliasing relationship between XMM (128-bit), YMM (256-bit), and ZMM
+          (512-bit) registers. Detail the AVX-to-SSE transition penalty: what physically causes the ~70-cycle hardware
+          stall, and how does the <code>vzeroupper</code> instruction instruct the hardware state machine to bypass it?
+        </p>
       </div>
-
-      <div class="quiz-question">
-        <p>10. During Tier 1 optimized JIT compilation, how does Chaitin's Graph Coloring algorithm assign 40 software variables into only 16 hardware registers without spilling to RAM?</p>
-        <div class="quiz-option">A) It compresses multiple integers into a single SIMD vector register.</div>
-        <div class="quiz-option">B) It calculates Liveness intervals to determine which variables are needed at the same time. Variables whose lifespans never overlap are assigned the exact same hardware register (node color), safely reusing the silicon over time without corrupting active data.</div>
-        <div class="quiz-option">C) It uses a sequential Linear Scan algorithm.</div>
-        <div class="quiz-option">D) It offloads the remaining 24 variables to the L1 Cache directly.</div>
-      </div>
-
-      <h3 style="margin-top: 24px;">Systems Writing Prompts</h3>
-      
-      <p style="font-weight: 700; margin-bottom: 4px; font-size: 9.5pt;">Prompt 1: SRAM and Register Files</p>
-      <p style="font-size: 9pt;">Explain the physics constraint of SRAM multi-porting. Why can modern CPUs comfortably cache megabytes of data in L2/L3 caches using single-ported cells, but are restricted to relatively small architectural Register Files (16 to 32 slots) due to the necessity of 10+ access ports per bitcell?</p>
-
-      <p style="font-weight: 700; margin-top: 14px; margin-bottom: 4px; font-size: 9.5pt;">Prompt 2: The Invariant Application</p>
-      <p style="font-size: 9pt;">Write out the exact hexadecimal state of the 64-bit <code>RBX</code> register before and after executing the following three sequential instructions. Clearly define when the Zero-Extension rule applies and when it does not: <br><code>mov rbx, 0x1111111111111111</code> <br><code>mov ebx, 0x22222222</code> <br><code>mov bx, 0x3333</code></p>
-
-      <p style="font-weight: 700; margin-top: 14px; margin-bottom: 4px; font-size: 9.5pt;">Prompt 3: Partial Register Hazards</p>
-      <p style="font-size: 9pt;">Trace the microarchitectural lifecycle of a Partial Register Stall in an older P6 pipeline. Explain the Read-Modify-Write (RMW) requirement. How did Intel Sandy Bridge mitigate this penalty by inserting hidden blending $\mu\text{ops}$ during the decode stage?</p>
-
-      <p style="font-weight: 700; margin-top: 14px; margin-bottom: 4px; font-size: 9.5pt;">Prompt 4: Vector Mechanics</p>
-      <p style="font-size: 9pt;">Explain the aliasing relationship between XMM (128-bit), YMM (256-bit), and ZMM (512-bit) registers. Detail the AVX-to-SSE transition penalty: what physically causes the ~70-cycle hardware stall, and how does the <code>vzeroupper</code> instruction instruct the hardware state machine to bypass it?</p>
     </div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 14: ANSWER KEY
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <div class="litmus-box" style="margin-top: 0; padding: 12px 14px; font-size: 7.5pt; line-height: 1.45;">
-      <div style="font-weight: 800; color: #4338CA; text-transform: uppercase; margin-bottom: 6px; font-size: 8.5pt;">Chapter 12 Technical Answer Key</div>
-      <div style="margin-bottom: 4px;"><b>1. (B)</b> Writing to a 32-bit sub-register (<code>EAX</code>) forces the hardware to automatically zero-extend the upper 32 bits of the full 64-bit architectural register (<code>RAX</code>).</div>
-      <div style="margin-bottom: 4px;"><b>2. (B)</b> To maintain deep historical backward compatibility, 16-bit and 8-bit sub-register writes (<code>AX</code>, <code>AL</code>) exclusively modify their localized bits, preserving whatever dirty or clean data currently resides in the upper 48 bits of the register.</div>
-      <div style="margin-bottom: 4px;"><b>3. (C)</b> The Out-of-Order CPU tracked the physical register state. Writing to <code>AL</code> assigned it to a new physical register, but <code>EAX</code> was now fractured across the new 8-bit state and the old 24-bit state. The CPU artificially stalled the pipeline to forcibly merge the components before executing the ADD.</div>
-      <div style="margin-bottom: 4px;"><b>4. (B)</b> AMD recognized that if 32-bit writes preserved dirty upper data, compiled 32-bit math operations could not be safely used as 64-bit memory pointers without explicit software clearing instructions. Hardwiring the zero-extension allowed seamless, performant execution of legacy math as 64-bit pointers.</div>
-      <div style="margin-bottom: 4px;"><b>5. (B)</b> The hardware Decoder and RAT identify the XOR-zeroing idiom. Knowing <code>X XOR X</code> is unconditionally 0, it assigns a fresh zeroed physical register, drops all prior data dependency tracking for <code>EAX</code>, and permits younger dependent instructions to execute instantly, bypassing the ALU.</div>
-      <div style="margin-bottom: 4px;"><b>6. (B)</b> The original ModR/M byte only allocated 3 bits for register indexing ($2^3 = 8$). Expanding to 16 registers mandated the 1-byte REX prefix to provide the extra indexing bit. This 1-byte tax inflates binary instruction sizes, pushing against L1i Cache capacity.</div>
-      <div style="margin-bottom: 4px;"><b>7. (B)</b> A negative 32-bit integer (e.g., <code>0xFFFFFFFB</code>) must be mathematically sign-extended when widening to 64-bits (<code>0xFFFFFFFFFFFFFFFB</code>). If the compiler used a standard move, the 32-bit zero-extension rule would trigger, yielding <code>0x00000000FFFFFFFB</code> (+4.2 Billion), corrupting the application state.</div>
-      <div style="margin-bottom: 4px;"><b>8. (B)</b> The hardware cannot blindly execute legacy 128-bit SSE code if the upper 128 bits of the YMM registers contain active AVX data, because the SSE specification assumes those upper bits are irrelevant. The hardware stalls to save the upper state. <code>vzeroupper</code> clears the upper bits, assuring the hardware that no state preservation is required.</div>
-      <div style="margin-bottom: 4px;"><b>9. (B)</b> Firing 512-bit wide ALUs simultaneously generates catastrophic thermal and electrical loads. The CPU hardware strictly offsets the clock frequency (downclocking) to stay within thermal limits, which can paradoxically slow down parallel threads executing scalar math on the same core.</div>
-      <div style="margin-bottom: 8px;"><b>10. (B)</b> Graph Coloring maps variable lifespans. Nodes represent variables; edges represent overlapping execution times. If two variables are never "Live" at the exact same clock cycle, they are assigned the same "Color" (Hardware Register), enabling massive variable arrays to multiplex gracefully within the 16 physical GPR limits without costly RAM Stack spilling.</div>
-      
-      <div style="margin-bottom: 4px;"><b>Prompt 2 (Execution State):</b><br>
-      Start: <code>0x1111111111111111</code><br>
-      After <code>mov ebx, 0x22222222</code>: The 32-bit rule forces zero-extension. The upper 32-bits are cleared. State: <code>0x0000000022222222</code><br>
-      After <code>mov bx, 0x3333</code>: The 16-bit exception applies. The upper 48 bits are preserved identically. Only the lower 16 bits are overwritten. State: <code>0x0000000022223333</code></div>
+  <div class="page-container content-flow">
+    <div>
+      <div class="litmus-box" style="margin-top: 0; padding: 12px 14px; font-size: 7.5pt; line-height: 1.45;">
+        <div style="font-weight: 800; color: #4338CA; text-transform: uppercase; margin-bottom: 6px; font-size: 8.5pt;">
+          Chapter 12 Technical Answer Key</div>
+        <div style="margin-bottom: 4px;"><b>1. (B)</b> Writing to a 32-bit sub-register (<code>EAX</code>) forces the
+          hardware to automatically zero-extend the upper 32 bits of the full 64-bit architectural register
+          (<code>RAX</code>).</div>
+        <div style="margin-bottom: 4px;"><b>2. (B)</b> To maintain deep historical backward compatibility, 16-bit and
+          8-bit sub-register writes (<code>AX</code>, <code>AL</code>) exclusively modify their localized bits,
+          preserving whatever dirty or clean data currently resides in the upper 48 bits of the register.</div>
+        <div style="margin-bottom: 4px;"><b>3. (C)</b> The Out-of-Order CPU tracked the physical register state. Writing
+          to <code>AL</code> assigned it to a new physical register, but <code>EAX</code> was now fractured across the
+          new 8-bit state and the old 24-bit state. The CPU artificially stalled the pipeline to forcibly merge the
+          components before executing the ADD.</div>
+        <div style="margin-bottom: 4px;"><b>4. (B)</b> AMD recognized that if 32-bit writes preserved dirty upper data,
+          compiled 32-bit math operations could not be safely used as 64-bit memory pointers without explicit software
+          clearing instructions. Hardwiring the zero-extension allowed seamless, performant execution of legacy math as
+          64-bit pointers.</div>
+        <div style="margin-bottom: 4px;"><b>5. (B)</b> The hardware Decoder and RAT identify the XOR-zeroing idiom.
+          Knowing <code>X XOR X</code> is unconditionally 0, it assigns a fresh zeroed physical register, drops all
+          prior data dependency tracking for <code>EAX</code>, and permits younger dependent instructions to execute
+          instantly, bypassing the ALU.</div>
+        <div style="margin-bottom: 4px;"><b>6. (B)</b> The original ModR/M byte only allocated 3 bits for register
+          indexing ($2^3 = 8$). Expanding to 16 registers mandated the 1-byte REX prefix to provide the extra indexing
+          bit. This 1-byte tax inflates binary instruction sizes, pushing against L1i Cache capacity.</div>
+        <div style="margin-bottom: 4px;"><b>7. (B)</b> A negative 32-bit integer (e.g., <code>0xFFFFFFFB</code>) must be
+          mathematically sign-extended when widening to 64-bits (<code>0xFFFFFFFFFFFFFFFB</code>). If the compiler used
+          a standard move, the 32-bit zero-extension rule would trigger, yielding <code>0x00000000FFFFFFFB</code> (+4.2
+          Billion), corrupting the application state.</div>
+        <div style="margin-bottom: 4px;"><b>8. (B)</b> The hardware cannot blindly execute legacy 128-bit SSE code if
+          the upper 128 bits of the YMM registers contain active AVX data, because the SSE specification assumes those
+          upper bits are irrelevant. The hardware stalls to save the upper state. <code>vzeroupper</code> clears the
+          upper bits, assuring the hardware that no state preservation is required.</div>
+        <div style="margin-bottom: 4px;"><b>9. (B)</b> Firing 512-bit wide ALUs simultaneously generates catastrophic
+          thermal and electrical loads. The CPU hardware strictly offsets the clock frequency (downclocking) to stay
+          within thermal limits, which can paradoxically slow down parallel threads executing scalar math on the same
+          core.</div>
+        <div style="margin-bottom: 8px;"><b>10. (B)</b> Graph Coloring maps variable lifespans. Nodes represent
+          variables; edges represent overlapping execution times. If two variables are never "Live" at the exact same
+          clock cycle, they are assigned the same "Color" (Hardware Register), enabling massive variable arrays to
+          multiplex gracefully within the 16 physical GPR limits without costly RAM Stack spilling.</div>
+
+        <div style="margin-bottom: 4px;"><b>Prompt 2 (Execution State):</b><br>
+          Start: <code>0x1111111111111111</code><br>
+          After <code>mov ebx, 0x22222222</code>: The 32-bit rule forces zero-extension. The upper 32-bits are cleared.
+          State: <code>0x0000000022222222</code><br>
+          After <code>mov bx, 0x3333</code>: The 16-bit exception applies. The upper 48 bits are preserved identically.
+          Only the lower 16 bits are overwritten. State: <code>0x0000000022223333</code></div>
+      </div>
     </div>
   </div>
-</div>
 
 </body>
+
 </html>

@@ -1,153 +1,206 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-<meta charset="utf-8">
-<link rel="stylesheet" href="common.css">
-<title>Chapter 7: Pipeline Hazards: RAW, WAR, WAW & Control</title>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="common.css">
+  <title>Chapter 7: Pipeline Hazards: RAW, WAR, WAW & Control</title>
 </head>
+
 <body class="chapter-seven">
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 1: 7.0 THE PHYSICS OF INSTRUCTION COLLISIONS
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <div class="phase-label">Volume I &middot; Silicon, Machine Architecture &amp; Low-Level Math</div>
-    <div class="chapter-number">Chapter 7 (Day 7)</div>
-    <h1 class="chapter-title">Pipeline Hazards: RAW, WAR, WAW &amp; Control</h1>
+  <div class="page-container content-flow">
+    <div>
+      <div class="phase-label">Volume I &middot; Silicon, Machine Architecture &amp; Low-Level Math</div>
+      <div class="chapter-number">Chapter 7 (Day 7)</div>
+      <h1 class="chapter-title">Pipeline Hazards: RAW, WAR, WAW &amp; Control</h1>
 
-    <h2>7.0 The Physics of Instruction Collisions</h2>
-    <p>A modern superscalar processor is a chaotic environment. In a perfect abstraction, software executes sequentially: line 1 finishes, then line 2 begins. In physical silicon, a 15-stage pipeline with 4 parallel Execution Units (ALUs) might have up to 60 instructions in-flight simultaneously at various stages of completion. When you force overlapping execution onto code that was authored with sequential assumptions, the instructions inevitably collide. These physical collisions are called <strong>Hazards</strong>.</p>
+      <h2>7.0 The Physics of Instruction Collisions</h2>
+      <p>A modern superscalar processor is a chaotic environment. In a perfect abstraction, software executes
+        sequentially: line 1 finishes, then line 2 begins. In physical silicon, a 15-stage pipeline with 4 parallel
+        Execution Units (ALUs) might have up to 60 instructions in-flight simultaneously at various stages of
+        completion. When you force overlapping execution onto code that was authored with sequential assumptions, the
+        instructions inevitably collide. These physical collisions are called <strong>Hazards</strong>.</p>
 
-    <h3>The C# Illusion</h3>
-    <p>Consider a simple block of C# backend logic mapping to an entity framework update:</p>
-    <pre><code>int baseSalary = employee.BaseSalary;         // Inst 1: Memory Load
+      <h3>The C# Illusion</h3>
+      <p>Consider a simple block of C# backend logic mapping to an entity framework update:</p>
+      <pre><code>int baseSalary = employee.BaseSalary;         // Inst 1: Memory Load
 int bonus = CalculateBonus(baseSalary);       // Inst 2: ALU Math (Depends on 1)
 employee.Total = baseSalary + bonus;          // Inst 3: ALU Math (Depends on 1 & 2)
 employee.LastUpdated = DateTime.UtcNow;       // Inst 4: Independent
 SaveToDatabase(employee);                     // Inst 5: Memory Store</code></pre>
 
-    <p>To a high-level developer, these 5 lines execute seamlessly in order. To the CPU pipeline, this code is a minefield of data dependencies. Instruction 2 requires the value of <code>baseSalary</code> before it can compute the <code>bonus</code>. However, because the CPU fetches Instruction 2 into the pipeline before Instruction 1 has even finished retrieving <code>baseSalary</code> from the L1 Data Cache, a <strong>Data Hazard</strong> occurs. The pipeline must physically halt, injecting "bubbles" (empty clock cycles) until the data resolves, destroying throughput.</p>
+      <p>To a high-level developer, these 5 lines execute seamlessly in order. To the CPU pipeline, this code is a
+        minefield of data dependencies. Instruction 2 requires the value of <code>baseSalary</code> before it can
+        compute the <code>bonus</code>. However, because the CPU fetches Instruction 2 into the pipeline before
+        Instruction 1 has even finished retrieving <code>baseSalary</code> from the L1 Data Cache, a <strong>Data
+          Hazard</strong> occurs. The pipeline must physically halt, injecting "bubbles" (empty clock cycles) until the
+        data resolves, destroying throughput.</p>
 
-    <h3>Structural Hazards (The Solved Problem)</h3>
-    <p>Before diving into data dependencies, we must acknowledge <strong>Structural Hazards</strong>. A structural hazard occurs when two instructions demand the exact same physical hardware circuit at the exact same picosecond. For example, if Instruction 4 is in the Fetch stage trying to read the next opcode from RAM, and Instruction 1 is in the Memory stage trying to read <code>employee.BaseSalary</code> from RAM, they collide on the memory bus.</p>
-    
-    <p>Hardware engineers solve structural hazards via <em>Hardware Duplication</em>. By physically splitting the L1 Cache into the L1i (Instruction) and L1d (Data) caches, they provide two isolated copper pathways, permanently eliminating this specific structural collision. However, data dependencies cannot be solved by simply adding more hardware; they require sophisticated temporal logic.</p>
+      <h3>Structural Hazards (The Solved Problem)</h3>
+      <p>Before diving into data dependencies, we must acknowledge <strong>Structural Hazards</strong>. A structural
+        hazard occurs when two instructions demand the exact same physical hardware circuit at the exact same
+        picosecond. For example, if Instruction 4 is in the Fetch stage trying to read the next opcode from RAM, and
+        Instruction 1 is in the Memory stage trying to read <code>employee.BaseSalary</code> from RAM, they collide on
+        the memory bus.</p>
+
+      <p>Hardware engineers solve structural hazards via <em>Hardware Duplication</em>. By physically splitting the L1
+        Cache into the L1i (Instruction) and L1d (Data) caches, they provide two isolated copper pathways, permanently
+        eliminating this specific structural collision. However, data dependencies cannot be solved by simply adding
+        more hardware; they require sophisticated temporal logic.</p>
+    </div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 2: WHITEBOARD 1
      ========================================================================== -->
-<div class="page-container">
-  <div class="whiteboard-page">
-    <div class="wb-header">
-      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
-      <div class="wb-ref">REF: CH07_HAZARD_PHYSICS_AND_CSHARP</div>
+  <div class="page-container">
+    <div class="whiteboard-page">
+      <div class="wb-header">
+        <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+        <div class="wb-ref">REF: CH07_HAZARD_PHYSICS_AND_CSHARP</div>
+      </div>
+      <div class="wb-invariants">
+        <div><b>The Superscalar Promise:</b> A modern CPU core can retire up to 6 instructions per clock cycle. However,
+          if the code is riddled with sequential data hazards, the IPC (Instructions Per Cycle) plummets to 0.5. Writing
+          mechanically sympathetic code means structuring data to keep all 6 lanes saturated.</div>
+      </div>
+      <div class="wb-canvas"></div>
+      <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 2</span></div>
     </div>
-    <div class="wb-invariants">
-      <div><b>The Superscalar Promise:</b> A modern CPU core can retire up to 6 instructions per clock cycle. However, if the code is riddled with sequential data hazards, the IPC (Instructions Per Cycle) plummets to 0.5. Writing mechanically sympathetic code means structuring data to keep all 6 lanes saturated.</div>
-    </div>
-    <div class="wb-canvas"></div>
-    <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 2</span></div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 3: 7.1 DATA HAZARDS (RAW, WAR, WAW)
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <h2>7.1 Data Hazards: The Dependency Tax</h2>
-    <p>Data hazards are temporal violations. They occur when the order of read and write accesses to a specific register (like <code>RAX</code>) differs in the overlapping physical pipeline from the sequential order intended by the compiled assembly code. There are three classifications of Data Hazards.</p>
+  <div class="page-container content-flow">
+    <div>
+      <h2>7.1 Data Hazards: The Dependency Tax</h2>
+      <p>Data hazards are temporal violations. They occur when the order of read and write accesses to a specific
+        register (like <code>RAX</code>) differs in the overlapping physical pipeline from the sequential order intended
+        by the compiled assembly code. There are three classifications of Data Hazards.</p>
 
-    <h3>1. True Dependency: Read-After-Write (RAW)</h3>
-    <p>A RAW hazard is the only "true" mathematical dependency. It occurs when an instruction requires a value that has not yet been computed by a preceding instruction.</p>
-    <pre><code>Inst 1: add eax, 5       // EX stage computes eax + 5
+      <h3>1. True Dependency: Read-After-Write (RAW)</h3>
+      <p>A RAW hazard is the only "true" mathematical dependency. It occurs when an instruction requires a value that
+        has not yet been computed by a preceding instruction.</p>
+      <pre><code>Inst 1: add eax, 5       // EX stage computes eax + 5
 Inst 2: sub ebx, eax     // ID stage needs the new 'eax' to decode</code></pre>
-    <p>In a 5-stage pipeline, Instruction 2 enters the Decode (ID) stage and attempts to read the physical voltage of <code>EAX</code> from the Register File. However, Instruction 1 is only one stage ahead in the Execute (EX) stage. It will not write the final answer back to the <code>EAX</code> Register File until the Write-Back (WB) stage, two clock cycles later. If Instruction 2 reads the register now, it will grab stale, corrupted data.</p>
+      <p>In a 5-stage pipeline, Instruction 2 enters the Decode (ID) stage and attempts to read the physical voltage of
+        <code>EAX</code> from the Register File. However, Instruction 1 is only one stage ahead in the Execute (EX)
+        stage. It will not write the final answer back to the <code>EAX</code> Register File until the Write-Back (WB)
+        stage, two clock cycles later. If Instruction 2 reads the register now, it will grab stale, corrupted data.</p>
 
-    <h3>2. Anti-Dependency: Write-After-Read (WAR)</h3>
-    <p>A WAR hazard occurs when an instruction writes to a register <em>after</em> a preceding instruction was supposed to read it. In an Out-of-Order (OoO) pipeline, the CPU might try to execute a newer instruction first to save time.</p>
-    <pre><code>Inst 1: add ebx, eax     // Needs to read the old EAX
+      <h3>2. Anti-Dependency: Write-After-Read (WAR)</h3>
+      <p>A WAR hazard occurs when an instruction writes to a register <em>after</em> a preceding instruction was
+        supposed to read it. In an Out-of-Order (OoO) pipeline, the CPU might try to execute a newer instruction first
+        to save time.</p>
+      <pre><code>Inst 1: add ebx, eax     // Needs to read the old EAX
 Inst 2: mov eax, 10      // Writes a new value to EAX</code></pre>
-    <p>If the CPU executes Instruction 2 before Instruction 1 (perhaps because Instruction 1 is stalled waiting on a cache miss for <code>EBX</code>), Instruction 2 will overwrite <code>EAX</code>. When Instruction 1 finally executes, it reads <code>10</code> instead of the original value, corrupting the math.</p>
+      <p>If the CPU executes Instruction 2 before Instruction 1 (perhaps because Instruction 1 is stalled waiting on a
+        cache miss for <code>EBX</code>), Instruction 2 will overwrite <code>EAX</code>. When Instruction 1 finally
+        executes, it reads <code>10</code> instead of the original value, corrupting the math.</p>
 
-    <h3>3. Output Dependency: Write-After-Write (WAW)</h3>
-    <p>A WAW hazard occurs when two instructions write to the exact same register.</p>
-    <pre><code>Inst 1: mov eax, 5
+      <h3>3. Output Dependency: Write-After-Write (WAW)</h3>
+      <p>A WAW hazard occurs when two instructions write to the exact same register.</p>
+      <pre><code>Inst 1: mov eax, 5
 Inst 2: mov eax, 10</code></pre>
-    <p>If executed out-of-order, Instruction 2 might write <code>10</code> to <code>EAX</code> instantly, and then Instruction 1 writes <code>5</code> to <code>EAX</code>. The final architectural state of the program is left as <code>5</code>, which is a catastrophic violation of the code's intended final state (<code>10</code>).</p>
+      <p>If executed out-of-order, Instruction 2 might write <code>10</code> to <code>EAX</code> instantly, and then
+        Instruction 1 writes <code>5</code> to <code>EAX</code>. The final architectural state of the program is left as
+        <code>5</code>, which is a catastrophic violation of the code's intended final state (<code>10</code>).</p>
+    </div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 4: WHITEBOARD 2
      ========================================================================== -->
-<div class="page-container">
-  <div class="whiteboard-page">
-    <div class="wb-header">
-      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
-      <div class="wb-ref">REF: CH07_DATA_HAZARDS_RAW_WAR_WAW</div>
+  <div class="page-container">
+    <div class="whiteboard-page">
+      <div class="wb-header">
+        <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+        <div class="wb-ref">REF: CH07_DATA_HAZARDS_RAW_WAR_WAW</div>
+      </div>
+      <div class="wb-invariants">
+        <div><b>The Name Dependency Flaw:</b> WAR and WAW are not true mathematical dependencies; they are "Name
+          Dependencies". They exist exclusively because the x86 architecture only exposes 16 general-purpose registers
+          (RAX, RBX, etc.). The C# JIT compiler is forced to aggressively reuse these names, artificially creating
+          conflicts between completely unrelated blocks of code.</div>
+      </div>
+      <div class="wb-canvas"></div>
+      <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 4</span></div>
     </div>
-    <div class="wb-invariants">
-      <div><b>The Name Dependency Flaw:</b> WAR and WAW are not true mathematical dependencies; they are "Name Dependencies". They exist exclusively because the x86 architecture only exposes 16 general-purpose registers (RAX, RBX, etc.). The C# JIT compiler is forced to aggressively reuse these names, artificially creating conflicts between completely unrelated blocks of code.</div>
-    </div>
-    <div class="wb-canvas"></div>
-    <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 4</span></div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 5: 7.2 RESOLVING RAW: OPERAND FORWARDING
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <h2>7.2 Resolving RAW: Operand Forwarding (Bypassing)</h2>
-    <p>A CPU cannot afford to stall 2 clock cycles every single time a sequential mathematical operation occurs. To resolve Read-After-Write (RAW) hazards, CPU architects utilize a physical wiring exploit known as <strong>Operand Forwarding</strong> (or Bypassing).</p>
+  <div class="page-container content-flow">
+    <div>
+      <h2>7.2 Resolving RAW: Operand Forwarding (Bypassing)</h2>
+      <p>A CPU cannot afford to stall 2 clock cycles every single time a sequential mathematical operation occurs. To
+        resolve Read-After-Write (RAW) hazards, CPU architects utilize a physical wiring exploit known as
+        <strong>Operand Forwarding</strong> (or Bypassing).</p>
 
-    <h3>The Hardware Bypass Network</h3>
-    <p>When the ALU completes its computation in the Execute (EX) stage, the resulting voltage is queued to move forward into the MEM and WB stages. However, hardware engineers solder physical copper wires directly from the ALU's output pins <em>backwards</em> across the silicon die, wiring them straight into the input Multiplexers (MUX) of the ALU.</p>
-    
-    <p>When Instruction 2 enters the EX stage needing the value of <code>EAX</code>, the hardware detects the RAW hazard. Instead of reading the stale value from the Register File, the input MUX dynamically selects the "Bypass" wire. The ALU consumes the freshly computed voltage directly from its own output from the previous clock cycle. The RAW hazard is instantly resolved with <strong>zero stalled cycles</strong>.</p>
+      <h3>The Hardware Bypass Network</h3>
+      <p>When the ALU completes its computation in the Execute (EX) stage, the resulting voltage is queued to move
+        forward into the MEM and WB stages. However, hardware engineers solder physical copper wires directly from the
+        ALU's output pins <em>backwards</em> across the silicon die, wiring them straight into the input Multiplexers
+        (MUX) of the ALU.</p>
 
-    <h3>The Exception: The Load-Use Stall</h3>
-    <p>Forwarding cannot solve everything. Consider the following C# array access:</p>
-    <pre><code>int val = array[0];      // load eax, [rcx]
+      <p>When Instruction 2 enters the EX stage needing the value of <code>EAX</code>, the hardware detects the RAW
+        hazard. Instead of reading the stale value from the Register File, the input MUX dynamically selects the
+        "Bypass" wire. The ALU consumes the freshly computed voltage directly from its own output from the previous
+        clock cycle. The RAW hazard is instantly resolved with <strong>zero stalled cycles</strong>.</p>
+
+      <h3>The Exception: The Load-Use Stall</h3>
+      <p>Forwarding cannot solve everything. Consider the following C# array access:</p>
+      <pre><code>int val = array[0];      // load eax, [rcx]
 int next = val + 5;      // add ebx, eax</code></pre>
-    
-    <p>Instruction 1 is a memory load. The data is not resolved in the EX stage; it is not retrieved from the L1 Data Cache until the <strong>MEM stage</strong>. When Instruction 2 enters the EX stage, it needs <code>EAX</code>. But the ALU cannot time-travel into the future to grab data that the MEM stage hasn't even fetched yet.</p>
-    
-    <p>This is a <strong>Load-Use Hazard</strong>. The pipeline has no choice but to physically stall Instruction 2 for 1 full clock cycle (a pipeline "bubble"). During the next cycle, the MEM stage finishes the cache read and forwards the data backward to the EX stage. This mandatory 1-cycle penalty is why elite developers aggressively hoist memory reads early in their code, separating them from the math that consumes them.</p>
-  </div>
-</div>
 
-<!-- ==========================================================================
+      <p>Instruction 1 is a memory load. The data is not resolved in the EX stage; it is not retrieved from the L1 Data
+        Cache until the <strong>MEM stage</strong>. When Instruction 2 enters the EX stage, it needs <code>EAX</code>.
+        But the ALU cannot time-travel into the future to grab data that the MEM stage hasn't even fetched yet.</p>
+
+      <p>This is a <strong>Load-Use Hazard</strong>. The pipeline has no choice but to physically stall Instruction 2
+        for 1 full clock cycle (a pipeline "bubble"). During the next cycle, the MEM stage finishes the cache read and
+        forwards the data backward to the EX stage. This mandatory 1-cycle penalty is why elite developers aggressively
+        hoist memory reads early in their code, separating them from the math that consumes them.</p>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
      PAGE 6: WHITEBOARD 3
      ========================================================================== -->
-<div class="page-container">
-  <div class="whiteboard-page">
-    <div class="wb-header">
-      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
-      <div class="wb-ref">REF: CH07_FORWARDING_AND_LOAD_USE</div>
+  <div class="page-container">
+    <div class="whiteboard-page">
+      <div class="wb-header">
+        <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+        <div class="wb-ref">REF: CH07_FORWARDING_AND_LOAD_USE</div>
+      </div>
+      <div class="wb-invariants">
+        <div><b>Instruction Scheduling:</b> The C# RyuJIT compiler and C++ LLVM optimizer are acutely aware of the
+          Load-Use Stall. During compilation, they will intentionally grab independent instructions from further down in
+          your function and physically move them between the `load` and the `add` assembly lines to do useful work while
+          the CPU waits for the cache.</div>
+      </div>
+      <div class="wb-canvas"></div>
+      <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 6</span></div>
     </div>
-    <div class="wb-invariants">
-      <div><b>Instruction Scheduling:</b> The C# RyuJIT compiler and C++ LLVM optimizer are acutely aware of the Load-Use Stall. During compilation, they will intentionally grab independent instructions from further down in your function and physically move them between the `load` and the `add` assembly lines to do useful work while the CPU waits for the cache.</div>
-    </div>
-    <div class="wb-canvas"></div>
-    <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 6</span></div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 7: 7.3 RESOLVING WAR & WAW: REGISTER RENAMING
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <h2>7.3 Resolving WAR &amp; WAW: Register Renaming</h2>
-    <p>As previously established, WAR (Anti) and WAW (Output) hazards are fake dependencies. They occur because the compiler runs out of registers and reuses <code>EAX</code> for a completely unrelated calculation later in the function.</p>
+  <div class="page-container content-flow">
+    <div>
+      <h2>7.3 Resolving WAR &amp; WAW: Register Renaming</h2>
+      <p>As previously established, WAR (Anti) and WAW (Output) hazards are fake dependencies. They occur because the
+        compiler runs out of registers and reuses <code>EAX</code> for a completely unrelated calculation later in the
+        function.</p>
 
-    <pre><code>// C# Example of a Name Dependency
+      <pre><code>// C# Example of a Name Dependency
 int sum1 = ComputeAlpha();       // Uses EAX
 SaveToDatabase(sum1);            // Reads EAX
 
@@ -155,266 +208,343 @@ SaveToDatabase(sum1);            // Reads EAX
 int sum2 = ComputeBeta();        // Compiler reuses EAX! (WAW Hazard)
 SaveToNetwork(sum2);             // Reads EAX (WAR Hazard against earlier code)</code></pre>
 
-    <h3>Tomasulo's Algorithm &amp; The PRF</h3>
-    <p>Invented in 1967 by Robert Tomasulo for the IBM System/360, this algorithm forms the basis of all modern Out-of-Order (OoO) CPUs. The hardware solves name dependencies by lying to the operating system.</p>
-    
-    <p>The OS and the compiler think the CPU only has 16 architectural registers (RAX, RBX, etc.). In physical reality, a modern Intel Core i9 contains over <strong>160 hidden Physical Registers</strong> inside its Physical Register File (PRF). When the CPU decodes instructions, it dynamically maps the fake architectural registers to fresh physical registers on the fly.</p>
+      <h3>Tomasulo's Algorithm &amp; The PRF</h3>
+      <p>Invented in 1967 by Robert Tomasulo for the IBM System/360, this algorithm forms the basis of all modern
+        Out-of-Order (OoO) CPUs. The hardware solves name dependencies by lying to the operating system.</p>
 
-    <h3>The Register Alias Table (RAT)</h3>
-    <p>The hardware component responsible for this is the Register Alias Table (RAT). It intercepts the instruction stream:</p>
-    <ol>
-      <li><strong>Inst 1:</strong> <code>mov eax, 5</code>. The RAT grabs a fresh, unused physical register, say <code>P42</code>. It records: "EAX currently points to P42". It changes the instruction to <code>mov P42, 5</code>.</li>
-      <li><strong>Inst 2:</strong> <code>add ebx, eax</code>. The RAT looks up EAX, finds <code>P42</code>, and changes it to <code>add P_new, P42</code>.</li>
-      <li><strong>Inst 3 (The WAW/WAR Offender):</strong> <code>mov eax, 10</code>. The RAT sees the compiler reusing EAX. Instead of overwriting <code>P42</code>, the RAT grabs a brand new physical register, <code>P89</code>. It records: "EAX now points to P89". The instruction becomes <code>mov P89, 10</code>.</li>
-    </ol>
-    <p>By mapping the second <code>EAX</code> write to an entirely different physical silicon location (<code>P89</code>), the WAR and WAW hazards instantly evaporate. Instruction 3 can execute wildly out-of-order, before Instruction 2, without corrupting the value <code>P42</code> that Instruction 2 is waiting to read. The fake dependencies are annihilated, unlocking massive superscalar parallelism.</p>
+      <p>The OS and the compiler think the CPU only has 16 architectural registers (RAX, RBX, etc.). In physical
+        reality, a modern Intel Core i9 contains over <strong>160 hidden Physical Registers</strong> inside its Physical
+        Register File (PRF). When the CPU decodes instructions, it dynamically maps the fake architectural registers to
+        fresh physical registers on the fly.</p>
+
+      <h3>The Register Alias Table (RAT)</h3>
+      <p>The hardware component responsible for this is the Register Alias Table (RAT). It intercepts the instruction
+        stream:</p>
+      <ol>
+        <li><strong>Inst 1:</strong> <code>mov eax, 5</code>. The RAT grabs a fresh, unused physical register, say
+          <code>P42</code>. It records: "EAX currently points to P42". It changes the instruction to
+          <code>mov P42, 5</code>.</li>
+        <li><strong>Inst 2:</strong> <code>add ebx, eax</code>. The RAT looks up EAX, finds <code>P42</code>, and
+          changes it to <code>add P_new, P42</code>.</li>
+        <li><strong>Inst 3 (The WAW/WAR Offender):</strong> <code>mov eax, 10</code>. The RAT sees the compiler reusing
+          EAX. Instead of overwriting <code>P42</code>, the RAT grabs a brand new physical register, <code>P89</code>.
+          It records: "EAX now points to P89". The instruction becomes <code>mov P89, 10</code>.</li>
+      </ol>
+      <p>By mapping the second <code>EAX</code> write to an entirely different physical silicon location
+        (<code>P89</code>), the WAR and WAW hazards instantly evaporate. Instruction 3 can execute wildly out-of-order,
+        before Instruction 2, without corrupting the value <code>P42</code> that Instruction 2 is waiting to read. The
+        fake dependencies are annihilated, unlocking massive superscalar parallelism.</p>
+    </div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 8: WHITEBOARD 4
      ========================================================================== -->
-<div class="page-container">
-  <div class="whiteboard-page">
-    <div class="wb-header">
-      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
-      <div class="wb-ref">REF: CH07_REGISTER_RENAMING_RAT</div>
+  <div class="page-container">
+    <div class="whiteboard-page">
+      <div class="wb-header">
+        <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+        <div class="wb-ref">REF: CH07_REGISTER_RENAMING_RAT</div>
+      </div>
+      <div class="wb-invariants">
+        <div><b>The Reorder Buffer (ROB):</b> If instructions execute out of order, how does the CPU handle crashes
+          safely? The Reorder Buffer (ROB). As instructions finish out-of-order, they dump their results into the ROB.
+          The ROB acts as a strict FIFO queue. It only allows instructions to permanently "Retire" (commit to the
+          architectural state) in the exact sequential order the C# developer originally wrote them.</div>
+      </div>
+      <div class="wb-canvas"></div>
+      <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 8</span></div>
     </div>
-    <div class="wb-invariants">
-      <div><b>The Reorder Buffer (ROB):</b> If instructions execute out of order, how does the CPU handle crashes safely? The Reorder Buffer (ROB). As instructions finish out-of-order, they dump their results into the ROB. The ROB acts as a strict FIFO queue. It only allows instructions to permanently "Retire" (commit to the architectural state) in the exact sequential order the C# developer originally wrote them.</div>
-    </div>
-    <div class="wb-canvas"></div>
-    <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 8</span></div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 9: 7.4 CONTROL HAZARDS
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <h2>7.4 Control Hazards: The Cost of Choices</h2>
-    <p>Data hazards slow the pipeline down by 1 or 2 cycles. Control hazards destroy the pipeline entirely. A control hazard is caused by a branch instruction (an <code>if</code> statement, a <code>for</code> loop, or a polymorphic virtual method call).</p>
+  <div class="page-container content-flow">
+    <div>
+      <h2>7.4 Control Hazards: The Cost of Choices</h2>
+      <p>Data hazards slow the pipeline down by 1 or 2 cycles. Control hazards destroy the pipeline entirely. A control
+        hazard is caused by a branch instruction (an <code>if</code> statement, a <code>for</code> loop, or a
+        polymorphic virtual method call).</p>
 
-    <h3>The Branch Problem</h3>
-    <pre><code>if (user.IsAdmin) {        // jne (Jump if Not Equal)
+      <h3>The Branch Problem</h3>
+      <pre><code>if (user.IsAdmin) {        // jne (Jump if Not Equal)
     GrantAccess();         // Address A
 } else {
     DenyAccess();          // Address B
 }</code></pre>
-    
-    <p>In a deeply pipelined CPU, the Fetch (IF) stage must pull a new instruction from the L1i cache every single nanosecond to keep the pipeline saturated. When the Fetch stage encounters the <code>jne</code> instruction, it faces a physical paradox: It must fetch the next instruction <em>now</em>, but the Execute (EX) stage won't actually evaluate the math (is <code>user.IsAdmin == true?</code>) for 15 to 20 more clock cycles.</p>
 
-    <h3>The Flush Penalty</h3>
-    <p>If the CPU decides to just wait for the EX stage to finish the math, it incurs a 20-cycle stall every time it hits an <code>if</code> statement. Given that ~20% of all compiled instructions are branches, stalling would reduce the CPU throughput to a crawl.</p>
-    
-    <p>Instead, the CPU <strong>Speculates</strong>. It guesses which path the code will take and blindly fetches and executes down that path. If the Execute stage eventually proves the guess was correct, the CPU loses zero cycles. Throughput is perfect.</p>
-    
-    <p>But if the Execute stage mathematically proves the guess was wrong, a <strong>Branch Misprediction</strong> occurs. The CPU asserts a global <code>FLUSH</code> signal. The 20 speculative instructions currently sitting in the Fetch, Decode, and Execution pipelines are violently aborted. Their flip-flops are zeroed out, all computed data is discarded, and the Fetch unit is forcefully redirected to the correct memory address. The CPU wastes ~15 to 20 clock cycles recovering.</p>
+      <p>In a deeply pipelined CPU, the Fetch (IF) stage must pull a new instruction from the L1i cache every single
+        nanosecond to keep the pipeline saturated. When the Fetch stage encounters the <code>jne</code> instruction, it
+        faces a physical paradox: It must fetch the next instruction <em>now</em>, but the Execute (EX) stage won't
+        actually evaluate the math (is <code>user.IsAdmin == true?</code>) for 15 to 20 more clock cycles.</p>
+
+      <h3>The Flush Penalty</h3>
+      <p>If the CPU decides to just wait for the EX stage to finish the math, it incurs a 20-cycle stall every time it
+        hits an <code>if</code> statement. Given that ~20% of all compiled instructions are branches, stalling would
+        reduce the CPU throughput to a crawl.</p>
+
+      <p>Instead, the CPU <strong>Speculates</strong>. It guesses which path the code will take and blindly fetches and
+        executes down that path. If the Execute stage eventually proves the guess was correct, the CPU loses zero
+        cycles. Throughput is perfect.</p>
+
+      <p>But if the Execute stage mathematically proves the guess was wrong, a <strong>Branch Misprediction</strong>
+        occurs. The CPU asserts a global <code>FLUSH</code> signal. The 20 speculative instructions currently sitting in
+        the Fetch, Decode, and Execution pipelines are violently aborted. Their flip-flops are zeroed out, all computed
+        data is discarded, and the Fetch unit is forcefully redirected to the correct memory address. The CPU wastes ~15
+        to 20 clock cycles recovering.</p>
+    </div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 10: WHITEBOARD 5
      ========================================================================== -->
-<div class="page-container">
-  <div class="whiteboard-page">
-    <div class="wb-header">
-      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
-      <div class="wb-ref">REF: CH07_CONTROL_HAZARDS_FLUSH</div>
+  <div class="page-container">
+    <div class="whiteboard-page">
+      <div class="wb-header">
+        <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+        <div class="wb-ref">REF: CH07_CONTROL_HAZARDS_FLUSH</div>
+      </div>
+      <div class="wb-invariants">
+        <div><b>The Magnitude of the Penalty:</b> If a C# loop iterates 1 billion times, and the <code>if</code>
+          condition inside mispredicts 50% of the time, the CPU suffers 500 million pipeline flushes. At 15 cycles per
+          flush, that is 7.5 billion wasted clock cycles. On a 5 GHz CPU, the software wastes <b>1.5 seconds of pure
+            physics overhead</b> doing absolutely nothing but zeroing out registers.</div>
+      </div>
+      <div class="wb-canvas"></div>
+      <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 10</span></div>
     </div>
-    <div class="wb-invariants">
-      <div><b>The Magnitude of the Penalty:</b> If a C# loop iterates 1 billion times, and the <code>if</code> condition inside mispredicts 50% of the time, the CPU suffers 500 million pipeline flushes. At 15 cycles per flush, that is 7.5 billion wasted clock cycles. On a 5 GHz CPU, the software wastes <b>1.5 seconds of pure physics overhead</b> doing absolutely nothing but zeroing out registers.</div>
-    </div>
-    <div class="wb-canvas"></div>
-    <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 10</span></div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 11: 7.5 BRANCH PREDICTION ARCHITECTURE (STATIC / 1-BIT / 2-BIT)
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <h2>7.5 Branch Prediction Architecture</h2>
-    <p>To avoid the catastrophic 15-cycle flush penalty, CPU architects integrate highly advanced machine learning hardware directly into the Fetch stage to guess the outcome of <code>if</code> statements with &gt;95% accuracy.</p>
+  <div class="page-container content-flow">
+    <div>
+      <h2>7.5 Branch Prediction Architecture</h2>
+      <p>To avoid the catastrophic 15-cycle flush penalty, CPU architects integrate highly advanced machine learning
+        hardware directly into the Fetch stage to guess the outcome of <code>if</code> statements with &gt;95% accuracy.
+      </p>
 
-    <h3>Static Prediction (The Fallback)</h3>
-    <p>Before dynamic hardware predictors existed, CPUs used hardcoded rules:</p>
-    <ul>
-      <li><strong>Backward Branches are Taken:</strong> If a jump points to an older memory address, it's almost certainly a <code>for</code> or <code>while</code> loop returning to the top. Loops usually repeat, so guess TRUE.</li>
-      <li><strong>Forward Branches are Not Taken:</strong> If a jump points to a future address, it's an <code>if</code> statement skipping a block. Assume normal control flow and guess FALSE.</li>
-    </ul>
+      <h3>Static Prediction (The Fallback)</h3>
+      <p>Before dynamic hardware predictors existed, CPUs used hardcoded rules:</p>
+      <ul>
+        <li><strong>Backward Branches are Taken:</strong> If a jump points to an older memory address, it's almost
+          certainly a <code>for</code> or <code>while</code> loop returning to the top. Loops usually repeat, so guess
+          TRUE.</li>
+        <li><strong>Forward Branches are Not Taken:</strong> If a jump points to a future address, it's an
+          <code>if</code> statement skipping a block. Assume normal control flow and guess FALSE.</li>
+      </ul>
 
-    <h3>Dynamic Prediction: 1-Bit &amp; 2-Bit Saturating Counters</h3>
-    <p>Modern CPUs track the historical behavior of individual branches using a <strong>Branch History Table (BHT)</strong> indexed by the memory address of the jump instruction.</p>
-    
-    <p>A <strong>1-Bit Predictor</strong> simply records what happened last time. If the branch was Taken last time, guess Taken this time. The flaw: in a <code>for</code> loop, the 1-bit predictor mispredicts twice (once when the loop exits, and once when the loop is entered again the next time the function is called).</p>
+      <h3>Dynamic Prediction: 1-Bit &amp; 2-Bit Saturating Counters</h3>
+      <p>Modern CPUs track the historical behavior of individual branches using a <strong>Branch History Table
+          (BHT)</strong> indexed by the memory address of the jump instruction.</p>
 
-    <p>To fix this, CPUs use a <strong>2-Bit Saturating Counter</strong>. It utilizes a 4-state Finite State Machine:</p>
-    <ul>
-      <li><code>11</code>: Strongly Taken</li>
-      <li><code>10</code>: Weakly Taken</li>
-      <li><code>01</code>: Weakly Not Taken</li>
-      <li><code>00</code>: Strongly Not Taken</li>
-    </ul>
-    <p>If the predictor is Strongly Taken (11), and the loop exits (Not Taken), it drops to Weakly Taken (10). The next time the loop is encountered, it <em>still</em> guesses Taken! It requires two consecutive anomalies to fully flip the predictor's allegiance, dramatically improving accuracy for nested loops.</p>
+      <p>A <strong>1-Bit Predictor</strong> simply records what happened last time. If the branch was Taken last time,
+        guess Taken this time. The flaw: in a <code>for</code> loop, the 1-bit predictor mispredicts twice (once when
+        the loop exits, and once when the loop is entered again the next time the function is called).</p>
+
+      <p>To fix this, CPUs use a <strong>2-Bit Saturating Counter</strong>. It utilizes a 4-state Finite State Machine:
+      </p>
+      <ul>
+        <li><code>11</code>: Strongly Taken</li>
+        <li><code>10</code>: Weakly Taken</li>
+        <li><code>01</code>: Weakly Not Taken</li>
+        <li><code>00</code>: Strongly Not Taken</li>
+      </ul>
+      <p>If the predictor is Strongly Taken (11), and the loop exits (Not Taken), it drops to Weakly Taken (10). The
+        next time the loop is encountered, it <em>still</em> guesses Taken! It requires two consecutive anomalies to
+        fully flip the predictor's allegiance, dramatically improving accuracy for nested loops.</p>
+    </div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 12: WHITEBOARD 6
      ========================================================================== -->
-<div class="page-container">
-  <div class="whiteboard-page">
-    <div class="wb-header">
-      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
-      <div class="wb-ref">REF: CH07_BRANCH_PREDICTION_FSM</div>
+  <div class="page-container">
+    <div class="whiteboard-page">
+      <div class="wb-header">
+        <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+        <div class="wb-ref">REF: CH07_BRANCH_PREDICTION_FSM</div>
+      </div>
+      <div class="wb-invariants">
+        <div><b>The Branch Target Buffer (BTB):</b> Knowing <i>if</i> a branch is taken is not enough; the CPU must know
+          <i>where</i> it goes to start fetching instantly. The BTB acts as a specialized L1 cache that stores the
+          64-bit destination memory pointers of previously executed jumps. Polymorphic virtual method calls (which use
+          dynamic v-tables) are notoriously difficult for the BTB to track, often causing stalls.</div>
+      </div>
+      <div class="wb-canvas"></div>
+      <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 12</span></div>
     </div>
-    <div class="wb-invariants">
-      <div><b>The Branch Target Buffer (BTB):</b> Knowing <i>if</i> a branch is taken is not enough; the CPU must know <i>where</i> it goes to start fetching instantly. The BTB acts as a specialized L1 cache that stores the 64-bit destination memory pointers of previously executed jumps. Polymorphic virtual method calls (which use dynamic v-tables) are notoriously difficult for the BTB to track, often causing stalls.</div>
-    </div>
-    <div class="wb-canvas"></div>
-    <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 12</span></div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 13: 7.5 BRANCH PREDICTION (GLOBAL HISTORY & PERCEPTRONS)
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <h3>Two-Level Adaptive Predictors (Yeh-Patt)</h3>
-    <p>A simple 2-bit counter fails on complex patterns. What if an <code>if</code> statement perfectly alternates: True, False, True, False? The 2-bit counter will be wrong 100% of the time, continuously chasing the previous state.</p>
-    
-    <p>In 1991, Tse-Yu Yeh and Yale Patt invented the Two-Level Adaptive Predictor. It introduces a <strong>Global History Register (GHR)</strong>, an N-bit shift register that records the exact sequence of the last N branches executed across the entire program (e.g., <code>101010</code>). The CPU uses this pattern to index into a secondary table of 2-bit counters. The predictor learns that the specific pattern <code>1010</code> is always followed by a <code>1</code>, perfectly predicting complex, alternating algorithmic structures.</p>
+  <div class="page-container content-flow">
+    <div>
+      <h3>Two-Level Adaptive Predictors (Yeh-Patt)</h3>
+      <p>A simple 2-bit counter fails on complex patterns. What if an <code>if</code> statement perfectly alternates:
+        True, False, True, False? The 2-bit counter will be wrong 100% of the time, continuously chasing the previous
+        state.</p>
 
-    <h3>Perceptron Predictors (Neural Networks in Silicon)</h3>
-    <p>Modern architectures (AMD Zen series, Samsung, Apple M-Series) have abandoned simple tables entirely. They embed physical, single-layer neural networks (Perceptrons) directly into the Fetch stage hardware.</p>
-    
-    <p>A Perceptron calculates the dot product of a weight vector and the Global History Register. If the sum is positive, the branch is predicted Taken. Every time the Execute stage resolves a branch, it back-propagates the result, dynamically incrementing or decrementing the integer weights in the silicon. The CPU literally trains a machine-learning model on your C# application's behavior in real-time, at 5 billion evaluations per second, achieving &gt;98% prediction accuracy across massive, chaotic server workloads.</p>
+      <p>In 1991, Tse-Yu Yeh and Yale Patt invented the Two-Level Adaptive Predictor. It introduces a <strong>Global
+          History Register (GHR)</strong>, an N-bit shift register that records the exact sequence of the last N
+        branches executed across the entire program (e.g., <code>101010</code>). The CPU uses this pattern to index into
+        a secondary table of 2-bit counters. The predictor learns that the specific pattern <code>1010</code> is always
+        followed by a <code>1</code>, perfectly predicting complex, alternating algorithmic structures.</p>
+
+      <h3>Perceptron Predictors (Neural Networks in Silicon)</h3>
+      <p>Modern architectures (AMD Zen series, Samsung, Apple M-Series) have abandoned simple tables entirely. They
+        embed physical, single-layer neural networks (Perceptrons) directly into the Fetch stage hardware.</p>
+
+      <p>A Perceptron calculates the dot product of a weight vector and the Global History Register. If the sum is
+        positive, the branch is predicted Taken. Every time the Execute stage resolves a branch, it back-propagates the
+        result, dynamically incrementing or decrementing the integer weights in the silicon. The CPU literally trains a
+        machine-learning model on your C# application's behavior in real-time, at 5 billion evaluations per second,
+        achieving &gt;98% prediction accuracy across massive, chaotic server workloads.</p>
+    </div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 14: WHITEBOARD 7
      ========================================================================== -->
-<div class="page-container">
-  <div class="whiteboard-page">
-    <div class="wb-header">
-      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
-      <div class="wb-ref">REF: CH07_PERCEPTRON_PREDICTOR</div>
+  <div class="page-container">
+    <div class="whiteboard-page">
+      <div class="wb-header">
+        <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+        <div class="wb-ref">REF: CH07_PERCEPTRON_PREDICTOR</div>
+      </div>
+      <div class="wb-canvas"></div>
+      <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 14</span></div>
     </div>
-    <div class="wb-canvas"></div>
-    <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 14</span></div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 15: 7.6 SOFTWARE RELEVANCY (SCHEDULING & UNROLLING)
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <h2>7.6 Software Relevancy: Exposing Hardware Sympathy</h2>
-    <p>Elite developers do not rely blindly on hardware branch predictors and operand forwarding. They architect their high-level code to minimize the physical demands on these systems.</p>
+  <div class="page-container content-flow">
+    <div>
+      <h2>7.6 Software Relevancy: Exposing Hardware Sympathy</h2>
+      <p>Elite developers do not rely blindly on hardware branch predictors and operand forwarding. They architect their
+        high-level code to minimize the physical demands on these systems.</p>
 
-    <h3>Compiler Instruction Scheduling</h3>
-    <p>To avoid Load-Use stalls (waiting for the MEM stage to read L1d cache), compilers actively reorder your instructions.</p>
-    <pre><code>// C# Logic
+      <h3>Compiler Instruction Scheduling</h3>
+      <p>To avoid Load-Use stalls (waiting for the MEM stage to read L1d cache), compilers actively reorder your
+        instructions.</p>
+      <pre><code>// C# Logic
 int a = data[0]; 
 int b = a * 2; 
 int c = data[1]; 
 int d = c * 2;</code></pre>
-    <p>The RyuJIT compiler will translate and physically reorder this at the assembly level to:</p>
-    <pre><code>LOAD R1, data[0]   // Fetch A (MEM stage initiated)
+      <p>The RyuJIT compiler will translate and physically reorder this at the assembly level to:</p>
+      <pre><code>LOAD R1, data[0]   // Fetch A (MEM stage initiated)
 LOAD R2, data[1]   // Fetch C (MEM stage initiated immediately)
 MUL R1, 2          // By the time the ALU hits this, A has arrived from cache
 MUL R2, 2          // C has arrived from cache</code></pre>
-    <p>By grouping the independent Memory Loads together at the top, the compiler hides the cache latency behind other useful instructions, completely avoiding the 1-cycle pipeline bubble.</p>
+      <p>By grouping the independent Memory Loads together at the top, the compiler hides the cache latency behind other
+        useful instructions, completely avoiding the 1-cycle pipeline bubble.</p>
 
-    <h3>Loop Unrolling</h3>
-    <p>Every time a <code>for</code> loop repeats, it executes a conditional branch (<code>if i < N</code>). Even with a 98% accurate Perceptron predictor, a loop running 100 million times will mispredict 2 million times, wasting 30 million clock cycles.</p>
-    <p>To eradicate control hazards, optimize the loop body:</p>
-    <pre><code>// C# Unrolled Loop
+      <h3>Loop Unrolling</h3>
+      <p>Every time a <code>for</code> loop repeats, it executes a conditional branch (<code>if i < N</code>). Even with
+        a 98% accurate Perceptron predictor, a loop running 100 million times will mispredict 2 million times, wasting
+        30 million clock cycles.</p>
+      <p>To eradicate control hazards, optimize the loop body:</p>
+      <pre><code>// C# Unrolled Loop
 for (int i = 0; i < N; i += 4) {
     sum += data[i];
     sum += data[i+1];
     sum += data[i+2];
     sum += data[i+3];
 }</code></pre>
-    <p>By processing 4 elements per iteration, the total number of conditional branches drops by 75%, proportionately eradicating 75% of all potential pipeline flushes.</p>
+      <p>By processing 4 elements per iteration, the total number of conditional branches drops by 75%, proportionately
+        eradicating 75% of all potential pipeline flushes.</p>
+    </div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 16: WHITEBOARD 8
      ========================================================================== -->
-<div class="page-container">
-  <div class="whiteboard-page">
-    <div class="wb-header">
-      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
-      <div class="wb-ref">REF: CH07_SCHEDULING_AND_UNROLLING</div>
+  <div class="page-container">
+    <div class="whiteboard-page">
+      <div class="wb-header">
+        <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+        <div class="wb-ref">REF: CH07_SCHEDULING_AND_UNROLLING</div>
+      </div>
+      <div class="wb-invariants">
+        <div><b>Vectorization (SIMD):</b> Loop unrolling is the first step toward SIMD (Single Instruction, Multiple
+          Data). By proving to the compiler that <code>data[i]</code> and <code>data[i+1]</code> are mathematically
+          independent, the C# JIT can replace the 4 scalar <code>add</code> instructions with a single
+          <code>VPADDD</code> AVX-2 instruction, executing all 4 additions concurrently in a single ALU port.</div>
+      </div>
+      <div class="wb-canvas"></div>
+      <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 16</span></div>
     </div>
-    <div class="wb-invariants">
-      <div><b>Vectorization (SIMD):</b> Loop unrolling is the first step toward SIMD (Single Instruction, Multiple Data). By proving to the compiler that <code>data[i]</code> and <code>data[i+1]</code> are mathematically independent, the C# JIT can replace the 4 scalar <code>add</code> instructions with a single <code>VPADDD</code> AVX-2 instruction, executing all 4 additions concurrently in a single ALU port.</div>
-    </div>
-    <div class="wb-canvas"></div>
-    <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 16</span></div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 17: 7.6 BRANCHLESS PROGRAMMING
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <h3>Branchless Programming (Bitwise over Branches)</h3>
-    <p>In high-frequency trading and low-latency game engine development, unpredictable <code>if</code> statements inside hot loops are considered catastrophic. When data is completely random (like processing live network packets), the Branch Predictor is mathematically capped at a 50% success rate (a coin flip). The 15-cycle flush penalty dominates execution time.</p>
+  <div class="page-container content-flow">
+    <div>
+      <h3>Branchless Programming (Bitwise over Branches)</h3>
+      <p>In high-frequency trading and low-latency game engine development, unpredictable <code>if</code> statements
+        inside hot loops are considered catastrophic. When data is completely random (like processing live network
+        packets), the Branch Predictor is mathematically capped at a 50% success rate (a coin flip). The 15-cycle flush
+        penalty dominates execution time.</p>
 
-    <p>Elite developers utilize <strong>Branchless Programming</strong>. They replace control flow logic with pure boolean bitwise mathematics that the ALU can execute deterministically without ever guessing.</p>
+      <p>Elite developers utilize <strong>Branchless Programming</strong>. They replace control flow logic with pure
+        boolean bitwise mathematics that the ALU can execute deterministically without ever guessing.</p>
 
-    <p><strong>The Goal:</strong> Find the minimum of <code>x</code> and <code>y</code>.</p>
-    <pre><code>// The Branching Method (Vulnerable to 15-cycle flushes)
+      <p><strong>The Goal:</strong> Find the minimum of <code>x</code> and <code>y</code>.</p>
+      <pre><code>// The Branching Method (Vulnerable to 15-cycle flushes)
 int min = (x < y) ? x : y;</code></pre>
 
-    <pre><code>// The Branchless Bitwise Method (Deterministic ~3 cycles)
+      <pre><code>// The Branchless Bitwise Method (Deterministic ~3 cycles)
 // 1. (x - y) >> 31 creates a mask: 0xFFFFFFFF if x < y, or 0x00000000 if x >= y
 // 2. We use this mask to bitwise AND the difference.
 int mask = (x - y) >> 31;
 int min = y + ((x - y) & mask);</code></pre>
 
-    <p>The bitwise method guarantees the CPU never touches the Branch Predictor. The ALU churns through the subtraction, bit-shift, and AND gates perfectly sequentially. It takes exactly the same number of clock cycles every single time, rendering the data randomness irrelevant.</p>
+      <p>The bitwise method guarantees the CPU never touches the Branch Predictor. The ALU churns through the
+        subtraction, bit-shift, and AND gates perfectly sequentially. It takes exactly the same number of clock cycles
+        every single time, rendering the data randomness irrelevant.</p>
 
-    <div class="callout tip">
-      <div class="callout-title">The CMOV Instruction (Emerald)</div>
-      Modern compilers are aware of this hazard. If you write <code>int min = (x < y) ? x : y;</code> in C++ or C#, the JIT compiler will often detect it and emit the <code>cmov</code> (Conditional Move) assembly instruction. <code>cmov</code> instructs the ALU to evaluate the condition and selectively update the register, completely bypassing the Instruction Fetch branch predictor. However, the compiler can only do this for simple assignments; complex logic blocks still require manual branchless restructuring.
+      <div class="callout tip">
+        <div class="callout-title">The CMOV Instruction (Emerald)</div>
+        Modern compilers are aware of this hazard. If you write <code>int min = (x < y) ? x : y;</code> in C++ or C#,
+        the JIT compiler will often detect it and emit the <code>cmov</code> (Conditional Move) assembly instruction.
+        <code>cmov</code> instructs the ALU to evaluate the condition and selectively update the register, completely
+        bypassing the Instruction Fetch branch predictor. However, the compiler can only do this for simple assignments;
+        complex logic blocks still require manual branchless restructuring.
+      </div>
     </div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 18: WHITEBOARD 9
      ========================================================================== -->
-<div class="page-container">
-  <div class="whiteboard-page">
-    <div class="wb-header">
-      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
-      <div class="wb-ref">REF: CH07_BRANCHLESS_MATH</div>
+  <div class="page-container">
+    <div class="whiteboard-page">
+      <div class="wb-header">
+        <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+        <div class="wb-ref">REF: CH07_BRANCHLESS_MATH</div>
+      </div>
+      <div class="wb-canvas"></div>
+      <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 18</span></div>
     </div>
-    <div class="wb-canvas"></div>
-    <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 18</span></div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 19: 7.6 THE SORTING HEURISTIC
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <h3>The Classic Sorting Heuristic (The StackOverflow Anomaly)</h3>
-    <p>The defining demonstration of Branch Prediction failure is the famous "Why is processing a sorted array faster than an unsorted array?" interview question.</p>
+  <div class="page-container content-flow">
+    <div>
+      <h3>The Classic Sorting Heuristic (The StackOverflow Anomaly)</h3>
+      <p>The defining demonstration of Branch Prediction failure is the famous "Why is processing a sorted array faster
+        than an unsorted array?" interview question.</p>
 
-    <pre><code>int[] data = new int[100000]; // Filled with random data 0-255
+      <pre><code>int[] data = new int[100000]; // Filled with random data 0-255
 
 // Array.Sort(data); // IF UNCOMMENTED, THE LOOP BELOW RUNS 6x FASTER
 
@@ -425,303 +555,428 @@ for (int i = 0; i < data.Length; i++) {
     }
 }</code></pre>
 
-    <p>If the array is unsorted, the values are randomly distributed above and below 128. The <code>if</code> statement evaluates to <code>True, False, False, True, False</code>. The hardware Perceptron or 2-Bit Counter attempts to find a pattern, but mathematically cannot. It guesses randomly, failing 50% of the time, triggering 50,000 pipeline flushes. The CPU wastes hundreds of thousands of cycles resetting the pipeline.</p>
+      <p>If the array is unsorted, the values are randomly distributed above and below 128. The <code>if</code>
+        statement evaluates to <code>True, False, False, True, False</code>. The hardware Perceptron or 2-Bit Counter
+        attempts to find a pattern, but mathematically cannot. It guesses randomly, failing 50% of the time, triggering
+        50,000 pipeline flushes. The CPU wastes hundreds of thousands of cycles resetting the pipeline.</p>
 
-    <p>If you uncomment <code>Array.Sort(data)</code>, the array is partitioned. The first 50,000 evaluations are strictly <code>False</code>. The next 50,000 are strictly <code>True</code>. The hardware predictor sees the solid block of <code>False</code> and achieves 99.99% accuracy. When the array crosses the 128 threshold, it mispredicts <em>exactly once</em>, adjusts its saturating counter, and then perfectly predicts the remaining 50,000 <code>True</code> states. By aligning the software data structure with the physical learning capabilities of the CPU hardware, the loop executes up to 600% faster.</p>
+      <p>If you uncomment <code>Array.Sort(data)</code>, the array is partitioned. The first 50,000 evaluations are
+        strictly <code>False</code>. The next 50,000 are strictly <code>True</code>. The hardware predictor sees the
+        solid block of <code>False</code> and achieves 99.99% accuracy. When the array crosses the 128 threshold, it
+        mispredicts <em>exactly once</em>, adjusts its saturating counter, and then perfectly predicts the remaining
+        50,000 <code>True</code> states. By aligning the software data structure with the physical learning capabilities
+        of the CPU hardware, the loop executes up to 600% faster.</p>
+    </div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 20: WHITEBOARD 10
      ========================================================================== -->
-<div class="page-container">
-  <div class="whiteboard-page">
-    <div class="wb-header">
-      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
-      <div class="wb-ref">REF: CH07_SORTING_HEURISTIC</div>
+  <div class="page-container">
+    <div class="whiteboard-page">
+      <div class="wb-header">
+        <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+        <div class="wb-ref">REF: CH07_SORTING_HEURISTIC</div>
+      </div>
+      <div class="wb-canvas"></div>
+      <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 20</span></div>
     </div>
-    <div class="wb-canvas"></div>
-    <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 20</span></div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 21: 7.7 CHECKLIST
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <h2>7.7 Chapter Verification, Checklist &amp; Quiz</h2>
+  <div class="page-container content-flow">
+    <div>
+      <h2>7.7 Chapter Verification, Checklist &amp; Quiz</h2>
 
-    <div class="checklist">
-      <h3>Verification Checklist</h3>
-      <div class="check-item"><div class="checkbox"></div><div>I can explain why sequential instruction overlap causes Data Hazards.</div></div>
-      <div class="check-item"><div class="checkbox"></div><div>I can define a Read-After-Write (RAW) hazard as a true mathematical dependency.</div></div>
-      <div class="check-item"><div class="checkbox"></div><div>I understand that WAR and WAW are "Name Dependencies" caused by limited architectural registers.</div></div>
-      <div class="check-item"><div class="checkbox"></div><div>I can explain how Operand Forwarding wires ALU outputs directly back to ALU inputs to solve RAW.</div></div>
-      <div class="check-item"><div class="checkbox"></div><div>I understand why a Load-Use hazard forces a 1-cycle pipeline stall despite forwarding.</div></div>
-      <div class="check-item"><div class="checkbox"></div><div>I can describe how the Register Alias Table (RAT) dynamically renames registers to eliminate WAR/WAW.</div></div>
-      <div class="check-item"><div class="checkbox"></div><div>I can explain the physical cost (e.g., 15-cycle flush) of a Control Hazard branch misprediction.</div></div>
-      <div class="check-item"><div class="checkbox"></div><div>I understand how 2-Bit Saturating Counters and Global History Registers (GHR) predict branches.</div></div>
-      <div class="check-item"><div class="checkbox"></div><div>I can write a simple branchless bitwise algorithm to bypass control flow hardware.</div></div>
-      <div class="check-item"><div class="checkbox"></div><div>I can explain why sorted arrays execute if-statements significantly faster than unsorted arrays.</div></div>
+      <div class="checklist">
+        <h3>Verification Checklist</h3>
+        <div class="check-item">
+          <div class="checkbox"></div>
+          <div>I can explain why sequential instruction overlap causes Data Hazards.</div>
+        </div>
+        <div class="check-item">
+          <div class="checkbox"></div>
+          <div>I can define a Read-After-Write (RAW) hazard as a true mathematical dependency.</div>
+        </div>
+        <div class="check-item">
+          <div class="checkbox"></div>
+          <div>I understand that WAR and WAW are "Name Dependencies" caused by limited architectural registers.</div>
+        </div>
+        <div class="check-item">
+          <div class="checkbox"></div>
+          <div>I can explain how Operand Forwarding wires ALU outputs directly back to ALU inputs to solve RAW.</div>
+        </div>
+        <div class="check-item">
+          <div class="checkbox"></div>
+          <div>I understand why a Load-Use hazard forces a 1-cycle pipeline stall despite forwarding.</div>
+        </div>
+        <div class="check-item">
+          <div class="checkbox"></div>
+          <div>I can describe how the Register Alias Table (RAT) dynamically renames registers to eliminate WAR/WAW.
+          </div>
+        </div>
+        <div class="check-item">
+          <div class="checkbox"></div>
+          <div>I can explain the physical cost (e.g., 15-cycle flush) of a Control Hazard branch misprediction.</div>
+        </div>
+        <div class="check-item">
+          <div class="checkbox"></div>
+          <div>I understand how 2-Bit Saturating Counters and Global History Registers (GHR) predict branches.</div>
+        </div>
+        <div class="check-item">
+          <div class="checkbox"></div>
+          <div>I can write a simple branchless bitwise algorithm to bypass control flow hardware.</div>
+        </div>
+        <div class="check-item">
+          <div class="checkbox"></div>
+          <div>I can explain why sorted arrays execute if-statements significantly faster than unsorted arrays.</div>
+        </div>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 22: WHITEBOARD 11
      ========================================================================== -->
-<div class="page-container">
-  <div class="whiteboard-page">
-    <div class="wb-header">
-      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
-      <div class="wb-ref">REF: CH07_CHECKLIST_NOTES</div>
+  <div class="page-container">
+    <div class="whiteboard-page">
+      <div class="wb-header">
+        <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+        <div class="wb-ref">REF: CH07_CHECKLIST_NOTES</div>
+      </div>
+      <div class="wb-canvas"></div>
+      <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 22</span></div>
     </div>
-    <div class="wb-canvas"></div>
-    <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 22</span></div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 23: QUIZ PART 1 (MCQs 1-4)
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <h3>Comprehensive Examination (Multiple Choice)</h3>
+  <div class="page-container content-flow">
+    <div>
+      <h3>Comprehensive Examination (Multiple Choice)</h3>
 
-    <div class="quiz-section">
-      <div class="quiz-question">
-        <p>1. Which of the following data hazards represents a true mathematical dependency that cannot be eliminated by dynamic hardware renaming?</p>
-        <div class="quiz-option">A) Write-After-Write (WAW)</div>
-        <div class="quiz-option">B) Write-After-Read (WAR)</div>
-        <div class="quiz-option">C) Read-After-Write (RAW)</div>
-        <div class="quiz-option">D) Structural Execution Hazard</div>
-      </div>
+      <div class="quiz-section">
+        <div class="quiz-question">
+          <p>1. Which of the following data hazards represents a true mathematical dependency that cannot be eliminated
+            by dynamic hardware renaming?</p>
+          <div class="quiz-option">A) Write-After-Write (WAW)</div>
+          <div class="quiz-option">B) Write-After-Read (WAR)</div>
+          <div class="quiz-option">C) Read-After-Write (RAW)</div>
+          <div class="quiz-option">D) Structural Execution Hazard</div>
+        </div>
 
-      <div class="quiz-question">
-        <p>2. A C# application executes <code>int a = arr[0]; int b = a + 5;</code>. Even with optimal Operand Forwarding networks, the CPU stalls for 1 clock cycle. Why?</p>
-        <div class="quiz-option">A) Branch prediction failed to predict the array bounds check.</div>
-        <div class="quiz-option">B) The ALU cannot compute integer additions in 1 cycle.</div>
-        <div class="quiz-option">C) The array value is not resolved until the Memory Access (MEM) stage, making it physically impossible to forward the data in time for the Execute (EX) stage of the next instruction.</div>
-        <div class="quiz-option">D) The Register Alias Table ran out of physical registers to assign to `b`.</div>
-      </div>
+        <div class="quiz-question">
+          <p>2. A C# application executes <code>int a = arr[0]; int b = a + 5;</code>. Even with optimal Operand
+            Forwarding networks, the CPU stalls for 1 clock cycle. Why?</p>
+          <div class="quiz-option">A) Branch prediction failed to predict the array bounds check.</div>
+          <div class="quiz-option">B) The ALU cannot compute integer additions in 1 cycle.</div>
+          <div class="quiz-option">C) The array value is not resolved until the Memory Access (MEM) stage, making it
+            physically impossible to forward the data in time for the Execute (EX) stage of the next instruction.</div>
+          <div class="quiz-option">D) The Register Alias Table ran out of physical registers to assign to `b`.</div>
+        </div>
 
-      <div class="quiz-question">
-        <p>3. How does Tomasulo's Algorithm (via the RAT) instantly eliminate WAR and WAW hazards?</p>
-        <div class="quiz-option">A) By stalling the pipeline until the offending instructions retire.</div>
-        <div class="quiz-option">B) By transparently mapping reused architectural registers (like `EAX`) to brand new, distinct physical silicon registers on the fly, breaking the artificial dependency.</div>
-        <div class="quiz-option">C) By using branch prediction to skip the redundant writes entirely.</div>
-        <div class="quiz-option">D) By flushing the Reorder Buffer (ROB) upon detection.</div>
-      </div>
+        <div class="quiz-question">
+          <p>3. How does Tomasulo's Algorithm (via the RAT) instantly eliminate WAR and WAW hazards?</p>
+          <div class="quiz-option">A) By stalling the pipeline until the offending instructions retire.</div>
+          <div class="quiz-option">B) By transparently mapping reused architectural registers (like `EAX`) to brand new,
+            distinct physical silicon registers on the fly, breaking the artificial dependency.</div>
+          <div class="quiz-option">C) By using branch prediction to skip the redundant writes entirely.</div>
+          <div class="quiz-option">D) By flushing the Reorder Buffer (ROB) upon detection.</div>
+        </div>
 
-      <div class="quiz-question">
-        <p>4. In a 2-Bit Saturating Counter branch predictor, what state transition occurs if the predictor is in the "Strongly Taken" (11) state, and the branch evaluates as "Not Taken"?</p>
-        <div class="quiz-option">A) It jumps immediately to "Strongly Not Taken" (00).</div>
-        <div class="quiz-option">B) It transitions to "Weakly Taken" (10).</div>
-        <div class="quiz-option">C) It flushes the pipeline and remains at (11).</div>
-        <div class="quiz-option">D) It queries the Global History Register.</div>
+        <div class="quiz-question">
+          <p>4. In a 2-Bit Saturating Counter branch predictor, what state transition occurs if the predictor is in the
+            "Strongly Taken" (11) state, and the branch evaluates as "Not Taken"?</p>
+          <div class="quiz-option">A) It jumps immediately to "Strongly Not Taken" (00).</div>
+          <div class="quiz-option">B) It transitions to "Weakly Taken" (10).</div>
+          <div class="quiz-option">C) It flushes the pipeline and remains at (11).</div>
+          <div class="quiz-option">D) It queries the Global History Register.</div>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 24: WHITEBOARD 12
      ========================================================================== -->
-<div class="page-container">
-  <div class="whiteboard-page">
-    <div class="wb-header">
-      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
-      <div class="wb-ref">REF: CH07_QUIZ_SCRATCHPAD_1</div>
+  <div class="page-container">
+    <div class="whiteboard-page">
+      <div class="wb-header">
+        <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+        <div class="wb-ref">REF: CH07_QUIZ_SCRATCHPAD_1</div>
+      </div>
+      <div class="wb-canvas"></div>
+      <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 24</span></div>
     </div>
-    <div class="wb-canvas"></div>
-    <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 24</span></div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 25: QUIZ PART 2 (MCQs 5-8)
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <div class="quiz-section" style="margin-top: 0;">
-      <div class="quiz-question">
-        <p>5. What is the physical penalty when a modern deeply pipelined CPU mispredicts a branch?</p>
-        <div class="quiz-option">A) The CPU halts execution and throws an OS-level segmentation fault.</div>
-        <div class="quiz-option">B) The CPU must invalidate the L1 Data Cache.</div>
-        <div class="quiz-option">C) The CPU must abort all speculatively fetched instructions, zero out the pipeline stages, and incur a ~15-20 clock cycle stall while the correct instructions are fetched from RAM.</div>
-        <div class="quiz-option">D) The ALU must recompute the mathematical condition twice.</div>
-      </div>
+  <div class="page-container content-flow">
+    <div>
+      <div class="quiz-section" style="margin-top: 0;">
+        <div class="quiz-question">
+          <p>5. What is the physical penalty when a modern deeply pipelined CPU mispredicts a branch?</p>
+          <div class="quiz-option">A) The CPU halts execution and throws an OS-level segmentation fault.</div>
+          <div class="quiz-option">B) The CPU must invalidate the L1 Data Cache.</div>
+          <div class="quiz-option">C) The CPU must abort all speculatively fetched instructions, zero out the pipeline
+            stages, and incur a ~15-20 clock cycle stall while the correct instructions are fetched from RAM.</div>
+          <div class="quiz-option">D) The ALU must recompute the mathematical condition twice.</div>
+        </div>
 
-      <div class="quiz-question">
-        <p>6. Why do elite performance engineers prefer the <code>CMOV</code> (Conditional Move) assembly instruction over a standard <code>JMP</code> (Jump) block?</p>
-        <div class="quiz-option">A) CMOV uses fewer CPU registers.</div>
-        <div class="quiz-option">B) CMOV evaluates the condition internally within the ALU without altering the Instruction Fetch pointer, completely bypassing the branch predictor and eliminating all risk of a flush penalty.</div>
-        <div class="quiz-option">C) CMOV leverages SIMD vectorization automatically.</div>
-        <div class="quiz-option">D) CMOV prevents cache coherence traffic.</div>
-      </div>
+        <div class="quiz-question">
+          <p>6. Why do elite performance engineers prefer the <code>CMOV</code> (Conditional Move) assembly instruction
+            over a standard <code>JMP</code> (Jump) block?</p>
+          <div class="quiz-option">A) CMOV uses fewer CPU registers.</div>
+          <div class="quiz-option">B) CMOV evaluates the condition internally within the ALU without altering the
+            Instruction Fetch pointer, completely bypassing the branch predictor and eliminating all risk of a flush
+            penalty.</div>
+          <div class="quiz-option">C) CMOV leverages SIMD vectorization automatically.</div>
+          <div class="quiz-option">D) CMOV prevents cache coherence traffic.</div>
+        </div>
 
-      <div class="quiz-question">
-        <p>7. The Yeh-Patt predictor introduced the Global History Register (GHR). What specific branching pattern does the GHR solve that simple 2-bit counters fail at?</p>
-        <div class="quiz-option">A) Infinite `while(true)` loops.</div>
-        <div class="quiz-option">B) Recursive function calls.</div>
-        <div class="quiz-option">C) Complex, alternating branch patterns (e.g., True, False, True, False) by tracking the exact historical sequence to index into a prediction matrix.</div>
-        <div class="quiz-option">D) Try-Catch exception block routing.</div>
-      </div>
+        <div class="quiz-question">
+          <p>7. The Yeh-Patt predictor introduced the Global History Register (GHR). What specific branching pattern
+            does the GHR solve that simple 2-bit counters fail at?</p>
+          <div class="quiz-option">A) Infinite `while(true)` loops.</div>
+          <div class="quiz-option">B) Recursive function calls.</div>
+          <div class="quiz-option">C) Complex, alternating branch patterns (e.g., True, False, True, False) by tracking
+            the exact historical sequence to index into a prediction matrix.</div>
+          <div class="quiz-option">D) Try-Catch exception block routing.</div>
+        </div>
 
-      <div class="quiz-question">
-        <p>8. How does Loop Unrolling improve Instruction-Level Parallelism (ILP)?</p>
-        <div class="quiz-option">A) It moves memory loads closer to the ALU execution phase.</div>
-        <div class="quiz-option">B) It utilizes the Reorder Buffer to sort instructions.</div>
-        <div class="quiz-option">C) It merges multiple loop iterations into a single block, drastically reducing the total number of conditional branch evaluations and potential pipeline flushes.</div>
-        <div class="quiz-option">D) It forces the CPU to use pure static prediction.</div>
+        <div class="quiz-question">
+          <p>8. How does Loop Unrolling improve Instruction-Level Parallelism (ILP)?</p>
+          <div class="quiz-option">A) It moves memory loads closer to the ALU execution phase.</div>
+          <div class="quiz-option">B) It utilizes the Reorder Buffer to sort instructions.</div>
+          <div class="quiz-option">C) It merges multiple loop iterations into a single block, drastically reducing the
+            total number of conditional branch evaluations and potential pipeline flushes.</div>
+          <div class="quiz-option">D) It forces the CPU to use pure static prediction.</div>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 26: WHITEBOARD 13
      ========================================================================== -->
-<div class="page-container">
-  <div class="whiteboard-page">
-    <div class="wb-header">
-      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
-      <div class="wb-ref">REF: CH07_QUIZ_SCRATCHPAD_2</div>
+  <div class="page-container">
+    <div class="whiteboard-page">
+      <div class="wb-header">
+        <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+        <div class="wb-ref">REF: CH07_QUIZ_SCRATCHPAD_2</div>
+      </div>
+      <div class="wb-canvas"></div>
+      <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 26</span></div>
     </div>
-    <div class="wb-canvas"></div>
-    <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 26</span></div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 27: QUIZ PART 3 (MCQs 9-12)
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <div class="quiz-section" style="margin-top: 0;">
-      <div class="quiz-question">
-        <p>9. In the classic "Sorting Heuristic" benchmark, why does processing an unsorted array containing random integers crash performance?</p>
-        <div class="quiz-option">A) The CPU cannot predict the true/false outcome of the `if` threshold check, leading to a 50% branch misprediction rate and constant 15-cycle flush penalties.</div>
-        <div class="quiz-option">B) Unsorted data causes L1 Data Cache misses.</div>
-        <div class="quiz-option">C) The math requires 64-bit precision instead of 32-bit.</div>
-        <div class="quiz-option">D) The compiler refuses to optimize unsorted iterations.</div>
-      </div>
+  <div class="page-container content-flow">
+    <div>
+      <div class="quiz-section" style="margin-top: 0;">
+        <div class="quiz-question">
+          <p>9. In the classic "Sorting Heuristic" benchmark, why does processing an unsorted array containing random
+            integers crash performance?</p>
+          <div class="quiz-option">A) The CPU cannot predict the true/false outcome of the `if` threshold check, leading
+            to a 50% branch misprediction rate and constant 15-cycle flush penalties.</div>
+          <div class="quiz-option">B) Unsorted data causes L1 Data Cache misses.</div>
+          <div class="quiz-option">C) The math requires 64-bit precision instead of 32-bit.</div>
+          <div class="quiz-option">D) The compiler refuses to optimize unsorted iterations.</div>
+        </div>
 
-      <div class="quiz-question">
-        <p>10. What is the fundamental difference between Architectural Registers and Physical Registers?</p>
-        <div class="quiz-option">A) Architectural registers store integers; physical registers store floats.</div>
-        <div class="quiz-option">B) Architectural registers are the 16 visible labels defined by the x86 ISA. Physical registers are the 160+ actual hardware flip-flops used under the hood to execute Out-of-Order scheduling.</div>
-        <div class="quiz-option">C) Architectural registers reside in RAM, while physical registers reside on the die.</div>
-        <div class="quiz-option">D) There is no difference; they are synonymous.</div>
-      </div>
+        <div class="quiz-question">
+          <p>10. What is the fundamental difference between Architectural Registers and Physical Registers?</p>
+          <div class="quiz-option">A) Architectural registers store integers; physical registers store floats.</div>
+          <div class="quiz-option">B) Architectural registers are the 16 visible labels defined by the x86 ISA. Physical
+            registers are the 160+ actual hardware flip-flops used under the hood to execute Out-of-Order scheduling.
+          </div>
+          <div class="quiz-option">C) Architectural registers reside in RAM, while physical registers reside on the die.
+          </div>
+          <div class="quiz-option">D) There is no difference; they are synonymous.</div>
+        </div>
 
-      <div class="quiz-question">
-        <p>11. Which architectural component ensures that Out-of-Order executions are committed to the application state safely and in the correct logical sequence?</p>
-        <div class="quiz-option">A) The Translation Lookaside Buffer (TLB)</div>
-        <div class="quiz-option">B) The Reorder Buffer (ROB)</div>
-        <div class="quiz-option">C) The Branch Target Buffer (BTB)</div>
-        <div class="quiz-option">D) The Arithmetic Logic Unit (ALU)</div>
-      </div>
+        <div class="quiz-question">
+          <p>11. Which architectural component ensures that Out-of-Order executions are committed to the application
+            state safely and in the correct logical sequence?</p>
+          <div class="quiz-option">A) The Translation Lookaside Buffer (TLB)</div>
+          <div class="quiz-option">B) The Reorder Buffer (ROB)</div>
+          <div class="quiz-option">C) The Branch Target Buffer (BTB)</div>
+          <div class="quiz-option">D) The Arithmetic Logic Unit (ALU)</div>
+        </div>
 
-      <div class="quiz-question">
-        <p>12. During a RAW hazard, Operand Forwarding routes data backward from which pipeline stage into the Execute (EX) stage?</p>
-        <div class="quiz-option">A) From Fetch (IF) to Execute (EX)</div>
-        <div class="quiz-option">B) From Decode (ID) to Execute (EX)</div>
-        <div class="quiz-option">C) From Memory (MEM) or Write-Back (WB) output directly to the ALU inputs in Execute (EX)</div>
-        <div class="quiz-option">D) From the L1 Cache into the Register File</div>
+        <div class="quiz-question">
+          <p>12. During a RAW hazard, Operand Forwarding routes data backward from which pipeline stage into the Execute
+            (EX) stage?</p>
+          <div class="quiz-option">A) From Fetch (IF) to Execute (EX)</div>
+          <div class="quiz-option">B) From Decode (ID) to Execute (EX)</div>
+          <div class="quiz-option">C) From Memory (MEM) or Write-Back (WB) output directly to the ALU inputs in Execute
+            (EX)</div>
+          <div class="quiz-option">D) From the L1 Cache into the Register File</div>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 28: WHITEBOARD 14
      ========================================================================== -->
-<div class="page-container">
-  <div class="whiteboard-page">
-    <div class="wb-header">
-      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
-      <div class="wb-ref">REF: CH07_QUIZ_SCRATCHPAD_3</div>
+  <div class="page-container">
+    <div class="whiteboard-page">
+      <div class="wb-header">
+        <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+        <div class="wb-ref">REF: CH07_QUIZ_SCRATCHPAD_3</div>
+      </div>
+      <div class="wb-canvas"></div>
+      <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 28</span></div>
     </div>
-    <div class="wb-canvas"></div>
-    <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 28</span></div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 29: THEORY PROMPTS
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <div class="quiz-section" style="margin-top: 0;">
-      <h3 style="margin-top: 10px;">Systems Writing Prompts</h3>
-      
-      <p style="font-weight: 700; margin-bottom: 4px; font-size: 9.5pt;">Prompt 1: The RAT and Tomasulo's Translation</p>
-      <p style="font-size: 9pt;">Given the following assembly block representing a WAW name dependency, trace how the Register Alias Table (RAT) assigns physical registers (e.g., P1, P2) to instantly resolve the conflict, allowing Instruction 3 to execute before Instruction 2.<br>
-      <code>Inst 1: LOAD EAX, [mem1]</code><br>
-      <code>Inst 2: ADD EBX, EAX</code><br>
-      <code>Inst 3: LOAD EAX, [mem2]</code></p>
+  <div class="page-container content-flow">
+    <div>
+      <div class="quiz-section" style="margin-top: 0;">
+        <h3 style="margin-top: 10px;">Systems Writing Prompts</h3>
 
-      <p style="font-weight: 700; margin-top: 14px; margin-bottom: 4px; font-size: 9.5pt;">Prompt 2: The Load-Use Discrepancy</p>
-      <p style="font-size: 9pt;">Explain the physics of the Load-Use Stall. Why can Operand Forwarding successfully bypass a typical ALU-to-ALU Read-After-Write (RAW) hazard with zero delay, but completely fails to prevent a 1-cycle penalty when the first instruction is a Memory Load?</p>
+        <p style="font-weight: 700; margin-bottom: 4px; font-size: 9.5pt;">Prompt 1: The RAT and Tomasulo's Translation
+        </p>
+        <p style="font-size: 9pt;">Given the following assembly block representing a WAW name dependency, trace how the
+          Register Alias Table (RAT) assigns physical registers (e.g., P1, P2) to instantly resolve the conflict,
+          allowing Instruction 3 to execute before Instruction 2.<br>
+          <code>Inst 1: LOAD EAX, [mem1]</code><br>
+          <code>Inst 2: ADD EBX, EAX</code><br>
+          <code>Inst 3: LOAD EAX, [mem2]</code>
+        </p>
 
-      <p style="font-weight: 700; margin-top: 14px; margin-bottom: 4px; font-size: 9.5pt;">Prompt 3: The Branchless Alternative</p>
-      <p style="font-size: 9pt;">Detail the mechanical cost of a branch misprediction in a 20-stage pipeline. Contrast this with the mechanics of the <code>CMOV</code> (Conditional Move) instruction or manual bitwise masking. Why does processing unpredictable financial data via bitwise math yield superior throughput despite executing more total instructions?</p>
+        <p style="font-weight: 700; margin-top: 14px; margin-bottom: 4px; font-size: 9.5pt;">Prompt 2: The Load-Use
+          Discrepancy</p>
+        <p style="font-size: 9pt;">Explain the physics of the Load-Use Stall. Why can Operand Forwarding successfully
+          bypass a typical ALU-to-ALU Read-After-Write (RAW) hazard with zero delay, but completely fails to prevent a
+          1-cycle penalty when the first instruction is a Memory Load?</p>
 
-      <p style="font-weight: 700; margin-top: 14px; margin-bottom: 4px; font-size: 9.5pt;">Prompt 4: Adaptive Prediction Limits</p>
-      <p style="font-size: 9pt;">Describe the state transitions of a 2-Bit Saturating Counter predictor. Explain why a 1-Bit predictor fails miserably on standard <code>for</code> loops, and how the 2-Bit counter's "Weakly" states act as a low-pass filter against single-anomaly mispredictions.</p>
-      
-      <p style="font-weight: 700; margin-top: 14px; margin-bottom: 4px; font-size: 9.5pt;">Prompt 5: Perceptron Evolution</p>
-      <p style="font-size: 9pt;">Modern AMD Zen cores utilize Neural Network Perceptrons for branch prediction. Summarize how a Perceptron calculates a prediction using the Global History Register (GHR) and weight vectors, and how the hardware reinforces the weights upon resolving the branch in the Execute stage.</p>
+        <p style="font-weight: 700; margin-top: 14px; margin-bottom: 4px; font-size: 9.5pt;">Prompt 3: The Branchless
+          Alternative</p>
+        <p style="font-size: 9pt;">Detail the mechanical cost of a branch misprediction in a 20-stage pipeline. Contrast
+          this with the mechanics of the <code>CMOV</code> (Conditional Move) instruction or manual bitwise masking. Why
+          does processing unpredictable financial data via bitwise math yield superior throughput despite executing more
+          total instructions?</p>
+
+        <p style="font-weight: 700; margin-top: 14px; margin-bottom: 4px; font-size: 9.5pt;">Prompt 4: Adaptive
+          Prediction Limits</p>
+        <p style="font-size: 9pt;">Describe the state transitions of a 2-Bit Saturating Counter predictor. Explain why a
+          1-Bit predictor fails miserably on standard <code>for</code> loops, and how the 2-Bit counter's "Weakly"
+          states act as a low-pass filter against single-anomaly mispredictions.</p>
+
+        <p style="font-weight: 700; margin-top: 14px; margin-bottom: 4px; font-size: 9.5pt;">Prompt 5: Perceptron
+          Evolution</p>
+        <p style="font-size: 9pt;">Modern AMD Zen cores utilize Neural Network Perceptrons for branch prediction.
+          Summarize how a Perceptron calculates a prediction using the Global History Register (GHR) and weight vectors,
+          and how the hardware reinforces the weights upon resolving the branch in the Execute stage.</p>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 30: ANSWER KEY
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <div class="litmus-box" style="margin-top: 0; padding: 12px 14px; font-size: 7.5pt; line-height: 1.45;">
-      <div style="font-weight: 800; color: #4338CA; text-transform: uppercase; margin-bottom: 6px; font-size: 8.5pt;">Chapter 7 Technical Answer Key</div>
-      <div style="margin-bottom: 6px;"><b>1. (C)</b> RAW is a true data dependency. The value physically does not exist yet. WAR and WAW are false name dependencies caused by limited architectural registers, which the CPU can solve via dynamic renaming.</div>
-      <div style="margin-bottom: 6px;"><b>2. (C)</b> This is the Load-Use Stall. The L1d cache read concludes in the MEM stage. The ALU in the EX stage requires the data one cycle earlier. Forwarding cannot reach backward in time, forcing a 1-cycle bubble.</div>
-      <div style="margin-bottom: 6px;"><b>3. (B)</b> By secretly remapping the reused architectural register to a fresh, independent physical register on the die, the RAT breaks the false dependency, allowing the new value and the old value to exist simultaneously in hardware.</div>
-      <div style="margin-bottom: 6px;"><b>4. (B)</b> The 2-bit counter acts as a buffer. A single anomaly (Not Taken) drops it from 11 (Strongly Taken) to 10 (Weakly Taken). It will still predict Taken on the next iteration unless a second consecutive anomaly forces it down to 01.</div>
-      <div style="margin-bottom: 6px;"><b>5. (C)</b> The CPU speculated incorrectly. It must discard all the speculative instructions currently in the IF and ID stages (the Flush), update the Program Counter to the correct path, and wait for the new instructions to traverse the pipeline from scratch.</div>
-      <div style="margin-bottom: 6px;"><b>6. (B)</b> CMOV executes sequentially through the ALU. The hardware pulls both potential answers, evaluates the condition, and discards the wrong answer. Because it does not alter the Instruction Pointer, it never uses the Branch Predictor, guaranteeing 0 flushes.</div>
-      <div style="margin-bottom: 6px;"><b>7. (C)</b> The GHR shifts in the recent history of all branches. Complex, alternating patterns (10101) become a unique binary index into the pattern table, allowing the predictor to map a sequence to a deterministic outcome, overriding simple single-branch counters.</div>
-      <div style="margin-bottom: 6px;"><b>8. (C)</b> Unrolling removes the <code>if (i < N)</code> branch logic from the loop body. Removing the branch instruction removes the risk of the branch predictor guessing incorrectly, securing high IPC by feeding uninterrupted sequential math to the ALUs.</div>
-      <div style="margin-bottom: 6px;"><b>9. (A)</b> The <code>if</code> check acts like a random coin flip. The predictor guesses wrong 50% of the time. 50,000 flushes at 15 cycles each destroys performance. Sorting the data creates a predictable block of falses followed by trues, achieving 99.9% prediction accuracy.</div>
-      <div style="margin-bottom: 6px;"><b>10. (B)</b> Software compilers target the 16 architectural registers defined by x86-64. The CPU internally maps these via the RAT to a massive pool of 160+ physical registers (PRF) to facilitate Out-of-Order execution and mitigate WAW/WAR hazards.</div>
-      <div style="margin-bottom: 6px;"><b>11. (B)</b> The Reorder Buffer (ROB) collects completed instructions that executed chaotically out of order. It only permits them to "Retire" (write to architectural state) in their strict original programmatic sequence.</div>
-      <div style="margin-bottom: 8px;"><b>12. (C)</b> Operand forwarding wires the output pin of the ALU (or the output of the MEM cache read) directly back into the input Multiplexer (MUX) of the EX stage, completely bypassing the slow Register File write process.</div>
+  <div class="page-container content-flow">
+    <div>
+      <div class="litmus-box" style="margin-top: 0; padding: 12px 14px; font-size: 7.5pt; line-height: 1.45;">
+        <div style="font-weight: 800; color: #4338CA; text-transform: uppercase; margin-bottom: 6px; font-size: 8.5pt;">
+          Chapter 7 Technical Answer Key</div>
+        <div style="margin-bottom: 6px;"><b>1. (C)</b> RAW is a true data dependency. The value physically does not
+          exist yet. WAR and WAW are false name dependencies caused by limited architectural registers, which the CPU
+          can solve via dynamic renaming.</div>
+        <div style="margin-bottom: 6px;"><b>2. (C)</b> This is the Load-Use Stall. The L1d cache read concludes in the
+          MEM stage. The ALU in the EX stage requires the data one cycle earlier. Forwarding cannot reach backward in
+          time, forcing a 1-cycle bubble.</div>
+        <div style="margin-bottom: 6px;"><b>3. (B)</b> By secretly remapping the reused architectural register to a
+          fresh, independent physical register on the die, the RAT breaks the false dependency, allowing the new value
+          and the old value to exist simultaneously in hardware.</div>
+        <div style="margin-bottom: 6px;"><b>4. (B)</b> The 2-bit counter acts as a buffer. A single anomaly (Not Taken)
+          drops it from 11 (Strongly Taken) to 10 (Weakly Taken). It will still predict Taken on the next iteration
+          unless a second consecutive anomaly forces it down to 01.</div>
+        <div style="margin-bottom: 6px;"><b>5. (C)</b> The CPU speculated incorrectly. It must discard all the
+          speculative instructions currently in the IF and ID stages (the Flush), update the Program Counter to the
+          correct path, and wait for the new instructions to traverse the pipeline from scratch.</div>
+        <div style="margin-bottom: 6px;"><b>6. (B)</b> CMOV executes sequentially through the ALU. The hardware pulls
+          both potential answers, evaluates the condition, and discards the wrong answer. Because it does not alter the
+          Instruction Pointer, it never uses the Branch Predictor, guaranteeing 0 flushes.</div>
+        <div style="margin-bottom: 6px;"><b>7. (C)</b> The GHR shifts in the recent history of all branches. Complex,
+          alternating patterns (10101) become a unique binary index into the pattern table, allowing the predictor to
+          map a sequence to a deterministic outcome, overriding simple single-branch counters.</div>
+        <div style="margin-bottom: 6px;"><b>8. (C)</b> Unrolling removes the <code>if (i < N)</code> branch logic from
+          the loop body. Removing the branch instruction removes the risk of the branch predictor guessing incorrectly,
+          securing high IPC by feeding uninterrupted sequential math to the ALUs.</div>
+        <div style="margin-bottom: 6px;"><b>9. (A)</b> The <code>if</code> check acts like a random coin flip. The
+          predictor guesses wrong 50% of the time. 50,000 flushes at 15 cycles each destroys performance. Sorting the
+          data creates a predictable block of falses followed by trues, achieving 99.9% prediction accuracy.</div>
+        <div style="margin-bottom: 6px;"><b>10. (B)</b> Software compilers target the 16 architectural registers defined
+          by x86-64. The CPU internally maps these via the RAT to a massive pool of 160+ physical registers (PRF) to
+          facilitate Out-of-Order execution and mitigate WAW/WAR hazards.</div>
+        <div style="margin-bottom: 6px;"><b>11. (B)</b> The Reorder Buffer (ROB) collects completed instructions that
+          executed chaotically out of order. It only permits them to "Retire" (write to architectural state) in their
+          strict original programmatic sequence.</div>
+        <div style="margin-bottom: 8px;"><b>12. (C)</b> Operand forwarding wires the output pin of the ALU (or the
+          output of the MEM cache read) directly back into the input Multiplexer (MUX) of the EX stage, completely
+          bypassing the slow Register File write process.</div>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 31: ANSWER KEY (CONT) + FINAL WHITEBOARD
      ========================================================================== -->
-<div class="page-container">
-  <div class="litmus-box" style="margin-top: 0; margin-bottom: 12px; padding: 12px 14px; font-size: 7.5pt; line-height: 1.45;">
-    <div style="margin-bottom: 6px;"><b>Prompt 1:</b> The RAT maps Inst 1's EAX to physical register P1 (<code>LOAD P1, [mem1]</code>). Inst 2 reads P1 (<code>ADD EBX, P1</code>). In Inst 3, the compiler reuses EAX. The RAT detects the WAW hazard, allocates a new register P2, and translates it to <code>LOAD P2, [mem2]</code>. P1 and P2 are mathematically isolated in hardware. The Out-of-Order engine can instantly execute Inst 3 without corrupting the EAX value (P1) that Inst 2 is waiting to consume.</div>
-    <div style="margin-bottom: 6px;"><b>Prompt 2:</b> An ALU-to-ALU RAW hazard resolves entirely within the EX stage. The first instruction finishes math in EX, and forwards it to the next instruction entering EX. A Load-Use hazard originates in the MEM stage. The data from the cache does not physically exist in the pipeline until the end of the MEM stage. The next instruction entering the EX stage requires the data one clock cycle before the MEM stage produces it. Physics dictates a 1-cycle stall.</div>
-    <div style="margin-bottom: 6px;"><b>Prompt 3:</b> A misprediction in a 20-stage pipeline flushes 19 speculative instructions, wasting ~20 clock cycles. For random financial data, the predictor acts as a coin flip, turning a 1-cycle <code>if</code> check into a 10-cycle average execution. Bitwise masks (or CMOV) evaluate unconditionally in the ALU. While executing both paths and masking the result takes 3 or 4 cycles, it is 100% deterministic, outperforming the erratic 10-cycle misprediction average.</div>
-    <div style="margin-bottom: 6px;"><b>Prompt 4:</b> A 1-Bit predictor tracking a loop of 100 iterations will correctly predict "Taken" 99 times, but mispredict on the exit (guessing "Taken" instead of "Not Taken"). The next time the loop starts, it guesses "Not Taken" based on the last exit, failing again. It incurs 2 failures per loop. A 2-Bit counter (Strongly Taken 11 -> Weakly Taken 10 -> Weakly Not Taken 01 -> Strongly Not Taken 00) requires two consecutive anomalies to alter its prediction trajectory. The exit anomaly drops it to 10 (Weakly Taken), so on the next loop entry, it still correctly guesses "Taken", cutting mispredictions in half.</div>
-    <div><b>Prompt 5:</b> A Perceptron replaces rigid lookup tables with a dot-product calculation. It takes the N-bit Global History Register (e.g., 1s and 0s representing past branch paths) and multiplies it against an array of learned integer weights. If the sum crosses a threshold (e.g., > 0), it predicts Taken. When the EX stage resolves the actual branch, it sends a back-propagation signal: if predicted correctly, weights aligned with the result are incremented; if wrong, weights are decremented. The CPU trains a physical neural network in real-time to recognize chaotic algorithmic patterns.</div>
-  </div>
-
-  <div class="whiteboard-page wb-split">
-    <div class="wb-header">
-      <div class="wb-title">Whiteboard &amp; Synthesis Workspace</div>
-      <div class="wb-ref">REF: CH07_FINAL_SYNTHESIS</div>
+  <div class="page-container">
+    <div class="litmus-box"
+      style="margin-top: 0; margin-bottom: 12px; padding: 12px 14px; font-size: 7.5pt; line-height: 1.45;">
+      <div style="margin-bottom: 6px;"><b>Prompt 1:</b> The RAT maps Inst 1's EAX to physical register P1
+        (<code>LOAD P1, [mem1]</code>). Inst 2 reads P1 (<code>ADD EBX, P1</code>). In Inst 3, the compiler reuses EAX.
+        The RAT detects the WAW hazard, allocates a new register P2, and translates it to <code>LOAD P2, [mem2]</code>.
+        P1 and P2 are mathematically isolated in hardware. The Out-of-Order engine can instantly execute Inst 3 without
+        corrupting the EAX value (P1) that Inst 2 is waiting to consume.</div>
+      <div style="margin-bottom: 6px;"><b>Prompt 2:</b> An ALU-to-ALU RAW hazard resolves entirely within the EX stage.
+        The first instruction finishes math in EX, and forwards it to the next instruction entering EX. A Load-Use
+        hazard originates in the MEM stage. The data from the cache does not physically exist in the pipeline until the
+        end of the MEM stage. The next instruction entering the EX stage requires the data one clock cycle before the
+        MEM stage produces it. Physics dictates a 1-cycle stall.</div>
+      <div style="margin-bottom: 6px;"><b>Prompt 3:</b> A misprediction in a 20-stage pipeline flushes 19 speculative
+        instructions, wasting ~20 clock cycles. For random financial data, the predictor acts as a coin flip, turning a
+        1-cycle <code>if</code> check into a 10-cycle average execution. Bitwise masks (or CMOV) evaluate
+        unconditionally in the ALU. While executing both paths and masking the result takes 3 or 4 cycles, it is 100%
+        deterministic, outperforming the erratic 10-cycle misprediction average.</div>
+      <div style="margin-bottom: 6px;"><b>Prompt 4:</b> A 1-Bit predictor tracking a loop of 100 iterations will
+        correctly predict "Taken" 99 times, but mispredict on the exit (guessing "Taken" instead of "Not Taken"). The
+        next time the loop starts, it guesses "Not Taken" based on the last exit, failing again. It incurs 2 failures
+        per loop. A 2-Bit counter (Strongly Taken 11 -> Weakly Taken 10 -> Weakly Not Taken 01 -> Strongly Not Taken 00)
+        requires two consecutive anomalies to alter its prediction trajectory. The exit anomaly drops it to 10 (Weakly
+        Taken), so on the next loop entry, it still correctly guesses "Taken", cutting mispredictions in half.</div>
+      <div><b>Prompt 5:</b> A Perceptron replaces rigid lookup tables with a dot-product calculation. It takes the N-bit
+        Global History Register (e.g., 1s and 0s representing past branch paths) and multiplies it against an array of
+        learned integer weights. If the sum crosses a threshold (e.g., > 0), it predicts Taken. When the EX stage
+        resolves the actual branch, it sends a back-propagation signal: if predicted correctly, weights aligned with the
+        result are incremented; if wrong, weights are decremented. The CPU trains a physical neural network in real-time
+        to recognize chaotic algorithmic patterns.</div>
     </div>
-    <div class="wb-canvas"></div>
-    <div class="wb-footer"><span>GIT GOOD &middot; CHAPTER 7 COMPLETE</span><span>PAGE 31</span></div>
+
+    <div class="whiteboard-page wb-split">
+      <div class="wb-header">
+        <div class="wb-title">Whiteboard &amp; Synthesis Workspace</div>
+        <div class="wb-ref">REF: CH07_FINAL_SYNTHESIS</div>
+      </div>
+      <div class="wb-canvas"></div>
+      <div class="wb-footer"><span>GIT GOOD &middot; CHAPTER 7 COMPLETE</span><span>PAGE 31</span></div>
+    </div>
   </div>
-</div>
 
 </body>
+
 </html>

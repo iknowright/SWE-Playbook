@@ -1,534 +1,771 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-<meta charset="utf-8">
-<link rel="stylesheet" href="common.css">
-<title>Chapter 5: Von Neumann vs. Harvard Architecture & The Physical Memory Bus Bottleneck</title>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="common.css">
+  <title>Chapter 5: Von Neumann vs. Harvard Architecture & The Physical Memory Bus Bottleneck</title>
 </head>
+
 <body class="chapter-five">
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 1: HISTORY PART 1
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <div class="phase-label">Volume I &middot; Silicon, Machine Architecture &amp; Low-Level Math</div>
-    <div class="chapter-number">Chapter 5 (Day 5)</div>
-    <h1 class="chapter-title">Von Neumann vs. Harvard Architecture &amp; The Physical Memory Bus Bottleneck</h1>
+  <div class="page-container content-flow">
+    <div>
+      <div class="phase-label">Volume I &middot; Silicon, Machine Architecture &amp; Low-Level Math</div>
+      <div class="chapter-number">Chapter 5 (Day 5)</div>
+      <h1 class="chapter-title">Von Neumann vs. Harvard Architecture &amp; The Physical Memory Bus Bottleneck</h1>
 
-    <h2>5.0 The Stored-Program Revolution (History &amp; Origins)</h2>
-    <p>To understand modern CPU bottlenecks, we must return to the dawn of electronic computing. The very definition of "software" did not exist in the early 1940s. A computer was not a universal machine; it was a rigid, physical calculator built to solve one specific differential equation.</p>
+      <h2>5.0 The Stored-Program Revolution (History &amp; Origins)</h2>
+      <p>To understand modern CPU bottlenecks, we must return to the dawn of electronic computing. The very definition
+        of "software" did not exist in the early 1940s. A computer was not a universal machine; it was a rigid, physical
+        calculator built to solve one specific differential equation.</p>
 
-    <h3>The ENIAC &amp; The Physical Program (1945)</h3>
-    <p>The ENIAC (Electronic Numerical Integrator and Computer), completed in 1945 at the University of Pennsylvania, was the world's first general-purpose electronic digital computer. However, "programming" the ENIAC did not involve typing code. It required weeks of physical labor. A team of brilliant female engineers (the "ENIAC Girls," including Jean Bartik and Betty Holberton) had to literally walk inside the 30-ton machine and manually plug hundreds of thick black patch cables into different sockets and flip thousands of mechanical switches to route the electrical logic for a new calculation.</p>
-    <p>In the ENIAC era, the <em>program</em> was the physical hardware wiring. The <em>data</em> was inputted via punch cards. Changing the program meant rebuilding the machine.</p>
+      <h3>The ENIAC &amp; The Physical Program (1945)</h3>
+      <p>The ENIAC (Electronic Numerical Integrator and Computer), completed in 1945 at the University of Pennsylvania,
+        was the world's first general-purpose electronic digital computer. However, "programming" the ENIAC did not
+        involve typing code. It required weeks of physical labor. A team of brilliant female engineers (the "ENIAC
+        Girls," including Jean Bartik and Betty Holberton) had to literally walk inside the 30-ton machine and manually
+        plug hundreds of thick black patch cables into different sockets and flip thousands of mechanical switches to
+        route the electrical logic for a new calculation.</p>
+      <p>In the ENIAC era, the <em>program</em> was the physical hardware wiring. The <em>data</em> was inputted via
+        punch cards. Changing the program meant rebuilding the machine.</p>
 
-    <h3>John von Neumann &amp; The EDVAC Report</h3>
-    <p>In 1945, the brilliant Hungarian-American mathematician John von Neumann was consulting on the ENIAC's successor, the EDVAC. He synthesized discussions with the ENIAC's inventors, J. Presper Eckert and John Mauchly, and authored a monumental 101-page document titled <em>"First Draft of a Report on the EDVAC."</em></p>
-    <p>This document proposed a radical, world-changing abstraction: <strong>The Stored-Program Concept</strong>. Von Neumann argued that the instructions dictating how the machine should behave could be encoded as binary numbers, exactly like the data it was calculating. Therefore, both the <em>Instructions</em> and the <em>Data</em> could be stored inside the exact same electronic memory array.</p>
-    
-    <div class="callout key">
-      <div class="callout-title">The Birth of Software (Indigo)</div>
-      The moment instructions were placed into RAM alongside data, the physical wiring of the computer never needed to change again. To run a different application, you simply loaded a different sequence of binary numbers into memory. Hardware and Software were permanently divorced. While Eckert and Mauchly deeply resented von Neumann for taking sole credit for the idea in his report, the resulting architecture was forever named the <strong>Von Neumann Architecture</strong>.
+      <h3>John von Neumann &amp; The EDVAC Report</h3>
+      <p>In 1945, the brilliant Hungarian-American mathematician John von Neumann was consulting on the ENIAC's
+        successor, the EDVAC. He synthesized discussions with the ENIAC's inventors, J. Presper Eckert and John Mauchly,
+        and authored a monumental 101-page document titled <em>"First Draft of a Report on the EDVAC."</em></p>
+      <p>This document proposed a radical, world-changing abstraction: <strong>The Stored-Program Concept</strong>. Von
+        Neumann argued that the instructions dictating how the machine should behave could be encoded as binary numbers,
+        exactly like the data it was calculating. Therefore, both the <em>Instructions</em> and the <em>Data</em> could
+        be stored inside the exact same electronic memory array.</p>
+
+      <div class="callout key">
+        <div class="callout-title">The Birth of Software (Indigo)</div>
+        The moment instructions were placed into RAM alongside data, the physical wiring of the computer never needed to
+        change again. To run a different application, you simply loaded a different sequence of binary numbers into
+        memory. Hardware and Software were permanently divorced. While Eckert and Mauchly deeply resented von Neumann
+        for taking sole credit for the idea in his report, the resulting architecture was forever named the <strong>Von
+          Neumann Architecture</strong>.
+      </div>
     </div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 2: HISTORY PART 2 & PURE VON NEUMANN
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <h2>5.1 The Pure Von Neumann Architecture</h2>
-    <p>A pure Von Neumann machine is defined by a single, unified physical memory holding both code and data, accessed by a single central processing unit through a shared communication pathway.</p>
+  <div class="page-container content-flow">
+    <div>
+      <h2>5.1 The Pure Von Neumann Architecture</h2>
+      <p>A pure Von Neumann machine is defined by a single, unified physical memory holding both code and data, accessed
+        by a single central processing unit through a shared communication pathway.</p>
 
-    <h3>The Tripartite System Bus</h3>
-    <p>The CPU communicates with the main memory via the "System Bus," which is physically composed of three distinct copper wire arrays etched into the motherboard:</p>
-    <ol>
-      <li><strong>The Address Bus:</strong> A unidirectional bus driven by the CPU. If a CPU has a 32-bit address bus, it has 32 physical pins dedicated to outputting $2^{32}$ ($4,294,967,296$) distinct electrical addresses, strictly limiting the system to $4\text{ GB}$ of RAM. A 64-bit address bus can theoretically address $16\text{ Exabytes}$.</li>
-      <li><strong>The Data Bus:</strong> A bidirectional bus. Once the CPU asserts an address, the RAM drives the requested binary data back to the CPU over these wires, or the CPU drives data to the RAM to be written. The width of this bus (e.g., 64-bit) dictates the memory throughput per clock cycle.</li>
-      <li><strong>The Control Bus:</strong> Contains operational signals like <code>Read Enable</code>, <code>Write Enable</code>, and the system clock pulse, ensuring the CPU and RAM interact synchronously.</li>
-    </ol>
+      <h3>The Tripartite System Bus</h3>
+      <p>The CPU communicates with the main memory via the "System Bus," which is physically composed of three distinct
+        copper wire arrays etched into the motherboard:</p>
+      <ol>
+        <li><strong>The Address Bus:</strong> A unidirectional bus driven by the CPU. If a CPU has a 32-bit address bus,
+          it has 32 physical pins dedicated to outputting $2^{32}$ ($4,294,967,296$) distinct electrical addresses,
+          strictly limiting the system to $4\text{ GB}$ of RAM. A 64-bit address bus can theoretically address $16\text{
+          Exabytes}$.</li>
+        <li><strong>The Data Bus:</strong> A bidirectional bus. Once the CPU asserts an address, the RAM drives the
+          requested binary data back to the CPU over these wires, or the CPU drives data to the RAM to be written. The
+          width of this bus (e.g., 64-bit) dictates the memory throughput per clock cycle.</li>
+        <li><strong>The Control Bus:</strong> Contains operational signals like <code>Read Enable</code>,
+          <code>Write Enable</code>, and the system clock pulse, ensuring the CPU and RAM interact synchronously.</li>
+      </ol>
 
-    <h3>The Sequential Execution Trap</h3>
-    <p>Because there is only one physical Data Bus connecting the CPU to the memory, the CPU is subjected to a strict, inescapable sequential execution cycle:</p>
-    <ul>
-      <li><strong>Cycle 1 (Fetch):</strong> The CPU asserts the <code>RIP</code> (Instruction Pointer) on the Address Bus. The RAM sends the opcode (the instruction) back over the Data Bus.</li>
-      <li><strong>Cycle 2 (Decode &amp; Fetch Operand):</strong> The CPU decodes the opcode. If the instruction says "Add Variable X," the CPU must assert the address of Variable X on the Address Bus. The RAM sends the data over the Data Bus.</li>
-      <li><strong>Cycle 3 (Execute &amp; Write):</strong> The ALU computes the sum. If the result must be saved, the CPU asserts the destination address on the Address Bus and sends the answer over the Data Bus.</li>
-    </ul>
+      <h3>The Sequential Execution Trap</h3>
+      <p>Because there is only one physical Data Bus connecting the CPU to the memory, the CPU is subjected to a strict,
+        inescapable sequential execution cycle:</p>
+      <ul>
+        <li><strong>Cycle 1 (Fetch):</strong> The CPU asserts the <code>RIP</code> (Instruction Pointer) on the Address
+          Bus. The RAM sends the opcode (the instruction) back over the Data Bus.</li>
+        <li><strong>Cycle 2 (Decode &amp; Fetch Operand):</strong> The CPU decodes the opcode. If the instruction says
+          "Add Variable X," the CPU must assert the address of Variable X on the Address Bus. The RAM sends the data
+          over the Data Bus.</li>
+        <li><strong>Cycle 3 (Execute &amp; Write):</strong> The ALU computes the sum. If the result must be saved, the
+          CPU asserts the destination address on the Address Bus and sends the answer over the Data Bus.</li>
+      </ul>
 
-    <div class="callout warn">
-      <div class="callout-title">The Bus Conflict (Orange)</div>
-      Notice the fatal structural limitation: <strong>The CPU cannot fetch the next instruction while it is reading or writing data.</strong> The physical copper wires of the Data Bus are already occupied. The CPU pipeline must brutally stall its Instruction Fetch stage until the Data Memory Access stage completes.
+      <div class="callout warn">
+        <div class="callout-title">The Bus Conflict (Orange)</div>
+        Notice the fatal structural limitation: <strong>The CPU cannot fetch the next instruction while it is reading or
+          writing data.</strong> The physical copper wires of the Data Bus are already occupied. The CPU pipeline must
+        brutally stall its Instruction Fetch stage until the Data Memory Access stage completes.
+      </div>
     </div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 3: WHITEBOARD 1
      ========================================================================== -->
-<div class="page-container">
-  <div class="whiteboard-page">
-    <div class="wb-header">
-      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
-      <div class="wb-ref">REF: CH05_VON_NEUMANN_BUS</div>
+  <div class="page-container">
+    <div class="whiteboard-page">
+      <div class="wb-header">
+        <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+        <div class="wb-ref">REF: CH05_VON_NEUMANN_BUS</div>
+      </div>
+      <div class="wb-invariants">
+        <div><b>The Stored-Program Isomorphism:</b> In a Von Neumann machine, memory is untyped. A 64-bit block of
+          <code>1</code>s and <code>0</code>s in RAM could be a floating-point number, a string of ASCII characters, or
+          a compiled <code>add rax, rbx</code> assembly instruction. Only the CPU's current execution context dictates
+          how the data is interpreted.</div>
+      </div>
+      <div class="wb-canvas"></div>
+      <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 3</span></div>
     </div>
-    <div class="wb-invariants">
-      <div><b>The Stored-Program Isomorphism:</b> In a Von Neumann machine, memory is untyped. A 64-bit block of <code>1</code>s and <code>0</code>s in RAM could be a floating-point number, a string of ASCII characters, or a compiled <code>add rax, rbx</code> assembly instruction. Only the CPU's current execution context dictates how the data is interpreted.</div>
-    </div>
-    <div class="wb-canvas"></div>
-    <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 3</span></div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 4: THE VON NEUMANN BOTTLENECK
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <h2>5.2 The Von Neumann Bottleneck (The Memory Wall)</h2>
-    <p>In 1977, John Backus (inventor of FORTRAN) won the Turing Award. In his legendary acceptance speech, he coined a phrase that defines modern hardware engineering: <strong>The Von Neumann Bottleneck</strong>.</p>
-    
-    <blockquote>"Surely there must be a less primitive way of making big changes in the store than by pushing vast numbers of words back and forth through the Von Neumann bottleneck. Not only is this tube a literal bottleneck for the data traffic of a problem, but, more importantly, it is an intellectual bottleneck that has kept us tied to word-at-a-time thinking." — John Backus</blockquote>
+  <div class="page-container content-flow">
+    <div>
+      <h2>5.2 The Von Neumann Bottleneck (The Memory Wall)</h2>
+      <p>In 1977, John Backus (inventor of FORTRAN) won the Turing Award. In his legendary acceptance speech, he coined
+        a phrase that defines modern hardware engineering: <strong>The Von Neumann Bottleneck</strong>.</p>
 
-    <h3>The Latency Divergence</h3>
-    <p>In the 1980s, CPU speeds and RAM speeds were relatively identical. However, Dennard Scaling allowed CPU frequencies to double every two years, rocketing to $5.0\text{ GHz}$ (a $0.2\text{ ns}$ cycle time). Meanwhile, Dynamic RAM (DRAM) relies on microscopic capacitors that must physically drain and fill with electrons. DRAM physics scaled much slower.</p>
-    
-    <p>Today, a modern DDR5 RAM access takes approximately $70\text{ to }100\text{ nanoseconds}$.</p>
-    <ul>
-      <li><strong>CPU Clock Cycle:</strong> $0.2\text{ ns}$</li>
-      <li><strong>RAM Access Latency:</strong> $80.0\text{ ns}$</li>
-      <li><strong>The Gap:</strong> A single main memory fetch costs the CPU <strong>400 clock cycles</strong>.</li>
-    </ul>
+      <blockquote>"Surely there must be a less primitive way of making big changes in the store than by pushing vast
+        numbers of words back and forth through the Von Neumann bottleneck. Not only is this tube a literal bottleneck
+        for the data traffic of a problem, but, more importantly, it is an intellectual bottleneck that has kept us tied
+        to word-at-a-time thinking." — John Backus</blockquote>
 
-    <p>If a CPU executing at 5 GHz had to reach across the Von Neumann bus to main RAM for every instruction and data fetch, it would spend 99.7% of its life completely frozen, waiting for electrons to travel across the motherboard. The processor would effectively operate at $12\text{ MHz}$. The shared bus became the ultimate choke point in computing history.</p>
+      <h3>The Latency Divergence</h3>
+      <p>In the 1980s, CPU speeds and RAM speeds were relatively identical. However, Dennard Scaling allowed CPU
+        frequencies to double every two years, rocketing to $5.0\text{ GHz}$ (a $0.2\text{ ns}$ cycle time). Meanwhile,
+        Dynamic RAM (DRAM) relies on microscopic capacitors that must physically drain and fill with electrons. DRAM
+        physics scaled much slower.</p>
 
-    <h3>Data Starvation</h3>
-    <p>Modern super-scalar ALUs can execute 4 or 5 instructions simultaneously per clock cycle. But if the Von Neumann bus can only deliver one word of data at a time, the ALUs starve. The CPU becomes a high-performance Ferrari stuck permanently in a one-lane traffic jam.</p>
+      <p>Today, a modern DDR5 RAM access takes approximately $70\text{ to }100\text{ nanoseconds}$.</p>
+      <ul>
+        <li><strong>CPU Clock Cycle:</strong> $0.2\text{ ns}$</li>
+        <li><strong>RAM Access Latency:</strong> $80.0\text{ ns}$</li>
+        <li><strong>The Gap:</strong> A single main memory fetch costs the CPU <strong>400 clock cycles</strong>.</li>
+      </ul>
+
+      <p>If a CPU executing at 5 GHz had to reach across the Von Neumann bus to main RAM for every instruction and data
+        fetch, it would spend 99.7% of its life completely frozen, waiting for electrons to travel across the
+        motherboard. The processor would effectively operate at $12\text{ MHz}$. The shared bus became the ultimate
+        choke point in computing history.</p>
+
+      <h3>Data Starvation</h3>
+      <p>Modern super-scalar ALUs can execute 4 or 5 instructions simultaneously per clock cycle. But if the Von Neumann
+        bus can only deliver one word of data at a time, the ALUs starve. The CPU becomes a high-performance Ferrari
+        stuck permanently in a one-lane traffic jam.</p>
+    </div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 5: PURE HARVARD ARCHITECTURE
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <h2>5.3 The Harvard Architecture</h2>
-    <p>While von Neumann was designing the EDVAC, Howard Aiken at Harvard University was designing the Harvard Mark I (1944). Unlike the EDVAC, Aiken's machine utilized a fundamentally different layout.</p>
+  <div class="page-container content-flow">
+    <div>
+      <h2>5.3 The Harvard Architecture</h2>
+      <p>While von Neumann was designing the EDVAC, Howard Aiken at Harvard University was designing the Harvard Mark I
+        (1944). Unlike the EDVAC, Aiken's machine utilized a fundamentally different layout.</p>
 
-    <h3>The Topology of Separation</h3>
-    <p>The <strong>Harvard Architecture</strong> physically separates Instructions and Data into two entirely isolated memory modules, each with its own dedicated Address and Data Bus.</p>
-    <ul>
-      <li><strong>Instruction Memory:</strong> Has its own copper pathways to the CPU's Fetch unit.</li>
-      <li><strong>Data Memory:</strong> Has its own copper pathways to the CPU's Memory Read/Write execution units.</li>
-    </ul>
+      <h3>The Topology of Separation</h3>
+      <p>The <strong>Harvard Architecture</strong> physically separates Instructions and Data into two entirely isolated
+        memory modules, each with its own dedicated Address and Data Bus.</p>
+      <ul>
+        <li><strong>Instruction Memory:</strong> Has its own copper pathways to the CPU's Fetch unit.</li>
+        <li><strong>Data Memory:</strong> Has its own copper pathways to the CPU's Memory Read/Write execution units.
+        </li>
+      </ul>
 
-    <h3>The Throughput Miracle</h3>
-    <p>Because the buses are physically isolated, there is no contention. In a 5-stage pipeline, the CPU can be fetching Instruction N from the Instruction RAM over Bus A, while simultaneously writing the result of Instruction N-2 to the Data RAM over Bus B during the exact same clock cycle. Theoretical memory bandwidth is instantly doubled.</p>
+      <h3>The Throughput Miracle</h3>
+      <p>Because the buses are physically isolated, there is no contention. In a 5-stage pipeline, the CPU can be
+        fetching Instruction N from the Instruction RAM over Bus A, while simultaneously writing the result of
+        Instruction N-2 to the Data RAM over Bus B during the exact same clock cycle. Theoretical memory bandwidth is
+        instantly doubled.</p>
 
-    <h3>The Wasted Space Dilemma</h3>
-    <p>If pure Harvard architecture is so vastly superior for throughput, why don't modern desktop computers use it for main RAM? <strong>Resource Fragmentation.</strong></p>
-    <p>If a motherboard has $16\text{ GB}$ of RAM, a pure Harvard design requires permanently soldering $8\text{ GB}$ for Instructions and $8\text{ GB}$ for Data. If a video game requires $12\text{ GB}$ of graphics data but only $2\text{ GB}$ of code, the application will crash with an Out-of-Memory exception, even though there are $6\text{ GB}$ of empty space sitting uselessly on the Instruction side of the board. General-purpose computing requires dynamic, flexible memory boundaries.</p>
+      <h3>The Wasted Space Dilemma</h3>
+      <p>If pure Harvard architecture is so vastly superior for throughput, why don't modern desktop computers use it
+        for main RAM? <strong>Resource Fragmentation.</strong></p>
+      <p>If a motherboard has $16\text{ GB}$ of RAM, a pure Harvard design requires permanently soldering $8\text{ GB}$
+        for Instructions and $8\text{ GB}$ for Data. If a video game requires $12\text{ GB}$ of graphics data but only
+        $2\text{ GB}$ of code, the application will crash with an Out-of-Memory exception, even though there are
+        $6\text{ GB}$ of empty space sitting uselessly on the Instruction side of the board. General-purpose computing
+        requires dynamic, flexible memory boundaries.</p>
 
-    <div class="callout tip">
-      <div class="callout-title">Microcontrollers: The Harvard Survivors (Emerald)</div>
-      Pure Harvard architecture completely dominates the embedded microcontroller market (Arduino, AVR, PIC chips). An embedded chip runs a single, compiled C-program forever. The program code is burned permanently into Flash ROM (Instruction Memory), and the runtime variables exist in a tiny SRAM (Data Memory). Because the code size is known and fixed at compile time, fragmentation is irrelevant, and the microcontroller enjoys perfect 1-cycle deterministic execution predictability.
+      <div class="callout tip">
+        <div class="callout-title">Microcontrollers: The Harvard Survivors (Emerald)</div>
+        Pure Harvard architecture completely dominates the embedded microcontroller market (Arduino, AVR, PIC chips). An
+        embedded chip runs a single, compiled C-program forever. The program code is burned permanently into Flash ROM
+        (Instruction Memory), and the runtime variables exist in a tiny SRAM (Data Memory). Because the code size is
+        known and fixed at compile time, fragmentation is irrelevant, and the microcontroller enjoys perfect 1-cycle
+        deterministic execution predictability.
+      </div>
     </div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 6: WHITEBOARD 2
      ========================================================================== -->
-<div class="page-container">
-  <div class="whiteboard-page">
-    <div class="wb-header">
-      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
-      <div class="wb-ref">REF: CH05_VON_NEUMANN_VS_HARVARD</div>
+  <div class="page-container">
+    <div class="whiteboard-page">
+      <div class="wb-header">
+        <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+        <div class="wb-ref">REF: CH05_VON_NEUMANN_VS_HARVARD</div>
+      </div>
+      <div class="wb-invariants">
+        <div><b>Instruction Width Independence:</b> In a Harvard architecture, the Instruction Bus and Data Bus do not
+          have to be the same size. A microcontroller can have a 14-bit wide Instruction Flash ROM to store optimized
+          opcodes, while featuring an 8-bit wide Data SRAM for standard byte manipulation. This is impossible in Von
+          Neumann.</div>
+      </div>
+      <div class="wb-canvas"></div>
+      <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 6</span></div>
     </div>
-    <div class="wb-invariants">
-      <div><b>Instruction Width Independence:</b> In a Harvard architecture, the Instruction Bus and Data Bus do not have to be the same size. A microcontroller can have a 14-bit wide Instruction Flash ROM to store optimized opcodes, while featuring an 8-bit wide Data SRAM for standard byte manipulation. This is impossible in Von Neumann.</div>
-    </div>
-    <div class="wb-canvas"></div>
-    <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 6</span></div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 7: SUPER-HARVARD (SHARC) & DSP
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <h2>5.4 The Super-Harvard Architecture (SHARC)</h2>
-    <p>Before exploring the modern desktop compromise, we must examine extreme high-performance variations. Digital Signal Processors (DSPs) are specialized chips used in audio processing, radar, and software-defined radio. They must process endless streams of data (like applying a Fast Fourier Transform to a $192\text{ kHz}$ audio stream) with zero latency tolerance.</p>
+  <div class="page-container content-flow">
+    <div>
+      <h2>5.4 The Super-Harvard Architecture (SHARC)</h2>
+      <p>Before exploring the modern desktop compromise, we must examine extreme high-performance variations. Digital
+        Signal Processors (DSPs) are specialized chips used in audio processing, radar, and software-defined radio. They
+        must process endless streams of data (like applying a Fast Fourier Transform to a $192\text{ kHz}$ audio stream)
+        with zero latency tolerance.</p>
 
-    <p>DSPs utilize the <strong>Super-Harvard Architecture (SHARC)</strong>. It extends the Harvard design by adding:</p>
-    <ul>
-      <li><strong>Dual Data Memories:</strong> Not just an Instruction and Data split, but <em>two</em> independent Data Memories (Data X and Data Y).</li>
-      <li><strong>Instruction Cache:</strong> A tiny, hyper-fast cache sitting in front of the Instruction Memory.</li>
-    </ul>
+      <p>DSPs utilize the <strong>Super-Harvard Architecture (SHARC)</strong>. It extends the Harvard design by adding:
+      </p>
+      <ul>
+        <li><strong>Dual Data Memories:</strong> Not just an Instruction and Data split, but <em>two</em> independent
+          Data Memories (Data X and Data Y).</li>
+        <li><strong>Instruction Cache:</strong> A tiny, hyper-fast cache sitting in front of the Instruction Memory.
+        </li>
+      </ul>
 
-    <h3>The MAC Operation (Multiply-Accumulate)</h3>
-    <p>The core of signal processing is the FIR (Finite Impulse Response) filter, which relies entirely on the mathematical operation: $A = A + (X \times Y)$.</p>
-    <p>In a pure Von Neumann machine, fetching $X$, fetching $Y$, multiplying, adding, and saving takes over a dozen clock cycles. In a SHARC DSP, the CPU can:</p>
-    <ol>
-      <li>Fetch the next MAC instruction from the Instruction Cache.</li>
-      <li>Fetch the $X$ audio sample from Data Memory 1 over Bus 1.</li>
-      <li>Fetch the $Y$ filter coefficient from Data Memory 2 over Bus 2.</li>
-      <li>Multiply and accumulate the result in the hardware MAC unit.</li>
-    </ol>
-    <p><strong>All of this occurs in a single physical clock cycle.</strong> This architectural specialization allows a $500\text{ MHz}$ DSP to absolutely destroy a $4.0\text{ GHz}$ Von Neumann CPU in raw audio signal processing throughput.</p>
+      <h3>The MAC Operation (Multiply-Accumulate)</h3>
+      <p>The core of signal processing is the FIR (Finite Impulse Response) filter, which relies entirely on the
+        mathematical operation: $A = A + (X \times Y)$.</p>
+      <p>In a pure Von Neumann machine, fetching $X$, fetching $Y$, multiplying, adding, and saving takes over a dozen
+        clock cycles. In a SHARC DSP, the CPU can:</p>
+      <ol>
+        <li>Fetch the next MAC instruction from the Instruction Cache.</li>
+        <li>Fetch the $X$ audio sample from Data Memory 1 over Bus 1.</li>
+        <li>Fetch the $Y$ filter coefficient from Data Memory 2 over Bus 2.</li>
+        <li>Multiply and accumulate the result in the hardware MAC unit.</li>
+      </ol>
+      <p><strong>All of this occurs in a single physical clock cycle.</strong> This architectural specialization allows
+        a $500\text{ MHz}$ DSP to absolutely destroy a $4.0\text{ GHz}$ Von Neumann CPU in raw audio signal processing
+        throughput.</p>
+    </div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 8: MODIFIED HARVARD ARCHITECTURE
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <h2>5.5 The Modern Compromise: Modified Harvard Architecture</h2>
-    <p>Modern general-purpose CPUs (Intel Core, AMD Ryzen, Apple M-Series) cannot use pure Harvard (due to RAM fragmentation) and cannot use pure Von Neumann (due to the 400-cycle bus bottleneck). The solution is a masterpiece of architectural deception: <strong>The Modified Harvard Architecture</strong>.</p>
+  <div class="page-container content-flow">
+    <div>
+      <h2>5.5 The Modern Compromise: Modified Harvard Architecture</h2>
+      <p>Modern general-purpose CPUs (Intel Core, AMD Ryzen, Apple M-Series) cannot use pure Harvard (due to RAM
+        fragmentation) and cannot use pure Von Neumann (due to the 400-cycle bus bottleneck). The solution is a
+        masterpiece of architectural deception: <strong>The Modified Harvard Architecture</strong>.</p>
 
-    <h3>Macro-Level: Von Neumann</h3>
-    <p>Outside the CPU die, the motherboard operates as a pure Von Neumann machine. You buy unified sticks of DDR5 RAM (e.g., $32\text{ GB}$). The operating system dynamically allocates chunks of this RAM for Chrome's executable code and Chrome's tab data seamlessly. There is only one external Memory Controller and one external physical system bus.</p>
+      <h3>Macro-Level: Von Neumann</h3>
+      <p>Outside the CPU die, the motherboard operates as a pure Von Neumann machine. You buy unified sticks of DDR5 RAM
+        (e.g., $32\text{ GB}$). The operating system dynamically allocates chunks of this RAM for Chrome's executable
+        code and Chrome's tab data seamlessly. There is only one external Memory Controller and one external physical
+        system bus.</p>
 
-    <h3>Micro-Level: Harvard</h3>
-    <p>Inside the CPU die, the architecture radically changes. To feed the superscalar pipeline, the CPU relies on microscopic, sub-nanosecond SRAM caches. The <strong>Level 1 (L1) Cache</strong> is strictly, physically split into two separate domains:</p>
-    <ul>
-      <li><strong>L1i (Instruction Cache):</strong> Typically $32\text{ KB}$. Wired directly to the pipeline's Instruction Fetch (IF) unit.</li>
-      <li><strong>L1d (Data Cache):</strong> Typically $32\text{ KB}$ to $48\text{ KB}$. Wired directly to the pipeline's Memory Access (MEM) execution unit.</li>
-    </ul>
+      <h3>Micro-Level: Harvard</h3>
+      <p>Inside the CPU die, the architecture radically changes. To feed the superscalar pipeline, the CPU relies on
+        microscopic, sub-nanosecond SRAM caches. The <strong>Level 1 (L1) Cache</strong> is strictly, physically split
+        into two separate domains:</p>
+      <ul>
+        <li><strong>L1i (Instruction Cache):</strong> Typically $32\text{ KB}$. Wired directly to the pipeline's
+          Instruction Fetch (IF) unit.</li>
+        <li><strong>L1d (Data Cache):</strong> Typically $32\text{ KB}$ to $48\text{ KB}$. Wired directly to the
+          pipeline's Memory Access (MEM) execution unit.</li>
+      </ul>
 
-    <p>Because the CPU executes out of the L1 cache 95% of the time, the execution pipeline experiences perfect, contention-free Harvard parallel bandwidth. It fetches opcodes and data simultaneously without bus collisions.</p>
+      <p>Because the CPU executes out of the L1 cache 95% of the time, the execution pipeline experiences perfect,
+        contention-free Harvard parallel bandwidth. It fetches opcodes and data simultaneously without bus collisions.
+      </p>
 
-    <div class="callout interview">
-      <div class="callout-title">The L2/L3 Cache Dilemma (Pink)</div>
-      If splitting L1 into Instruction and Data is so powerful, why are L2 and L3 caches universally unified (Von Neumann)?<br><br>
-      <strong>Answer:</strong> Statistical utilization limits. Instruction code footprints are usually small and highly localized (a few loops), while data footprints are massive and unpredictable (large arrays). If L2 was split $1\text{MB}/1\text{MB}$, the Data cache would constantly overflow while the Instruction cache sat 90% empty. A unified L2 dynamically adapts to the workload, storing 10% instructions and 90% data if required, optimizing expensive silicon real estate while relying on the L1 split to handle the immediate pipeline throughput.
+      <div class="callout interview">
+        <div class="callout-title">The L2/L3 Cache Dilemma (Pink)</div>
+        If splitting L1 into Instruction and Data is so powerful, why are L2 and L3 caches universally unified (Von
+        Neumann)?<br><br>
+        <strong>Answer:</strong> Statistical utilization limits. Instruction code footprints are usually small and
+        highly localized (a few loops), while data footprints are massive and unpredictable (large arrays). If L2 was
+        split $1\text{MB}/1\text{MB}$, the Data cache would constantly overflow while the Instruction cache sat 90%
+        empty. A unified L2 dynamically adapts to the workload, storing 10% instructions and 90% data if required,
+        optimizing expensive silicon real estate while relying on the L1 split to handle the immediate pipeline
+        throughput.
+      </div>
     </div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 9: WHITEBOARD 3
      ========================================================================== -->
-<div class="page-container">
-  <div class="whiteboard-page">
-    <div class="wb-header">
-      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
-      <div class="wb-ref">REF: CH05_MODIFIED_HARVARD_CACHE</div>
+  <div class="page-container">
+    <div class="whiteboard-page">
+      <div class="wb-header">
+        <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+        <div class="wb-ref">REF: CH05_MODIFIED_HARVARD_CACHE</div>
+      </div>
+      <div class="wb-canvas"></div>
+      <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 9</span></div>
     </div>
-    <div class="wb-canvas"></div>
-    <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 9</span></div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 10: SECURITY RAMIFICATIONS (BUFFER OVERFLOWS)
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <h2>5.6 Security Ramifications: The Curse of Von Neumann</h2>
-    <p>The Von Neumann architecture’s greatest strength—that code and data share the exact same memory—is also the greatest security vulnerability in the history of computer science. If the CPU cannot physically distinguish between an integer variable and an executable instruction, it can be tricked into executing user data.</p>
+  <div class="page-container content-flow">
+    <div>
+      <h2>5.6 Security Ramifications: The Curse of Von Neumann</h2>
+      <p>The Von Neumann architecture’s greatest strength—that code and data share the exact same memory—is also the
+        greatest security vulnerability in the history of computer science. If the CPU cannot physically distinguish
+        between an integer variable and an executable instruction, it can be tricked into executing user data.</p>
 
-    <h3>Smashing the Stack for Fun and Profit (1996)</h3>
-    <p>In 1996, security researcher Elias Levy (Aleph One) published a paper detailing the canonical <strong>Stack-Based Buffer Overflow</strong>. </p>
-    
-    <p>When a C function is called, the CPU pushes the <strong>Return Address</strong> (the `RIP` pointer telling the CPU where to go when the function finishes) onto the Call Stack. Right below this return address, the program allocates space for local variables (like a 64-byte <code>char</code> array for a username).</p>
-    
-    <p>If the programmer uses an unsafe function like <code>strcpy()</code>, which copies user input into the array without checking the length, a hacker can input a 100-byte string. The first 64 bytes fill the array. The remaining 36 bytes physically overflow the array boundary, continuing up the stack memory, and <strong>overwrite the saved Return Address</strong>.</p>
+      <h3>Smashing the Stack for Fun and Profit (1996)</h3>
+      <p>In 1996, security researcher Elias Levy (Aleph One) published a paper detailing the canonical
+        <strong>Stack-Based Buffer Overflow</strong>. </p>
 
-    <h3>The Malicious Payload (Shellcode)</h3>
-    <p>The hacker doesn't just overwrite the return address with garbage. They overwrite it with the exact memory address pointing <em>back into the array they just overflowed</em>. Inside that array, they have hidden raw binary assembly opcodes (Shellcode) disguised as string data.</p>
-    <p>When the C function finishes, it executes the <code>ret</code> instruction. The CPU pops the corrupted Return Address off the stack and jumps to it. Because it is a Von Neumann machine, the CPU blindly assumes the string data in the array is now executable code, and begins executing the hacker's payload, granting them full control of the server.</p>
+      <p>When a C function is called, the CPU pushes the <strong>Return Address</strong> (the `RIP` pointer telling the
+        CPU where to go when the function finishes) onto the Call Stack. Right below this return address, the program
+        allocates space for local variables (like a 64-byte <code>char</code> array for a username).</p>
+
+      <p>If the programmer uses an unsafe function like <code>strcpy()</code>, which copies user input into the array
+        without checking the length, a hacker can input a 100-byte string. The first 64 bytes fill the array. The
+        remaining 36 bytes physically overflow the array boundary, continuing up the stack memory, and <strong>overwrite
+          the saved Return Address</strong>.</p>
+
+      <h3>The Malicious Payload (Shellcode)</h3>
+      <p>The hacker doesn't just overwrite the return address with garbage. They overwrite it with the exact memory
+        address pointing <em>back into the array they just overflowed</em>. Inside that array, they have hidden raw
+        binary assembly opcodes (Shellcode) disguised as string data.</p>
+      <p>When the C function finishes, it executes the <code>ret</code> instruction. The CPU pops the corrupted Return
+        Address off the stack and jumps to it. Because it is a Von Neumann machine, the CPU blindly assumes the string
+        data in the array is now executable code, and begins executing the hacker's payload, granting them full control
+        of the server.</p>
+    </div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 11: HARDWARE DEFENSES & ROP
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <h3>Hardware Defenses: Enforcing Harvard on Von Neumann</h3>
-    <p>To stop buffer overflows, AMD and Intel realized they had to introduce Harvard-style separation logically, if not physically. They introduced a new feature to the MMU (Memory Management Unit) page tables: <strong>The NX Bit (No-Execute)</strong>, also known as DEP (Data Execution Prevention).</p>
+  <div class="page-container content-flow">
+    <div>
+      <h3>Hardware Defenses: Enforcing Harvard on Von Neumann</h3>
+      <p>To stop buffer overflows, AMD and Intel realized they had to introduce Harvard-style separation logically, if
+        not physically. They introduced a new feature to the MMU (Memory Management Unit) page tables: <strong>The NX
+          Bit (No-Execute)</strong>, also known as DEP (Data Execution Prevention).</p>
 
-    <p>With the NX bit, the operating system can mark regions of RAM with a <strong>W^X (Write XOR Execute)</strong> policy:</p>
-    <ul>
-      <li><strong>Data regions (Heap, Stack):</strong> Marked as Writable but NOT Executable.</li>
-      <li><strong>Code regions (Text segment):</strong> Marked as Executable but NOT Writable.</li>
-    </ul>
-    <p>Now, if a hacker overflows the stack and points the <code>RIP</code> to their shellcode string, the CPU's MMU sees that the Stack page has the NX bit set. The CPU instantly halts, throwing a hardware `Segmentation Fault` (Access Violation), refusing to execute the data.</p>
+      <p>With the NX bit, the operating system can mark regions of RAM with a <strong>W^X (Write XOR Execute)</strong>
+        policy:</p>
+      <ul>
+        <li><strong>Data regions (Heap, Stack):</strong> Marked as Writable but NOT Executable.</li>
+        <li><strong>Code regions (Text segment):</strong> Marked as Executable but NOT Writable.</li>
+      </ul>
+      <p>Now, if a hacker overflows the stack and points the <code>RIP</code> to their shellcode string, the CPU's MMU
+        sees that the Stack page has the NX bit set. The CPU instantly halts, throwing a hardware `Segmentation Fault`
+        (Access Violation), refusing to execute the data.</p>
 
-    <div class="callout warn">
-      <div class="callout-title">The Return-Oriented Programming (ROP) Countermeasure</div>
-      Hackers evolved. If they can no longer execute their own injected code due to the NX bit, they exploit the code that is <em>already</em> marked as executable in the program. By carefully overwriting the stack with a massive chain of fake return addresses, they force the CPU to bounce around the existing executable memory, executing tiny fragments of existing code ending in a <code>ret</code> instruction (called <em>Gadgets</em>). By chaining thousands of gadgets together (a ROP Chain), they synthesize a malicious payload using the host program's own legitimate assembly instructions, perfectly bypassing DEP and the NX bit.
+      <div class="callout warn">
+        <div class="callout-title">The Return-Oriented Programming (ROP) Countermeasure</div>
+        Hackers evolved. If they can no longer execute their own injected code due to the NX bit, they exploit the code
+        that is <em>already</em> marked as executable in the program. By carefully overwriting the stack with a massive
+        chain of fake return addresses, they force the CPU to bounce around the existing executable memory, executing
+        tiny fragments of existing code ending in a <code>ret</code> instruction (called <em>Gadgets</em>). By chaining
+        thousands of gadgets together (a ROP Chain), they synthesize a malicious payload using the host program's own
+        legitimate assembly instructions, perfectly bypassing DEP and the NX bit.
+      </div>
     </div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 12: WHITEBOARD 4
      ========================================================================== -->
-<div class="page-container">
-  <div class="whiteboard-page">
-    <div class="wb-header">
-      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
-      <div class="wb-ref">REF: CH05_SECURITY_BUFFER_OVERFLOW</div>
+  <div class="page-container">
+    <div class="whiteboard-page">
+      <div class="wb-header">
+        <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+        <div class="wb-ref">REF: CH05_SECURITY_BUFFER_OVERFLOW</div>
+      </div>
+      <div class="wb-invariants">
+        <div><b>The JIT Security Paradox:</b> Just-In-Time compilers (like the V8 JavaScript engine or the .NET CLR)
+          fundamentally violate W^X policies. Because they generate machine code on the fly, they require memory pages
+          that are simultaneously Writable (to emit the JITed assembly) and Executable (to run it). This makes JIT
+          buffers a massive target for browser exploit chains.</div>
+      </div>
+      <div class="wb-canvas"></div>
+      <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 12</span></div>
     </div>
-    <div class="wb-invariants">
-      <div><b>The JIT Security Paradox:</b> Just-In-Time compilers (like the V8 JavaScript engine or the .NET CLR) fundamentally violate W^X policies. Because they generate machine code on the fly, they require memory pages that are simultaneously Writable (to emit the JITed assembly) and Executable (to run it). This makes JIT buffers a massive target for browser exploit chains.</div>
-    </div>
-    <div class="wb-canvas"></div>
-    <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 12</span></div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 13: SOFTWARE RELEVANCY: MECHANICAL SYMPATHY
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <h2>5.7 Software Relevancy: Mechanical Sympathy</h2>
-    <p>Understanding the L1i and L1d split in the Modified Harvard architecture directly influences how elite software engineers organize their code and memory layouts. Ignorance of this split results in invisible, catastrophic performance drops.</p>
+  <div class="page-container content-flow">
+    <div>
+      <h2>5.7 Software Relevancy: Mechanical Sympathy</h2>
+      <p>Understanding the L1i and L1d split in the Modified Harvard architecture directly influences how elite software
+        engineers organize their code and memory layouts. Ignorance of this split results in invisible, catastrophic
+        performance drops.</p>
 
-    <h3>L1 Data Cache Sympathy (L1d Thrashing)</h3>
-    <p>The L1d cache relies heavily on spatial locality. When you request a 4-byte integer from RAM, the CPU actually fetches an entire 64-byte Cache Line.</p>
-    <ul>
-      <li><strong>Array of Structs (AoS):</strong> If you have an array of <code>Player</code> objects, and you run a loop to sum up everyone's <code>Health</code>, you fetch the Player object, read the 4-byte health, and skip over the 60 bytes of Inventory, Name, and Position data. You just wasted 90% of your L1d cache bandwidth pulling useless data over the bus.</li>
-      <li><strong>Struct of Arrays (SoA):</strong> Data-Oriented Design (DOD) reorganizes this. You create a single array containing only <code>Health</code> integers. Now, one 64-byte cache line pull delivers 16 sequential Health values. The ALU processes them instantly, achieving 100% L1d cache utilization and maximizing bus throughput.</li>
-    </ul>
+      <h3>L1 Data Cache Sympathy (L1d Thrashing)</h3>
+      <p>The L1d cache relies heavily on spatial locality. When you request a 4-byte integer from RAM, the CPU actually
+        fetches an entire 64-byte Cache Line.</p>
+      <ul>
+        <li><strong>Array of Structs (AoS):</strong> If you have an array of <code>Player</code> objects, and you run a
+          loop to sum up everyone's <code>Health</code>, you fetch the Player object, read the 4-byte health, and skip
+          over the 60 bytes of Inventory, Name, and Position data. You just wasted 90% of your L1d cache bandwidth
+          pulling useless data over the bus.</li>
+        <li><strong>Struct of Arrays (SoA):</strong> Data-Oriented Design (DOD) reorganizes this. You create a single
+          array containing only <code>Health</code> integers. Now, one 64-byte cache line pull delivers 16 sequential
+          Health values. The ALU processes them instantly, achieving 100% L1d cache utilization and maximizing bus
+          throughput.</li>
+      </ul>
 
-    <h3>L1 Instruction Cache Sympathy (L1i Thrashing)</h3>
-    <p>The L1i cache is incredibly small ($32\text{ KB}$). If your code executing inside a tight loop exceeds $32\text{ KB}$ of compiled assembly instructions, the end of the loop will overwrite the instructions for the beginning of the loop in the cache. When the loop restarts, the CPU suffers an L1i cache miss and must stall the pipeline to re-fetch the start of the loop from L2 cache. This is known as <strong>Instruction Thrashing</strong>.</p>
+      <h3>L1 Instruction Cache Sympathy (L1i Thrashing)</h3>
+      <p>The L1i cache is incredibly small ($32\text{ KB}$). If your code executing inside a tight loop exceeds
+        $32\text{ KB}$ of compiled assembly instructions, the end of the loop will overwrite the instructions for the
+        beginning of the loop in the cache. When the loop restarts, the CPU suffers an L1i cache miss and must stall the
+        pipeline to re-fetch the start of the loop from L2 cache. This is known as <strong>Instruction
+          Thrashing</strong>.</p>
+    </div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 14: L1I THRASHING CAUSES
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <p>How does a developer accidentally bloat a tight loop beyond the $32\text{ KB}$ L1i limit?</p>
-    <ol>
-      <li><strong>Aggressive Loop Unrolling:</strong> Compilers sometimes copy-paste the inside of a loop 10 times in a row to avoid the branch condition check (`i++ < N`). If the loop body is large, this copy-pasting blows out the L1i footprint.</li>
-      <li><strong>Excessive Function Inlining:</strong> Marking every helper function as <code>[MethodImpl(MethodImplOptions.AggressiveInlining)]</code> forces the compiler to inject the function's raw assembly directly into the call site. While it saves the 5-cycle function call overhead, repeating this 50 times across a hot path destroys the L1i cache, making the program radically slower overall.</li>
-      <li><strong>Deep Object-Oriented Virtual Dispatch:</strong> Heavy polymorphism and deep inheritance trees require the CPU to navigate massive v-tables (Virtual Method Tables). The code for these disparate inherited methods is scattered randomly across memory, making it impossible for the L1i prefetcher to load the code sequentially, resulting in constant pipeline stalls.</li>
-    </ol>
+  <div class="page-container content-flow">
+    <div>
+      <p>How does a developer accidentally bloat a tight loop beyond the $32\text{ KB}$ L1i limit?</p>
+      <ol>
+        <li><strong>Aggressive Loop Unrolling:</strong> Compilers sometimes copy-paste the inside of a loop 10 times in
+          a row to avoid the branch condition check (`i++ < N`). If the loop body is large, this copy-pasting blows out
+            the L1i footprint.</li>
+        <li><strong>Excessive Function Inlining:</strong> Marking every helper function as
+          <code>[MethodImpl(MethodImplOptions.AggressiveInlining)]</code> forces the compiler to inject the function's
+          raw assembly directly into the call site. While it saves the 5-cycle function call overhead, repeating this 50
+          times across a hot path destroys the L1i cache, making the program radically slower overall.</li>
+        <li><strong>Deep Object-Oriented Virtual Dispatch:</strong> Heavy polymorphism and deep inheritance trees
+          require the CPU to navigate massive v-tables (Virtual Method Tables). The code for these disparate inherited
+          methods is scattered randomly across memory, making it impossible for the L1i prefetcher to load the code
+          sequentially, resulting in constant pipeline stalls.</li>
+      </ol>
 
-    <div class="callout tip">
-      <div class="callout-title">The Production Profiling Benchmark (Emerald)</div>
-      When tuning high-frequency trading engines, engineers don't just look at total execution time. They run Linux <code>perf stat</code> to analyze hardware PMU (Performance Monitoring Unit) counters. If they see <code>L1-icache-load-misses</code> spiking, they immediately restrict function inlining and compact their control flow. Optimizing for instruction cache density is often more impactful than optimizing the algorithmic Big-O complexity in hot paths.
+      <div class="callout tip">
+        <div class="callout-title">The Production Profiling Benchmark (Emerald)</div>
+        When tuning high-frequency trading engines, engineers don't just look at total execution time. They run Linux
+        <code>perf stat</code> to analyze hardware PMU (Performance Monitoring Unit) counters. If they see
+        <code>L1-icache-load-misses</code> spiking, they immediately restrict function inlining and compact their
+        control flow. Optimizing for instruction cache density is often more impactful than optimizing the algorithmic
+        Big-O complexity in hot paths.
+      </div>
     </div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 15: WHITEBOARD 5
      ========================================================================== -->
-<div class="page-container">
-  <div class="whiteboard-page">
-    <div class="wb-header">
-      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
-      <div class="wb-ref">REF: CH05_MECHANICAL_SYMPATHY_CACHES</div>
+  <div class="page-container">
+    <div class="whiteboard-page">
+      <div class="wb-header">
+        <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+        <div class="wb-ref">REF: CH05_MECHANICAL_SYMPATHY_CACHES</div>
+      </div>
+      <div class="wb-invariants">
+        <div><b>The Code Density Fallacy:</b> Writing "less code" in a high-level language does not guarantee L1i cache
+          density. A single 1-line LINQ query in C# can dynamically generate hundreds of lines of invisible closure
+          state-machine allocations and generic specialization assembly, silently blowing out the instruction cache.
+        </div>
+      </div>
+      <div class="wb-canvas"></div>
+      <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 15</span></div>
     </div>
-    <div class="wb-invariants">
-      <div><b>The Code Density Fallacy:</b> Writing "less code" in a high-level language does not guarantee L1i cache density. A single 1-line LINQ query in C# can dynamically generate hundreds of lines of invisible closure state-machine allocations and generic specialization assembly, silently blowing out the instruction cache.</div>
-    </div>
-    <div class="wb-canvas"></div>
-    <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 15</span></div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 16: CHECKLIST
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <h2>5.8 Chapter Verification, Checklist &amp; Quiz</h2>
+  <div class="page-container content-flow">
+    <div>
+      <h2>5.8 Chapter Verification, Checklist &amp; Quiz</h2>
 
-    <div class="checklist">
-      <h3>Verification Checklist</h3>
-      <div class="check-item"><div class="checkbox"></div><div>I can explain the Stored-Program concept and why it divorced hardware wiring from software logic.</div></div>
-      <div class="check-item"><div class="checkbox"></div><div>I can define the three components of the System Bus (Address, Data, Control).</div></div>
-      <div class="check-item"><div class="checkbox"></div><div>I understand the Von Neumann Bottleneck and why RAM latency starves modern CPUs.</div></div>
-      <div class="check-item"><div class="checkbox"></div><div>I can describe the physical layout of a pure Harvard Architecture and its throughput advantages.</div></div>
-      <div class="check-item"><div class="checkbox"></div><div>I understand the memory fragmentation flaw that prevents pure Harvard use in general computing.</div></div>
-      <div class="check-item"><div class="checkbox"></div><div>I can identify why microcontrollers (Arduino/AVR) utilize pure Harvard architectures.</div></div>
-      <div class="check-item"><div class="checkbox"></div><div>I can explain the Modified Harvard Architecture (Unified Main RAM + Split L1i/L1d caches).</div></div>
-      <div class="check-item"><div class="checkbox"></div><div>I understand how a Buffer Overflow leverages the Von Neumann unified memory to execute injected data.</div></div>
-      <div class="check-item"><div class="checkbox"></div><div>I can explain how the NX Bit (W^X) artificially enforces Harvard isolation for security.</div></div>
-      <div class="check-item"><div class="checkbox"></div><div>I understand how excessive function inlining destroys performance via L1 Instruction Cache thrashing.</div></div>
+      <div class="checklist">
+        <h3>Verification Checklist</h3>
+        <div class="check-item">
+          <div class="checkbox"></div>
+          <div>I can explain the Stored-Program concept and why it divorced hardware wiring from software logic.</div>
+        </div>
+        <div class="check-item">
+          <div class="checkbox"></div>
+          <div>I can define the three components of the System Bus (Address, Data, Control).</div>
+        </div>
+        <div class="check-item">
+          <div class="checkbox"></div>
+          <div>I understand the Von Neumann Bottleneck and why RAM latency starves modern CPUs.</div>
+        </div>
+        <div class="check-item">
+          <div class="checkbox"></div>
+          <div>I can describe the physical layout of a pure Harvard Architecture and its throughput advantages.</div>
+        </div>
+        <div class="check-item">
+          <div class="checkbox"></div>
+          <div>I understand the memory fragmentation flaw that prevents pure Harvard use in general computing.</div>
+        </div>
+        <div class="check-item">
+          <div class="checkbox"></div>
+          <div>I can identify why microcontrollers (Arduino/AVR) utilize pure Harvard architectures.</div>
+        </div>
+        <div class="check-item">
+          <div class="checkbox"></div>
+          <div>I can explain the Modified Harvard Architecture (Unified Main RAM + Split L1i/L1d caches).</div>
+        </div>
+        <div class="check-item">
+          <div class="checkbox"></div>
+          <div>I understand how a Buffer Overflow leverages the Von Neumann unified memory to execute injected data.
+          </div>
+        </div>
+        <div class="check-item">
+          <div class="checkbox"></div>
+          <div>I can explain how the NX Bit (W^X) artificially enforces Harvard isolation for security.</div>
+        </div>
+        <div class="check-item">
+          <div class="checkbox"></div>
+          <div>I understand how excessive function inlining destroys performance via L1 Instruction Cache thrashing.
+          </div>
+        </div>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 17: QUIZ PART 1
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <h3>Comprehensive Examination</h3>
+  <div class="page-container content-flow">
+    <div>
+      <h3>Comprehensive Examination</h3>
 
-    <div class="quiz-section">
-      <div class="quiz-question">
-        <p>1. What is the fundamental, defining characteristic of a pure Von Neumann machine?</p>
-        <div class="quiz-option">A) The CPU utilizes separate buses for Address and Data mapping.</div>
-        <div class="quiz-option">B) The system relies on a multi-stage execution pipeline to increase throughput.</div>
-        <div class="quiz-option">C) Instructions (code) and Data (variables) are stored in the exact same physical memory space and share a single bus array.</div>
-        <div class="quiz-option">D) The architecture uses dynamic RAM (DRAM) instead of static RAM (SRAM) for main memory.</div>
-      </div>
+      <div class="quiz-section">
+        <div class="quiz-question">
+          <p>1. What is the fundamental, defining characteristic of a pure Von Neumann machine?</p>
+          <div class="quiz-option">A) The CPU utilizes separate buses for Address and Data mapping.</div>
+          <div class="quiz-option">B) The system relies on a multi-stage execution pipeline to increase throughput.
+          </div>
+          <div class="quiz-option">C) Instructions (code) and Data (variables) are stored in the exact same physical
+            memory space and share a single bus array.</div>
+          <div class="quiz-option">D) The architecture uses dynamic RAM (DRAM) instead of static RAM (SRAM) for main
+            memory.</div>
+        </div>
 
-      <div class="quiz-question">
-        <p>2. According to John Backus, what is the primary physical cause of the "Von Neumann Bottleneck"?</p>
-        <div class="quiz-option">A) The CPU generates too much heat when evaluating instructions sequentially.</div>
-        <div class="quiz-option">B) The single shared Data Bus forces the CPU to stall instruction fetches while reading or writing data, exacerbated by the massive latency gap between fast CPU clocks and slow DRAM response times.</div>
-        <div class="quiz-option">C) The Address bus is physically restricted to 32 bits, capping memory at 4 GB.</div>
-        <div class="quiz-option">D) The lack of an L1 cache in early processor topologies.</div>
-      </div>
+        <div class="quiz-question">
+          <p>2. According to John Backus, what is the primary physical cause of the "Von Neumann Bottleneck"?</p>
+          <div class="quiz-option">A) The CPU generates too much heat when evaluating instructions sequentially.</div>
+          <div class="quiz-option">B) The single shared Data Bus forces the CPU to stall instruction fetches while
+            reading or writing data, exacerbated by the massive latency gap between fast CPU clocks and slow DRAM
+            response times.</div>
+          <div class="quiz-option">C) The Address bus is physically restricted to 32 bits, capping memory at 4 GB.</div>
+          <div class="quiz-option">D) The lack of an L1 cache in early processor topologies.</div>
+        </div>
 
-      <div class="quiz-question">
-        <p>3. Why is the pure Harvard Architecture unsuitable for a modern desktop operating system running general-purpose applications?</p>
-        <div class="quiz-option">A) It does not support floating-point mathematics inherently.</div>
-        <div class="quiz-option">B) It restricts the use of virtual memory and translation lookaside buffers (TLBs).</div>
-        <div class="quiz-option">C) It requires physically partitioned RAM for code and data, leading to catastrophic resource fragmentation and out-of-memory errors for unpredictable workloads.</div>
-        <div class="quiz-option">D) The dual buses create severe electromagnetic interference (EMI) at gigahertz speeds.</div>
+        <div class="quiz-question">
+          <p>3. Why is the pure Harvard Architecture unsuitable for a modern desktop operating system running
+            general-purpose applications?</p>
+          <div class="quiz-option">A) It does not support floating-point mathematics inherently.</div>
+          <div class="quiz-option">B) It restricts the use of virtual memory and translation lookaside buffers (TLBs).
+          </div>
+          <div class="quiz-option">C) It requires physically partitioned RAM for code and data, leading to catastrophic
+            resource fragmentation and out-of-memory errors for unpredictable workloads.</div>
+          <div class="quiz-option">D) The dual buses create severe electromagnetic interference (EMI) at gigahertz
+            speeds.</div>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 18: WHITEBOARD 6
      ========================================================================== -->
-<div class="page-container">
-  <div class="whiteboard-page">
-    <div class="wb-header">
-      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
-      <div class="wb-ref">REF: CH05_QUIZ_SCRATCHPAD_1</div>
+  <div class="page-container">
+    <div class="whiteboard-page">
+      <div class="wb-header">
+        <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+        <div class="wb-ref">REF: CH05_QUIZ_SCRATCHPAD_1</div>
+      </div>
+      <div class="wb-canvas"></div>
+      <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 18</span></div>
     </div>
-    <div class="wb-canvas"></div>
-    <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 18</span></div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 19: QUIZ PART 2
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <div class="quiz-section" style="margin-top: 0;">
-      <div class="quiz-question">
-        <p>4. Which of the following accurately describes the "Modified Harvard Architecture" utilized by all modern Intel, AMD, and Apple processors?</p>
-        <div class="quiz-option">A) Main memory (DRAM) is unified, but the internal L1 cache is strictly split into dedicated Instruction (L1i) and Data (L1d) caches to feed the pipeline concurrently.</div>
-        <div class="quiz-option">B) The CPU uses Harvard for main memory but unifies the L3 cache.</div>
-        <div class="quiz-option">C) The architecture uses software microcode to simulate a dual-bus structure over a single physical copper trace.</div>
-        <div class="quiz-option">D) Main memory is strictly split, but the CPU pipeline executes instructions out of order to simulate a unified space.</div>
-      </div>
+  <div class="page-container content-flow">
+    <div>
+      <div class="quiz-section" style="margin-top: 0;">
+        <div class="quiz-question">
+          <p>4. Which of the following accurately describes the "Modified Harvard Architecture" utilized by all modern
+            Intel, AMD, and Apple processors?</p>
+          <div class="quiz-option">A) Main memory (DRAM) is unified, but the internal L1 cache is strictly split into
+            dedicated Instruction (L1i) and Data (L1d) caches to feed the pipeline concurrently.</div>
+          <div class="quiz-option">B) The CPU uses Harvard for main memory but unifies the L3 cache.</div>
+          <div class="quiz-option">C) The architecture uses software microcode to simulate a dual-bus structure over a
+            single physical copper trace.</div>
+          <div class="quiz-option">D) Main memory is strictly split, but the CPU pipeline executes instructions out of
+            order to simulate a unified space.</div>
+        </div>
 
-      <div class="quiz-question">
-        <p>5. How does the No-Execute (NX) bit hardware feature defend against classic Stack-Based Buffer Overflow attacks?</p>
-        <div class="quiz-option">A) It encrypts the return address (`RIP`) pointer on the stack using a random canary value.</div>
-        <div class="quiz-option">B) It enforces a W^X (Write XOR Execute) policy, preventing the CPU from executing assembly instructions that reside in memory pages marked for variable data (like the Stack or Heap).</div>
-        <div class="quiz-option">C) It physically disconnects the data bus if a string exceeds its allocated integer array boundary.</div>
-        <div class="quiz-option">D) It randomizes the memory locations of shared libraries (ASLR).</div>
-      </div>
+        <div class="quiz-question">
+          <p>5. How does the No-Execute (NX) bit hardware feature defend against classic Stack-Based Buffer Overflow
+            attacks?</p>
+          <div class="quiz-option">A) It encrypts the return address (`RIP`) pointer on the stack using a random canary
+            value.</div>
+          <div class="quiz-option">B) It enforces a W^X (Write XOR Execute) policy, preventing the CPU from executing
+            assembly instructions that reside in memory pages marked for variable data (like the Stack or Heap).</div>
+          <div class="quiz-option">C) It physically disconnects the data bus if a string exceeds its allocated integer
+            array boundary.</div>
+          <div class="quiz-option">D) It randomizes the memory locations of shared libraries (ASLR).</div>
+        </div>
 
-      <div class="quiz-question">
-        <p>6. An engineer marks 50 utility functions with aggressive compiler inline attributes. Benchmarks show the code is now 20% slower. What architectural threshold was likely violated?</p>
-        <div class="quiz-option">A) The CPU experienced Data Hazard RAW stalls due to register depletion.</div>
-        <div class="quiz-option">B) The inlined assembly footprint exceeded the 32 KB capacity of the L1 Instruction Cache (L1i), causing severe instruction thrashing and pipeline starvation.</div>
-        <div class="quiz-option">C) The expanded code caused a stack overflow, expanding into the Heap.</div>
-        <div class="quiz-option">D) The L2 cache failed to synchronize via the MESI protocol.</div>
+        <div class="quiz-question">
+          <p>6. An engineer marks 50 utility functions with aggressive compiler inline attributes. Benchmarks show the
+            code is now 20% slower. What architectural threshold was likely violated?</p>
+          <div class="quiz-option">A) The CPU experienced Data Hazard RAW stalls due to register depletion.</div>
+          <div class="quiz-option">B) The inlined assembly footprint exceeded the 32 KB capacity of the L1 Instruction
+            Cache (L1i), causing severe instruction thrashing and pipeline starvation.</div>
+          <div class="quiz-option">C) The expanded code caused a stack overflow, expanding into the Heap.</div>
+          <div class="quiz-option">D) The L2 cache failed to synchronize via the MESI protocol.</div>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 20: QUIZ PART 3 & PROMPTS
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <div class="quiz-section" style="margin-top: 0;">
-      <div class="quiz-question">
-        <p>7. In the Super-Harvard Architecture (SHARC) used by Digital Signal Processors, why are there two independent Data Memories in addition to the Instruction Cache?</p>
-        <div class="quiz-option">A) To separate incoming network packets from outgoing packets.</div>
-        <div class="quiz-option">B) To allow the Multiply-Accumulate (MAC) unit to fetch two separate operands (e.g., an audio sample and a filter coefficient) simultaneously in a single clock cycle.</div>
-        <div class="quiz-option">C) To provide a backup failover memory in high-radiation aerospace environments.</div>
-        <div class="quiz-option">D) To partition integer variables from floating-point variables.</div>
+  <div class="page-container content-flow">
+    <div>
+      <div class="quiz-section" style="margin-top: 0;">
+        <div class="quiz-question">
+          <p>7. In the Super-Harvard Architecture (SHARC) used by Digital Signal Processors, why are there two
+            independent Data Memories in addition to the Instruction Cache?</p>
+          <div class="quiz-option">A) To separate incoming network packets from outgoing packets.</div>
+          <div class="quiz-option">B) To allow the Multiply-Accumulate (MAC) unit to fetch two separate operands (e.g.,
+            an audio sample and a filter coefficient) simultaneously in a single clock cycle.</div>
+          <div class="quiz-option">C) To provide a backup failover memory in high-radiation aerospace environments.
+          </div>
+          <div class="quiz-option">D) To partition integer variables from floating-point variables.</div>
+        </div>
+
+        <div class="quiz-question">
+          <p>8. What technique do modern hackers use to bypass the NX Bit / DEP security mechanisms on Von Neumann
+            machines?</p>
+          <div class="quiz-option">A) Cross-Site Scripting (XSS).</div>
+          <div class="quiz-option">B) Return-Oriented Programming (ROP) Chains, which string together existing
+            executable code snippets instead of injecting new executable data.</div>
+          <div class="quiz-option">C) SQL Injection to alter the MMU page tables directly.</div>
+          <div class="quiz-option">D) Thermal fault injection via aggressive overclocking.</div>
+        </div>
+
+        <h3 style="margin-top: 24px;">Systems Writing Prompts</h3>
+
+        <p style="font-weight: 700; margin-bottom: 4px; font-size: 9.5pt;">Prompt 1: The Bottleneck Equation</p>
+        <p style="font-size: 9pt;">Explain the mechanics of the Von Neumann Bottleneck. Contrast the physical latency of
+          a modern CPU clock cycle against the access latency of DDR5 RAM. Detail why adding more ALUs to a processor
+          does not increase performance for memory-bound workloads.</p>
+
+        <p style="font-weight: 700; margin-top: 14px; margin-bottom: 4px; font-size: 9.5pt;">Prompt 2: The Security
+          Paradox</p>
+        <p style="font-size: 9pt;">The Stored-Program concept treats code and data as identical binary strings. Explain
+          how this brilliant architectural abstraction directly enables Buffer Overflows. Describe the physical stack
+          layout (Local Variables vs. Return Address) and the mechanical execution sequence of a malicious payload.</p>
       </div>
-
-      <div class="quiz-question">
-        <p>8. What technique do modern hackers use to bypass the NX Bit / DEP security mechanisms on Von Neumann machines?</p>
-        <div class="quiz-option">A) Cross-Site Scripting (XSS).</div>
-        <div class="quiz-option">B) Return-Oriented Programming (ROP) Chains, which string together existing executable code snippets instead of injecting new executable data.</div>
-        <div class="quiz-option">C) SQL Injection to alter the MMU page tables directly.</div>
-        <div class="quiz-option">D) Thermal fault injection via aggressive overclocking.</div>
-      </div>
-
-      <h3 style="margin-top: 24px;">Systems Writing Prompts</h3>
-      
-      <p style="font-weight: 700; margin-bottom: 4px; font-size: 9.5pt;">Prompt 1: The Bottleneck Equation</p>
-      <p style="font-size: 9pt;">Explain the mechanics of the Von Neumann Bottleneck. Contrast the physical latency of a modern CPU clock cycle against the access latency of DDR5 RAM. Detail why adding more ALUs to a processor does not increase performance for memory-bound workloads.</p>
-
-      <p style="font-weight: 700; margin-top: 14px; margin-bottom: 4px; font-size: 9.5pt;">Prompt 2: The Security Paradox</p>
-      <p style="font-size: 9pt;">The Stored-Program concept treats code and data as identical binary strings. Explain how this brilliant architectural abstraction directly enables Buffer Overflows. Describe the physical stack layout (Local Variables vs. Return Address) and the mechanical execution sequence of a malicious payload.</p>
     </div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 21: WHITEBOARD 7
      ========================================================================== -->
-<div class="page-container">
-  <div class="whiteboard-page">
-    <div class="wb-header">
-      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
-      <div class="wb-ref">REF: CH05_PROMPT_SCRATCHPAD</div>
+  <div class="page-container">
+    <div class="whiteboard-page">
+      <div class="wb-header">
+        <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+        <div class="wb-ref">REF: CH05_PROMPT_SCRATCHPAD</div>
+      </div>
+      <div class="wb-canvas"></div>
+      <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 21</span></div>
     </div>
-    <div class="wb-canvas"></div>
-    <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 21</span></div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 22: ANSWER KEY (PART 1)
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <div class="litmus-box" style="margin-top: 0; padding: 12px 14px; font-size: 8pt; line-height: 1.5;">
-      <div style="font-weight: 800; color: #4338CA; text-transform: uppercase; margin-bottom: 6px; font-size: 8.5pt;">Chapter 5 Technical Answer Key</div>
-      <div style="margin-bottom: 6px;"><b>1. (C)</b> The defining trait of Von Neumann is the unified memory model. The lack of distinction between data and executable code revolutionized computing flexibility but introduced severe bus contention bottlenecks and security vulnerabilities.</div>
-      <div style="margin-bottom: 6px;"><b>2. (B)</b> The CPU is orders of magnitude faster than DRAM. Because it must use the same physical bus to fetch instructions and read/write data, it cannot do both concurrently. The pipeline starves while waiting for the RAM to respond.</div>
-      <div style="margin-bottom: 6px;"><b>3. (C)</b> Pure Harvard requires hard-wired partitions (e.g., exactly 8GB for code, 8GB for data). If an application's memory profile dynamically shifts and requires 10GB of data, the system crashes from fragmentation, leaving empty instruction memory stranded and unusable.</div>
-      <div style="margin-bottom: 6px;"><b>4. (A)</b> To achieve Harvard-level parallel pipeline throughput without suffering Von Neumann fragmentation, modern chips use a Unified DDR RAM but strict physically separated L1i and L1d SRAM caches on the die.</div>
-      <div style="margin-bottom: 6px;"><b>5. (B)</b> By explicitly segregating memory pages via the MMU (W^X), the OS guarantees that any area the user can write to (data buffers) is chemically stripped of its execute privileges, instantly faulting if the <code>RIP</code> is pointed there.</div>
-      <div style="margin-bottom: 6px;"><b>6. (B)</b> Inlining removes function call overhead but physically copies the assembly payload into every call site. This massive code bloat evicts other critical instructions from the tiny 32KB L1i cache. When the loop restarts, the CPU must stall to re-fetch the instructions from L2, destroying pipeline throughput.</div>
+  <div class="page-container content-flow">
+    <div>
+      <div class="litmus-box" style="margin-top: 0; padding: 12px 14px; font-size: 8pt; line-height: 1.5;">
+        <div style="font-weight: 800; color: #4338CA; text-transform: uppercase; margin-bottom: 6px; font-size: 8.5pt;">
+          Chapter 5 Technical Answer Key</div>
+        <div style="margin-bottom: 6px;"><b>1. (C)</b> The defining trait of Von Neumann is the unified memory model.
+          The lack of distinction between data and executable code revolutionized computing flexibility but introduced
+          severe bus contention bottlenecks and security vulnerabilities.</div>
+        <div style="margin-bottom: 6px;"><b>2. (B)</b> The CPU is orders of magnitude faster than DRAM. Because it must
+          use the same physical bus to fetch instructions and read/write data, it cannot do both concurrently. The
+          pipeline starves while waiting for the RAM to respond.</div>
+        <div style="margin-bottom: 6px;"><b>3. (C)</b> Pure Harvard requires hard-wired partitions (e.g., exactly 8GB
+          for code, 8GB for data). If an application's memory profile dynamically shifts and requires 10GB of data, the
+          system crashes from fragmentation, leaving empty instruction memory stranded and unusable.</div>
+        <div style="margin-bottom: 6px;"><b>4. (A)</b> To achieve Harvard-level parallel pipeline throughput without
+          suffering Von Neumann fragmentation, modern chips use a Unified DDR RAM but strict physically separated L1i
+          and L1d SRAM caches on the die.</div>
+        <div style="margin-bottom: 6px;"><b>5. (B)</b> By explicitly segregating memory pages via the MMU (W^X), the OS
+          guarantees that any area the user can write to (data buffers) is chemically stripped of its execute
+          privileges, instantly faulting if the <code>RIP</code> is pointed there.</div>
+        <div style="margin-bottom: 6px;"><b>6. (B)</b> Inlining removes function call overhead but physically copies the
+          assembly payload into every call site. This massive code bloat evicts other critical instructions from the
+          tiny 32KB L1i cache. When the loop restarts, the CPU must stall to re-fetch the instructions from L2,
+          destroying pipeline throughput.</div>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 23: ANSWER KEY (PART 2) & FINAL SYNTHESIS WHITEBOARD
      ========================================================================== -->
-<div class="page-container">
-  <div class="litmus-box" style="margin-top: 0; margin-bottom: 12px; padding: 12px 14px; font-size: 8pt; line-height: 1.5;">
-    <div style="margin-bottom: 6px;"><b>7. (B)</b> DSP algorithms like FIR filters require a Multiply-Accumulate (MAC) operation involving two distinct data inputs simultaneously. Dual data memories and buses allow both inputs to be fetched concurrently in 1 clock cycle without stalling the pipeline.</div>
-    <div style="margin-bottom: 6px;"><b>8. (B)</b> Since hackers cannot execute their injected stack payloads due to the NX bit, they pivot to ROP. By chaining together tiny, preexisting fragments of application code that end in <code>ret</code>, they manipulate the stack pointers to achieve arbitrary code execution via the application's own legitimate, executable memory.</div>
-    <div style="margin-bottom: 6px;"><b>Prompt 1:</b> A modern CPU cycles every $0.2\text{ns}$, while DDR5 latency is ~$80\text{ns}$ (a 400-cycle gap). The Von Neumann bottleneck is the inability to fetch instructions and data simultaneously over the shared bus. If a workload is memory-bound (e.g., massive array traversals), the execution units sit idle waiting for data. Adding 10 more ALUs provides zero benefit because the physical copper data pipeline is saturated, stalling the entire architecture.</div>
-    <div><b>Prompt 2:</b> Because RAM is untyped binary, user inputs and kernel code look identical to the CPU. If `strcpy` overwrites an array boundary, it bleeds into the call stack, overwriting the saved Return Address. By pointing this corrupted Return Address to the injected shellcode inside the array, the CPU will jump there upon function exit and execute the text input as if it were a valid compiled program.</div>
-  </div>
-
-  <div class="whiteboard-page wb-split">
-    <div class="wb-header">
-      <div class="wb-title">Whiteboard &amp; Synthesis Workspace</div>
-      <div class="wb-ref">REF: CH05_FINAL_SYNTHESIS</div>
+  <div class="page-container">
+    <div class="litmus-box"
+      style="margin-top: 0; margin-bottom: 12px; padding: 12px 14px; font-size: 8pt; line-height: 1.5;">
+      <div style="margin-bottom: 6px;"><b>7. (B)</b> DSP algorithms like FIR filters require a Multiply-Accumulate (MAC)
+        operation involving two distinct data inputs simultaneously. Dual data memories and buses allow both inputs to
+        be fetched concurrently in 1 clock cycle without stalling the pipeline.</div>
+      <div style="margin-bottom: 6px;"><b>8. (B)</b> Since hackers cannot execute their injected stack payloads due to
+        the NX bit, they pivot to ROP. By chaining together tiny, preexisting fragments of application code that end in
+        <code>ret</code>, they manipulate the stack pointers to achieve arbitrary code execution via the application's
+        own legitimate, executable memory.</div>
+      <div style="margin-bottom: 6px;"><b>Prompt 1:</b> A modern CPU cycles every $0.2\text{ns}$, while DDR5 latency is
+        ~$80\text{ns}$ (a 400-cycle gap). The Von Neumann bottleneck is the inability to fetch instructions and data
+        simultaneously over the shared bus. If a workload is memory-bound (e.g., massive array traversals), the
+        execution units sit idle waiting for data. Adding 10 more ALUs provides zero benefit because the physical copper
+        data pipeline is saturated, stalling the entire architecture.</div>
+      <div><b>Prompt 2:</b> Because RAM is untyped binary, user inputs and kernel code look identical to the CPU. If
+        `strcpy` overwrites an array boundary, it bleeds into the call stack, overwriting the saved Return Address. By
+        pointing this corrupted Return Address to the injected shellcode inside the array, the CPU will jump there upon
+        function exit and execute the text input as if it were a valid compiled program.</div>
     </div>
-    <div class="wb-canvas"></div>
-    <div class="wb-footer"><span>GIT GOOD &middot; CHAPTER 5 COMPLETE</span><span>PAGE 23</span></div>
+
+    <div class="whiteboard-page wb-split">
+      <div class="wb-header">
+        <div class="wb-title">Whiteboard &amp; Synthesis Workspace</div>
+        <div class="wb-ref">REF: CH05_FINAL_SYNTHESIS</div>
+      </div>
+      <div class="wb-canvas"></div>
+      <div class="wb-footer"><span>GIT GOOD &middot; CHAPTER 5 COMPLETE</span><span>PAGE 23</span></div>
+    </div>
   </div>
-</div>
 
 </body>
+
 </html>

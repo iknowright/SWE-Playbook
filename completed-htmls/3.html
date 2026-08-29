@@ -1,677 +1,920 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-<meta charset="utf-8">
-<link rel="stylesheet" href="common.css">
-<title>Chapter 3: Quartz Crystal Oscillators, Piezoelectric Resonance, PLLs & Clock Period Math</title>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="common.css">
+  <title>Chapter 3: Quartz Crystal Oscillators, Piezoelectric Resonance, PLLs & Clock Period Math</title>
 </head>
+
 <body class="chapter-three">
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 1: THE NEED FOR A HEARTBEAT (SEQUENTIAL LOGIC)
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <div class="phase-label">Volume I &middot; Silicon, Machine Architecture &amp; Low-Level Math</div>
-    <div class="chapter-number">Chapter 3 (Day 3)</div>
-    <h1 class="chapter-title">Quartz Crystal Oscillators, Piezoelectric Resonance, PLL Multipliers &amp; Clock Period Math</h1>
+  <div class="page-container content-flow">
+    <div>
+      <div class="phase-label">Volume I &middot; Silicon, Machine Architecture &amp; Low-Level Math</div>
+      <div class="chapter-number">Chapter 3 (Day 3)</div>
+      <h1 class="chapter-title">Quartz Crystal Oscillators, Piezoelectric Resonance, PLL Multipliers &amp; Clock Period
+        Math</h1>
 
-    <h2>3.0 The Chaos of Combinational Logic &amp; The Need for a Heartbeat</h2>
-    <p>In Chapter 2, we built an Arithmetic Logic Unit (ALU) entirely out of NAND gates. This was <strong>Combinational Logic</strong>—circuits where the output is strictly a function of the current inputs. However, combinational logic has a fatal flaw: it possesses no concept of <em>Time</em> or <em>State</em>.</p>
+      <h2>3.0 The Chaos of Combinational Logic &amp; The Need for a Heartbeat</h2>
+      <p>In Chapter 2, we built an Arithmetic Logic Unit (ALU) entirely out of NAND gates. This was
+        <strong>Combinational Logic</strong>—circuits where the output is strictly a function of the current inputs.
+        However, combinational logic has a fatal flaw: it possesses no concept of <em>Time</em> or <em>State</em>.</p>
 
-    <p>If you wire the output of a combinational circuit directly back into its own input (a feedback loop), the circuit enters a catastrophic race condition. Electrons flow through the gates as fast as physics allows, constantly flipping states in unpredictable, uncontrolled oscillations. A CPU built purely of combinational logic is a chaotic ocean of electrical noise.</p>
-    
-    <p>To compute deterministically, we must capture, hold, and release electrical signals in strict, orderly intervals. We need to introduce <strong>Sequential Logic</strong>. We must transform the chaotic flow of electrons into a synchronized marching band. This requires a universal metronome: <strong>The Clock</strong>.</p>
+      <p>If you wire the output of a combinational circuit directly back into its own input (a feedback loop), the
+        circuit enters a catastrophic race condition. Electrons flow through the gates as fast as physics allows,
+        constantly flipping states in unpredictable, uncontrolled oscillations. A CPU built purely of combinational
+        logic is a chaotic ocean of electrical noise.</p>
 
-    <h3>The Metronome of Silicon</h3>
-    <p>A CPU clock is not a time-of-day tracker; it is a continuous, ultra-high-speed electrical square wave alternating between $0\text{V}$ and $V_{DD}$ ($1.2\text{V}$). Every time this voltage transitions from low to high (the <em>Rising Edge</em>), millions of microscopic D-Flip Flops across the silicon die simultaneously latch their inputs and freeze their outputs. This allows the ALUs exactly one "Clock Cycle" to perform their mathematical acrobatics before the next heartbeat captures the result.</p>
+      <p>To compute deterministically, we must capture, hold, and release electrical signals in strict, orderly
+        intervals. We need to introduce <strong>Sequential Logic</strong>. We must transform the chaotic flow of
+        electrons into a synchronized marching band. This requires a universal metronome: <strong>The Clock</strong>.
+      </p>
+
+      <h3>The Metronome of Silicon</h3>
+      <p>A CPU clock is not a time-of-day tracker; it is a continuous, ultra-high-speed electrical square wave
+        alternating between $0\text{V}$ and $V_{DD}$ ($1.2\text{V}$). Every time this voltage transitions from low to
+        high (the <em>Rising Edge</em>), millions of microscopic D-Flip Flops across the silicon die simultaneously
+        latch their inputs and freeze their outputs. This allows the ALUs exactly one "Clock Cycle" to perform their
+        mathematical acrobatics before the next heartbeat captures the result.</p>
+    </div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 2: WHITEBOARD 1
      ========================================================================== -->
-<div class="page-container">
-  <div class="whiteboard-page">
-    <div class="wb-header">
-      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
-      <div class="wb-ref">REF: CH03_SEQUENTIAL_LOGIC_INTRO</div>
+  <div class="page-container">
+    <div class="whiteboard-page">
+      <div class="wb-header">
+        <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+        <div class="wb-ref">REF: CH03_SEQUENTIAL_LOGIC_INTRO</div>
+      </div>
+      <div class="wb-invariants">
+        <div><b>The Sequential Invariant:</b> Combinational logic performs the <i>computation</i>. Sequential logic
+          (driven by the clock) provides the <i>memory and state</i>. Without the clock, a CPU cannot execute sequential
+          instructions.</div>
+      </div>
+      <div class="wb-canvas"></div>
+      <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 2</span></div>
     </div>
-    <div class="wb-invariants">
-      <div><b>The Sequential Invariant:</b> Combinational logic performs the <i>computation</i>. Sequential logic (driven by the clock) provides the <i>memory and state</i>. Without the clock, a CPU cannot execute sequential instructions.</div>
-    </div>
-    <div class="wb-canvas"></div>
-    <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 2</span></div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 3: THE PIEZOELECTRIC EFFECT
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <h2>3.1 The Piezoelectric Effect &amp; Quartz Crystals</h2>
-    <p>How do we generate a mathematically perfect, continuous square wave to drive a multi-gigahertz processor? The answer lies not in silicon, but in a completely different material: <strong>Quartz ($\text{SiO}_2$)</strong>.</p>
+  <div class="page-container content-flow">
+    <div>
+      <h2>3.1 The Piezoelectric Effect &amp; Quartz Crystals</h2>
+      <p>How do we generate a mathematically perfect, continuous square wave to drive a multi-gigahertz processor? The
+        answer lies not in silicon, but in a completely different material: <strong>Quartz ($\text{SiO}_2$)</strong>.
+      </p>
 
-    <h3>The Curie Brothers &amp; Piezoelectricity</h3>
-    <p>In 1880, Pierre and Jacques Curie discovered the <strong>Piezoelectric Effect</strong>. Certain crystalline structures, due to their internal atomic asymmetry, exhibit a unique physical property:</p>
-    <ul>
-      <li><strong>The Direct Effect:</strong> If you physically strike or squeeze the crystal, it generates a brief electrical voltage. (This is how push-button cigarette lighters work).</li>
-      <li><strong>The Inverse Effect:</strong> If you apply an electrical voltage to the crystal, its atomic lattice physically deforms and bends.</li>
-    </ul>
+      <h3>The Curie Brothers &amp; Piezoelectricity</h3>
+      <p>In 1880, Pierre and Jacques Curie discovered the <strong>Piezoelectric Effect</strong>. Certain crystalline
+        structures, due to their internal atomic asymmetry, exhibit a unique physical property:</p>
+      <ul>
+        <li><strong>The Direct Effect:</strong> If you physically strike or squeeze the crystal, it generates a brief
+          electrical voltage. (This is how push-button cigarette lighters work).</li>
+        <li><strong>The Inverse Effect:</strong> If you apply an electrical voltage to the crystal, its atomic lattice
+          physically deforms and bends.</li>
+      </ul>
 
-    <h3>The Quartz Tuning Fork</h3>
-    <p>If you apply a sharp voltage spike to a sliver of quartz and then remove it, the crystal will physically flex, rebound, and vibrate. Because of the Direct Effect, as it physically vibrates, it generates an oscillating alternating current (AC) voltage. Like a musical tuning fork, the quartz will vibrate at its <em>mechanical resonant frequency</em>—a frequency dictated strictly by the physical size, thickness, and cut angle of the quartz slice.</p>
+      <h3>The Quartz Tuning Fork</h3>
+      <p>If you apply a sharp voltage spike to a sliver of quartz and then remove it, the crystal will physically flex,
+        rebound, and vibrate. Because of the Direct Effect, as it physically vibrates, it generates an oscillating
+        alternating current (AC) voltage. Like a musical tuning fork, the quartz will vibrate at its <em>mechanical
+          resonant frequency</em>—a frequency dictated strictly by the physical size, thickness, and cut angle of the
+        quartz slice.</p>
 
-    <div class="callout key">
-      <div class="callout-title">The AT-Cut Quartz (Indigo)</div>
-      Most motherboard oscillators use an "AT-cut" quartz crystal. The angle of the cut ($35^\circ 15'$) ensures that the crystal's resonant frequency remains incredibly stable across a wide range of operating temperatures ($0^\circ\text{C}$ to $70^\circ\text{C}$). This prevents your CPU clock from drifting when the server rack gets hot.
+      <div class="callout key">
+        <div class="callout-title">The AT-Cut Quartz (Indigo)</div>
+        Most motherboard oscillators use an "AT-cut" quartz crystal. The angle of the cut ($35^\circ 15'$) ensures that
+        the crystal's resonant frequency remains incredibly stable across a wide range of operating temperatures
+        ($0^\circ\text{C}$ to $70^\circ\text{C}$). This prevents your CPU clock from drifting when the server rack gets
+        hot.
+      </div>
     </div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 4: WHITEBOARD 2
      ========================================================================== -->
-<div class="page-container">
-  <div class="whiteboard-page">
-    <div class="wb-header">
-      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
-      <div class="wb-ref">REF: CH03_PIEZOELECTRIC_PHYSICS</div>
+  <div class="page-container">
+    <div class="whiteboard-page">
+      <div class="wb-header">
+        <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+        <div class="wb-ref">REF: CH03_PIEZOELECTRIC_PHYSICS</div>
+      </div>
+      <div class="wb-invariants">
+        <div><b>Mechanical Origin of Digital Time:</b> Every digital operation, from a TCP handshake to a high-frequency
+          trading execution, is ultimately governed by the physical, mechanical flexing of a tiny rock soldered to the
+          motherboard.</div>
+      </div>
+      <div class="wb-canvas"></div>
+      <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 4</span></div>
     </div>
-    <div class="wb-invariants">
-      <div><b>Mechanical Origin of Digital Time:</b> Every digital operation, from a TCP handshake to a high-frequency trading execution, is ultimately governed by the physical, mechanical flexing of a tiny rock soldered to the motherboard.</div>
-    </div>
-    <div class="wb-canvas"></div>
-    <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 4</span></div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 5: THE RLC EQUIVALENT CIRCUIT & Q-FACTOR
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <h2>3.2 The Equivalent RLC Circuit &amp; Q-Factor</h2>
-    <p>To an electrical engineer, a vibrating piece of quartz acts exactly like a highly tuned RLC (Resistor-Inductor-Capacitor) tank circuit. When integrated into an oscillator circuit (like a Pierce Oscillator), it provides the feedback necessary to sustain a perfect, endless sine wave.</p>
+  <div class="page-container content-flow">
+    <div>
+      <h2>3.2 The Equivalent RLC Circuit &amp; Q-Factor</h2>
+      <p>To an electrical engineer, a vibrating piece of quartz acts exactly like a highly tuned RLC
+        (Resistor-Inductor-Capacitor) tank circuit. When integrated into an oscillator circuit (like a Pierce
+        Oscillator), it provides the feedback necessary to sustain a perfect, endless sine wave.</p>
 
-    <h3>The High Q-Factor</h3>
-    <p>Why use quartz instead of just building an oscillator out of standard capacitors and inductors? The answer is the <strong>Quality Factor (Q-factor)</strong>, which measures how purely and efficiently a resonator rings without losing energy to heat (damping).</p>
-    <ul>
-      <li>A standard electrical LC circuit has a Q-factor of around $\sim 100$.</li>
-      <li>A standard AT-cut quartz crystal has a Q-factor ranging from <strong>$10,000$ to $100,000$</strong>.</li>
-    </ul>
-    <p>This immense Q-factor means the quartz acts as an uncompromising electrical filter. It rejects all electrical noise and refuses to oscillate at any frequency other than its exact mechanical resonance. This guarantees that your computer's base clock does not waver, jitter, or drift.</p>
+      <h3>The High Q-Factor</h3>
+      <p>Why use quartz instead of just building an oscillator out of standard capacitors and inductors? The answer is
+        the <strong>Quality Factor (Q-factor)</strong>, which measures how purely and efficiently a resonator rings
+        without losing energy to heat (damping).</p>
+      <ul>
+        <li>A standard electrical LC circuit has a Q-factor of around $\sim 100$.</li>
+        <li>A standard AT-cut quartz crystal has a Q-factor ranging from <strong>$10,000$ to $100,000$</strong>.</li>
+      </ul>
+      <p>This immense Q-factor means the quartz acts as an uncompromising electrical filter. It rejects all electrical
+        noise and refuses to oscillate at any frequency other than its exact mechanical resonance. This guarantees that
+        your computer's base clock does not waver, jitter, or drift.</p>
 
-    <h3>The 24 MHz Base Clock Limit</h3>
-    <p>There is a severe physical limitation to quartz. The resonant frequency is inversely proportional to the crystal's physical thickness. To make a crystal vibrate faster, you must cut it thinner.</p>
-    <p>A $24\text{ MHz}$ crystal (the standard base clock on many modern motherboards) is already paper-thin. If you wanted to cut a quartz crystal to vibrate natively at modern CPU speeds of $4\text{ GHz}$, the quartz slice would need to be fractions of a micrometer thick. It would shatter into dust during manufacturing, or disintegrate the moment a voltage was applied. <strong>We cannot mechanically generate a $4\text{ GHz}$ clock.</strong></p>
+      <h3>The 24 MHz Base Clock Limit</h3>
+      <p>There is a severe physical limitation to quartz. The resonant frequency is inversely proportional to the
+        crystal's physical thickness. To make a crystal vibrate faster, you must cut it thinner.</p>
+      <p>A $24\text{ MHz}$ crystal (the standard base clock on many modern motherboards) is already paper-thin. If you
+        wanted to cut a quartz crystal to vibrate natively at modern CPU speeds of $4\text{ GHz}$, the quartz slice
+        would need to be fractions of a micrometer thick. It would shatter into dust during manufacturing, or
+        disintegrate the moment a voltage was applied. <strong>We cannot mechanically generate a $4\text{ GHz}$
+          clock.</strong></p>
+    </div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 6: WHITEBOARD 3
      ========================================================================== -->
-<div class="page-container">
-  <div class="whiteboard-page">
-    <div class="wb-header">
-      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
-      <div class="wb-ref">REF: CH03_QUARTZ_QFACTOR</div>
+  <div class="page-container">
+    <div class="whiteboard-page">
+      <div class="wb-header">
+        <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+        <div class="wb-ref">REF: CH03_QUARTZ_QFACTOR</div>
+      </div>
+      <div class="wb-invariants">
+        <div><b>The Crystal Limitation:</b> Because quartz shatters if cut too thin for gigahertz frequencies,
+          motherboard architectures strictly separate the Base Clock (BCLK, ~100 MHz) from the CPU Core Clock (~4 GHz).
+          The CPU must multiply the base clock internally.</div>
+      </div>
+      <div class="wb-canvas"></div>
+      <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 6</span></div>
     </div>
-    <div class="wb-invariants">
-      <div><b>The Crystal Limitation:</b> Because quartz shatters if cut too thin for gigahertz frequencies, motherboard architectures strictly separate the Base Clock (BCLK, ~100 MHz) from the CPU Core Clock (~4 GHz). The CPU must multiply the base clock internally.</div>
-    </div>
-    <div class="wb-canvas"></div>
-    <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 6</span></div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 7: PHASE-LOCKED LOOPS (PLL)
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <h2>3.3 Phase-Locked Loops (PLLs) &amp; Frequency Multipliers</h2>
-    <p>If the motherboard can only safely provide a $100\text{ MHz}$ base clock (BCLK), how does the CPU internal pipeline operate at $4.0\text{ GHz}$? The CPU relies on an advanced analog-digital circuit called a <strong>Phase-Locked Loop (PLL)</strong> to multiply the frequency.</p>
+  <div class="page-container content-flow">
+    <div>
+      <h2>3.3 Phase-Locked Loops (PLLs) &amp; Frequency Multipliers</h2>
+      <p>If the motherboard can only safely provide a $100\text{ MHz}$ base clock (BCLK), how does the CPU internal
+        pipeline operate at $4.0\text{ GHz}$? The CPU relies on an advanced analog-digital circuit called a
+        <strong>Phase-Locked Loop (PLL)</strong> to multiply the frequency.</p>
 
-    <h3>The PLL Architecture</h3>
-    <p>A PLL does not "speed up" the existing clock; instead, it generates a completely new, incredibly fast clock internally, and forces it to synchronize perfectly with the slow motherboard clock. It operates as a continuous negative-feedback control system containing four core components:</p>
+      <h3>The PLL Architecture</h3>
+      <p>A PLL does not "speed up" the existing clock; instead, it generates a completely new, incredibly fast clock
+        internally, and forces it to synchronize perfectly with the slow motherboard clock. It operates as a continuous
+        negative-feedback control system containing four core components:</p>
 
-    <ol>
-      <li><strong>Voltage Controlled Oscillator (VCO):</strong> A purely internal silicon circuit (often a ring oscillator) that generates a very fast, but highly unstable, gigahertz clock signal. The frequency it generates is directly controlled by the input voltage it receives.</li>
-      <li><strong>Frequency Divider ($\div N$):</strong> The fast output of the VCO (e.g., $4.0\text{ GHz}$) is routed into a divider circuit that divides the frequency by a multiplier ratio (e.g., $N = 40$). The output of this divider is exactly $100\text{ MHz}$.</li>
-      <li><strong>Phase-Frequency Detector (PFD):</strong> This circuit receives two inputs: the reliable $100\text{ MHz}$ reference clock from the quartz crystal, and the divided $100\text{ MHz}$ signal from the VCO. The PFD compares the exact timing of their rising edges.</li>
-      <li><strong>Charge Pump &amp; Low-Pass Filter:</strong> If the VCO's divided signal is lagging behind the quartz signal (meaning the VCO is running too slow), the PFD tells the Charge Pump to inject voltage into the Low-Pass Filter. This increased voltage speeds up the VCO. If the VCO is too fast, the PFD drains voltage, slowing it down.</li>
-    </ol>
+      <ol>
+        <li><strong>Voltage Controlled Oscillator (VCO):</strong> A purely internal silicon circuit (often a ring
+          oscillator) that generates a very fast, but highly unstable, gigahertz clock signal. The frequency it
+          generates is directly controlled by the input voltage it receives.</li>
+        <li><strong>Frequency Divider ($\div N$):</strong> The fast output of the VCO (e.g., $4.0\text{ GHz}$) is routed
+          into a divider circuit that divides the frequency by a multiplier ratio (e.g., $N = 40$). The output of this
+          divider is exactly $100\text{ MHz}$.</li>
+        <li><strong>Phase-Frequency Detector (PFD):</strong> This circuit receives two inputs: the reliable $100\text{
+          MHz}$ reference clock from the quartz crystal, and the divided $100\text{ MHz}$ signal from the VCO. The PFD
+          compares the exact timing of their rising edges.</li>
+        <li><strong>Charge Pump &amp; Low-Pass Filter:</strong> If the VCO's divided signal is lagging behind the quartz
+          signal (meaning the VCO is running too slow), the PFD tells the Charge Pump to inject voltage into the
+          Low-Pass Filter. This increased voltage speeds up the VCO. If the VCO is too fast, the PFD drains voltage,
+          slowing it down.</li>
+      </ol>
+    </div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 8: WHITEBOARD 4
      ========================================================================== -->
-<div class="page-container">
-  <div class="whiteboard-page">
-    <div class="wb-header">
-      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
-      <div class="wb-ref">REF: CH03_PLL_ARCHITECTURE</div>
+  <div class="page-container">
+    <div class="whiteboard-page">
+      <div class="wb-header">
+        <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+        <div class="wb-ref">REF: CH03_PLL_ARCHITECTURE</div>
+      </div>
+      <div class="wb-invariants">
+        <div><b>CPU Multiplier Configuration:</b> When you "overclock" a CPU in the BIOS, you are literally
+          reprogramming the integer $N$ in the PLL's Frequency Divider. Changing the multiplier from $40$ to $45$ forces
+          the feedback loop to drive the VCO to $4.5\text{ GHz}$ to maintain the $100\text{ MHz}$ lock.</div>
+      </div>
+      <div class="wb-canvas"></div>
+      <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 8</span></div>
     </div>
-    <div class="wb-invariants">
-      <div><b>CPU Multiplier Configuration:</b> When you "overclock" a CPU in the BIOS, you are literally reprogramming the integer $N$ in the PLL's Frequency Divider. Changing the multiplier from $40$ to $45$ forces the feedback loop to drive the VCO to $4.5\text{ GHz}$ to maintain the $100\text{ MHz}$ lock.</div>
-    </div>
-    <div class="wb-canvas"></div>
-    <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 8</span></div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 9: CLOCK DISTRIBUTION NETWORKS
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <h2>3.4 Clock Distribution Networks (H-Trees)</h2>
-    <p>Once the PLL generates a flawless $4.0\text{ GHz}$ square wave, that signal must be delivered to billions of D-Flip Flops scattered across a $200\text{ mm}^2$ silicon die. This is the hardest routing problem in modern VLSI (Very Large Scale Integration) design.</p>
+  <div class="page-container content-flow">
+    <div>
+      <h2>3.4 Clock Distribution Networks (H-Trees)</h2>
+      <p>Once the PLL generates a flawless $4.0\text{ GHz}$ square wave, that signal must be delivered to billions of
+        D-Flip Flops scattered across a $200\text{ mm}^2$ silicon die. This is the hardest routing problem in modern
+        VLSI (Very Large Scale Integration) design.</p>
 
-    <h3>The Speed of Light Constraints</h3>
-    <p>Electrical signals in copper interconnects travel at roughly half the speed of light ($c_{copper} \approx 1.5 \times 10^8 \text{ m/s}$). Therefore, the signal travels approximately $15\text{ centimeters per nanosecond}$.</p>
-    <p>If the clock generator is sitting on the left side of the die, and the ALU is on the right side of the die, the clock pulse will physically hit the flip-flops on the left side picoseconds before it hits the right side. This catastrophic synchronization failure is called <strong>Clock Skew</strong>.</p>
+      <h3>The Speed of Light Constraints</h3>
+      <p>Electrical signals in copper interconnects travel at roughly half the speed of light ($c_{copper} \approx 1.5
+        \times 10^8 \text{ m/s}$). Therefore, the signal travels approximately $15\text{ centimeters per nanosecond}$.
+      </p>
+      <p>If the clock generator is sitting on the left side of the die, and the ALU is on the right side of the die, the
+        clock pulse will physically hit the flip-flops on the left side picoseconds before it hits the right side. This
+        catastrophic synchronization failure is called <strong>Clock Skew</strong>.</p>
 
-    <h3>The H-Tree Routing Algorithm</h3>
-    <p>To ensure the clock pulse arrives at every single flip-flop at the exact same picosecond, hardware engineers do not use straight wires. They use a fractal, symmetrical routing topology called an <strong>H-Tree</strong>.</p>
-    <ul>
-      <li>The primary clock signal originates at the exact geometric center of the die.</li>
-      <li>The wire splits into an 'H' shape, delivering the signal to four quadrants.</li>
-      <li>At the center of each quadrant, it splits into another smaller 'H', branching recursively down to the microscopic gate level.</li>
-    </ul>
-    
-    <p>Because every path through a perfect fractal H-Tree has the exact same physical length, the propagation delay is geometrically identical for every flip-flop. They all receive the clock edge simultaneously.</p>
+      <h3>The H-Tree Routing Algorithm</h3>
+      <p>To ensure the clock pulse arrives at every single flip-flop at the exact same picosecond, hardware engineers do
+        not use straight wires. They use a fractal, symmetrical routing topology called an <strong>H-Tree</strong>.</p>
+      <ul>
+        <li>The primary clock signal originates at the exact geometric center of the die.</li>
+        <li>The wire splits into an 'H' shape, delivering the signal to four quadrants.</li>
+        <li>At the center of each quadrant, it splits into another smaller 'H', branching recursively down to the
+          microscopic gate level.</li>
+      </ul>
+
+      <p>Because every path through a perfect fractal H-Tree has the exact same physical length, the propagation delay
+        is geometrically identical for every flip-flop. They all receive the clock edge simultaneously.</p>
+    </div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 10: WHITEBOARD 5
      ========================================================================== -->
-<div class="page-container">
-  <div class="whiteboard-page">
-    <div class="wb-header">
-      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
-      <div class="wb-ref">REF: CH03_HTREE_DISTRIBUTION</div>
+  <div class="page-container">
+    <div class="whiteboard-page">
+      <div class="wb-header">
+        <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+        <div class="wb-ref">REF: CH03_HTREE_DISTRIBUTION</div>
+      </div>
+      <div class="wb-invariants">
+        <div><b>Clock Buffers & RC Delay:</b> Wires have inherent Resistance and Capacitance (RC delay). A signal
+          traveling down a long H-Tree branch will degrade into a slow, sloppy curve. Heavy <i>Clock Buffers</i> are
+          placed at every branch intersection to drive the signal and keep the square wave edges infinitely sharp.</div>
+      </div>
+      <div class="wb-canvas"></div>
+      <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 10</span></div>
     </div>
-    <div class="wb-invariants">
-      <div><b>Clock Buffers & RC Delay:</b> Wires have inherent Resistance and Capacitance (RC delay). A signal traveling down a long H-Tree branch will degrade into a slow, sloppy curve. Heavy <i>Clock Buffers</i> are placed at every branch intersection to drive the signal and keep the square wave edges infinitely sharp.</div>
-    </div>
-    <div class="wb-canvas"></div>
-    <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 10</span></div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 11: SKEW VS. JITTER
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <h2>3.5 Clock Skew vs. Clock Jitter</h2>
-    <p>Despite the perfection of H-Trees, the physical universe is imperfect. Engineers must mathematically budget for two distinct timing anomalies when designing CPUs.</p>
+  <div class="page-container content-flow">
+    <div>
+      <h2>3.5 Clock Skew vs. Clock Jitter</h2>
+      <p>Despite the perfection of H-Trees, the physical universe is imperfect. Engineers must mathematically budget for
+        two distinct timing anomalies when designing CPUs.</p>
 
-    <h3>Clock Skew (Spatial Variation)</h3>
-    <p><strong>Clock Skew</strong> is the difference in arrival time of the clock edge between two different physical locations on the die. Even with an H-Tree, slight variations in copper etching during photolithography, or localized thermal hotspots (one side of the chip is hotter, increasing wire resistance), will cause one flip-flop to receive the clock slightly later than its neighbor.</p>
-    <ul>
-      <li><em>Positive Skew:</em> The receiving flip-flop gets the clock later than the sending flip-flop. (Helps prevent hold-time violations, but hurts setup-time).</li>
-      <li><em>Negative Skew:</em> The receiving flip-flop gets the clock earlier than the sender. (Dangerously eats into the available computation time).</li>
-    </ul>
+      <h3>Clock Skew (Spatial Variation)</h3>
+      <p><strong>Clock Skew</strong> is the difference in arrival time of the clock edge between two different physical
+        locations on the die. Even with an H-Tree, slight variations in copper etching during photolithography, or
+        localized thermal hotspots (one side of the chip is hotter, increasing wire resistance), will cause one
+        flip-flop to receive the clock slightly later than its neighbor.</p>
+      <ul>
+        <li><em>Positive Skew:</em> The receiving flip-flop gets the clock later than the sending flip-flop. (Helps
+          prevent hold-time violations, but hurts setup-time).</li>
+        <li><em>Negative Skew:</em> The receiving flip-flop gets the clock earlier than the sender. (Dangerously eats
+          into the available computation time).</li>
+      </ul>
 
-    <h3>Clock Jitter (Temporal Variation)</h3>
-    <p><strong>Clock Jitter</strong> is the variation in the clock period over time at a <em>single</em> location. If the target clock period is $250\text{ ps}$, the PLL might output $249\text{ ps}$ on cycle one, $251\text{ ps}$ on cycle two, and $248\text{ ps}$ on cycle three. Jitter is caused by power supply noise, electromagnetic interference (EMI), and inherent phase noise in the VCO. The CPU architecture must be designed to survive the worst-case shortest possible clock cycle caused by jitter.</p>
+      <h3>Clock Jitter (Temporal Variation)</h3>
+      <p><strong>Clock Jitter</strong> is the variation in the clock period over time at a <em>single</em> location. If
+        the target clock period is $250\text{ ps}$, the PLL might output $249\text{ ps}$ on cycle one, $251\text{ ps}$
+        on cycle two, and $248\text{ ps}$ on cycle three. Jitter is caused by power supply noise, electromagnetic
+        interference (EMI), and inherent phase noise in the VCO. The CPU architecture must be designed to survive the
+        worst-case shortest possible clock cycle caused by jitter.</p>
 
-    <div class="callout warn">
-      <div class="callout-title">The Margins of Error (Amber)</div>
-      If a CPU targets a $4.0\text{ GHz}$ clock ($250\text{ ps}$ period), engineers cannot give the ALU the full $250\text{ ps}$ to do its math. They must subtract the worst-case Clock Skew ($15\text{ ps}$) and the worst-case Clock Jitter ($10\text{ ps}$). The ALU actually only gets $225\text{ ps}$ to complete its work.
+      <div class="callout warn">
+        <div class="callout-title">The Margins of Error (Amber)</div>
+        If a CPU targets a $4.0\text{ GHz}$ clock ($250\text{ ps}$ period), engineers cannot give the ALU the full
+        $250\text{ ps}$ to do its math. They must subtract the worst-case Clock Skew ($15\text{ ps}$) and the worst-case
+        Clock Jitter ($10\text{ ps}$). The ALU actually only gets $225\text{ ps}$ to complete its work.
+      </div>
     </div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 12: WHITEBOARD 6
      ========================================================================== -->
-<div class="page-container">
-  <div class="whiteboard-page">
-    <div class="wb-header">
-      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
-      <div class="wb-ref">REF: CH03_SKEW_VS_JITTER</div>
+  <div class="page-container">
+    <div class="whiteboard-page">
+      <div class="wb-header">
+        <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+        <div class="wb-ref">REF: CH03_SKEW_VS_JITTER</div>
+      </div>
+      <div class="wb-invariants">
+        <div><b>Spatial vs Temporal:</b> Skew is a spatial delta ($\Delta T$ between Location A and Location B). Jitter
+          is a temporal delta ($\Delta T$ between Cycle $N$ and Cycle $N+1$). Both steal precious picoseconds from the
+          Critical Path.</div>
+      </div>
+      <div class="wb-canvas"></div>
+      <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 12</span></div>
     </div>
-    <div class="wb-invariants">
-      <div><b>Spatial vs Temporal:</b> Skew is a spatial delta ($\Delta T$ between Location A and Location B). Jitter is a temporal delta ($\Delta T$ between Cycle $N$ and Cycle $N+1$). Both steal precious picoseconds from the Critical Path.</div>
-    </div>
-    <div class="wb-canvas"></div>
-    <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 12</span></div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 13: CLOCK PERIOD MATH & SPEED OF LIGHT
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <h2>3.6 Clock Period Math &amp; The Speed of Light</h2>
-    <p>High-level developers measure execution in Big-O notation or milliseconds. Systems engineers measure execution in clock cycles and picoseconds. Understanding the physical constraints of execution speed is mandatory for grasping why hardware architectures are designed the way they are.</p>
+  <div class="page-container content-flow">
+    <div>
+      <h2>3.6 Clock Period Math &amp; The Speed of Light</h2>
+      <p>High-level developers measure execution in Big-O notation or milliseconds. Systems engineers measure execution
+        in clock cycles and picoseconds. Understanding the physical constraints of execution speed is mandatory for
+        grasping why hardware architectures are designed the way they are.</p>
 
-    <h3>The Frequency to Period Equation</h3>
-    <p>The time available for one complete pipeline stage operation is the Clock Period ($T$), defined as:</p>
-    $$T = \frac{1}{f}$$
-    <p>Let's map historical CPU frequencies to their physical periods:</p>
-    <ul>
-      <li><strong>1980s (Intel 8086 @ 5 MHz):</strong> $T = 200\text{ ns}$ ($200,000\text{ ps}$). Enormous amounts of time. Signals could cross entire PCBs multiple times.</li>
-      <li><strong>1990s (Pentium @ 500 MHz):</strong> $T = 2.0\text{ ns}$ ($2,000\text{ ps}$).</li>
-      <li><strong>2020s (Core i9 @ 5.0 GHz):</strong> $T = 0.2\text{ ns}$ ($200\text{ ps}$).</li>
-    </ul>
+      <h3>The Frequency to Period Equation</h3>
+      <p>The time available for one complete pipeline stage operation is the Clock Period ($T$), defined as:</p>
+      $$T = \frac{1}{f}$$
+      <p>Let's map historical CPU frequencies to their physical periods:</p>
+      <ul>
+        <li><strong>1980s (Intel 8086 @ 5 MHz):</strong> $T = 200\text{ ns}$ ($200,000\text{ ps}$). Enormous amounts of
+          time. Signals could cross entire PCBs multiple times.</li>
+        <li><strong>1990s (Pentium @ 500 MHz):</strong> $T = 2.0\text{ ns}$ ($2,000\text{ ps}$).</li>
+        <li><strong>2020s (Core i9 @ 5.0 GHz):</strong> $T = 0.2\text{ ns}$ ($200\text{ ps}$).</li>
+      </ul>
 
-    <h3>The Speed of Light Constraint</h3>
-    <p>In a vacuum, light travels at $c = 299,792,458 \text{ m/s}$. Inside the dielectric materials of a printed circuit board (FR4) or a silicon die, electromagnetic waves propagate at roughly $0.5c$ to $0.6c$.</p>
-    <p>This equates to a signal velocity of approximately <strong>$15 \text{ centimeters per nanosecond}$</strong>.</p>
+      <h3>The Speed of Light Constraint</h3>
+      <p>In a vacuum, light travels at $c = 299,792,458 \text{ m/s}$. Inside the dielectric materials of a printed
+        circuit board (FR4) or a silicon die, electromagnetic waves propagate at roughly $0.5c$ to $0.6c$.</p>
+      <p>This equates to a signal velocity of approximately <strong>$15 \text{ centimeters per nanosecond}$</strong>.
+      </p>
 
-    <div class="callout key">
-      <div class="callout-title">The Die Size Invariant (Indigo)</div>
-      At $5.0\text{ GHz}$, the clock period is $0.2\text{ ns}$. In that time, an electrical signal can physically travel a maximum absolute distance of $15\text{ cm/ns} \times 0.2\text{ ns} = \mathbf{3.0\text{ centimeters}}$.<br><br>
-      This means if L1 cache is located more than $1.5\text{ cm}$ away from the ALU, <strong>it is physically impossible for the data to arrive within one clock cycle</strong>, even if the logic gates had zero delay. This is why CPUs cannot be arbitrarily large, and why L1 cache must be etched directly against the execution units.
+      <div class="callout key">
+        <div class="callout-title">The Die Size Invariant (Indigo)</div>
+        At $5.0\text{ GHz}$, the clock period is $0.2\text{ ns}$. In that time, an electrical signal can physically
+        travel a maximum absolute distance of $15\text{ cm/ns} \times 0.2\text{ ns} = \mathbf{3.0\text{
+        centimeters}}$.<br><br>
+        This means if L1 cache is located more than $1.5\text{ cm}$ away from the ALU, <strong>it is physically
+          impossible for the data to arrive within one clock cycle</strong>, even if the logic gates had zero delay.
+        This is why CPUs cannot be arbitrarily large, and why L1 cache must be etched directly against the execution
+        units.
+      </div>
     </div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 14: WHITEBOARD 7
      ========================================================================== -->
-<div class="page-container">
-  <div class="whiteboard-page">
-    <div class="wb-header">
-      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
-      <div class="wb-ref">REF: CH03_SPEED_OF_LIGHT</div>
+  <div class="page-container">
+    <div class="whiteboard-page">
+      <div class="wb-header">
+        <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+        <div class="wb-ref">REF: CH03_SPEED_OF_LIGHT</div>
+      </div>
+      <div class="wb-canvas"></div>
+      <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 14</span></div>
     </div>
-    <div class="wb-canvas"></div>
-    <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 14</span></div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 15: SETUP, HOLD, AND FLIP-FLOPS
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <h2>3.7 Synchronous Logic: D-Flip Flops &amp; Timing Invariants</h2>
-    <p>To safely pass data from one pipeline stage to the next, we use D-Flip Flops (Data Flip-Flops). A D-Flip Flop acts as a digital lockbox. When the clock signal transitions from 0 to 1 (the Rising Edge), the flip-flop samples whatever voltage is currently on its input wire ($D$), and instantly pushes that voltage to its output wire ($Q$). For the rest of the clock cycle, $Q$ remains locked, ignoring any subsequent chaos on the input wire.</p>
+  <div class="page-container content-flow">
+    <div>
+      <h2>3.7 Synchronous Logic: D-Flip Flops &amp; Timing Invariants</h2>
+      <p>To safely pass data from one pipeline stage to the next, we use D-Flip Flops (Data Flip-Flops). A D-Flip Flop
+        acts as a digital lockbox. When the clock signal transitions from 0 to 1 (the Rising Edge), the flip-flop
+        samples whatever voltage is currently on its input wire ($D$), and instantly pushes that voltage to its output
+        wire ($Q$). For the rest of the clock cycle, $Q$ remains locked, ignoring any subsequent chaos on the input
+        wire.</p>
 
-    <p>However, D-Flip Flops are made of physical transistors (usually master-slave latch configurations). They are not instant, and they demand strict electrical stability. This introduces three critical hardware timing parameters:</p>
+      <p>However, D-Flip Flops are made of physical transistors (usually master-slave latch configurations). They are
+        not instant, and they demand strict electrical stability. This introduces three critical hardware timing
+        parameters:</p>
 
-    <ul>
-      <li><strong>Setup Time ($T_{setup}$):</strong> The input data signal ($D$) must arrive and be completely stable for a specified amount of time <em>before</em> the clock's rising edge hits. If the data arrives too late, the flip-flop might latch garbage.</li>
-      <li><strong>Hold Time ($T_{hold}$):</strong> The input data signal ($D$) must remain perfectly stable for a brief period <em>after</em> the clock's rising edge hits, ensuring the internal transistors have fully latched the state.</li>
-      <li><strong>Clock-to-Q Delay ($T_{cq}$):</strong> Once the clock edge hits, it takes physical time for the new data to propagate through the flip-flop and stabilize on the output wire ($Q$).</li>
-    </ul>
+      <ul>
+        <li><strong>Setup Time ($T_{setup}$):</strong> The input data signal ($D$) must arrive and be completely stable
+          for a specified amount of time <em>before</em> the clock's rising edge hits. If the data arrives too late, the
+          flip-flop might latch garbage.</li>
+        <li><strong>Hold Time ($T_{hold}$):</strong> The input data signal ($D$) must remain perfectly stable for a
+          brief period <em>after</em> the clock's rising edge hits, ensuring the internal transistors have fully latched
+          the state.</li>
+        <li><strong>Clock-to-Q Delay ($T_{cq}$):</strong> Once the clock edge hits, it takes physical time for the new
+          data to propagate through the flip-flop and stabilize on the output wire ($Q$).</li>
+      </ul>
 
-    <div class="callout tip">
-      <div class="callout-title">The Photographic Metaphor (Emerald)</div>
-      Think of a D-Flip Flop like a camera taking a flash photograph. The Clock is the flash.<br>
-      $T_{setup}$: You must hold a smile for a split second <i>before</i> the flash to ensure the lens focuses.<br>
-      $T_{hold}$: You must hold the smile a split second <i>after</i> the flash to ensure the film exposes properly.<br>
-      $T_{cq}$: It takes a moment for the polaroid to actually print out of the camera.
+      <div class="callout tip">
+        <div class="callout-title">The Photographic Metaphor (Emerald)</div>
+        Think of a D-Flip Flop like a camera taking a flash photograph. The Clock is the flash.<br>
+        $T_{setup}$: You must hold a smile for a split second <i>before</i> the flash to ensure the lens focuses.<br>
+        $T_{hold}$: You must hold the smile a split second <i>after</i> the flash to ensure the film exposes
+        properly.<br>
+        $T_{cq}$: It takes a moment for the polaroid to actually print out of the camera.
+      </div>
     </div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 16: WHITEBOARD 8
      ========================================================================== -->
-<div class="page-container">
-  <div class="whiteboard-page">
-    <div class="wb-header">
-      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
-      <div class="wb-ref">REF: CH03_DFLIP_FLOP_TIMING</div>
+  <div class="page-container">
+    <div class="whiteboard-page">
+      <div class="wb-header">
+        <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+        <div class="wb-ref">REF: CH03_DFLIP_FLOP_TIMING</div>
+      </div>
+      <div class="wb-canvas"></div>
+      <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 16</span></div>
     </div>
-    <div class="wb-canvas"></div>
-    <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 16</span></div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 17: THE CRITICAL PATH EQUATION
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <h2>3.8 The Maximum Frequency Equation ($T_{clk}$)</h2>
-    <p>We now have all the variables to understand the ultimate mathematical law of CPU architecture: <strong>The Critical Path Equation</strong>.</p>
+  <div class="page-container content-flow">
+    <div>
+      <h2>3.8 The Maximum Frequency Equation ($T_{clk}$)</h2>
+      <p>We now have all the variables to understand the ultimate mathematical law of CPU architecture: <strong>The
+          Critical Path Equation</strong>.</p>
 
-    <p>Between any two pipeline stages, data leaves a source flip-flop, travels through a massive web of combinational logic gates (like our Carry-Lookahead Adder), and must arrive at a destination flip-flop in time for the next clock pulse.</p>
+      <p>Between any two pipeline stages, data leaves a source flip-flop, travels through a massive web of combinational
+        logic gates (like our Carry-Lookahead Adder), and must arrive at a destination flip-flop in time for the next
+        clock pulse.</p>
 
-    <p>To guarantee that the CPU will not corrupt data, the Clock Period ($T_{clk}$) must be strictly greater than or equal to the sum of all worst-case physical delays:</p>
-    
-    $$T_{clk} \ge T_{cq} + T_{comb} + T_{setup} + T_{skew}$$
+      <p>To guarantee that the CPU will not corrupt data, the Clock Period ($T_{clk}$) must be strictly greater than or
+        equal to the sum of all worst-case physical delays:</p>
 
-    <ul>
-      <li>$T_{cq}$: Time lost waiting for the source flip-flop to output the data.</li>
-      <li>$T_{comb}$: The propagation delay of the longest, deepest chain of logic gates between the two registers (The Critical Path).</li>
-      <li>$T_{setup}$: The mandatory early-arrival window for the destination flip-flop.</li>
-      <li>$T_{skew}$: The worst-case clock arrival delta between the source and destination registers.</li>
-    </ul>
+      $$T_{clk} \ge T_{cq} + T_{comb} + T_{setup} + T_{skew}$$
 
-    <div class="callout interview">
-      <div class="callout-title">The Engineering Dilemma (Pink)</div>
-      If Intel wants to increase the clock speed from $4\text{ GHz}$ to $5\text{ GHz}$, they must reduce $T_{clk}$. However, $T_{cq}$ and $T_{setup}$ are fixed properties of the silicon process node (e.g., TSMC 3nm). $T_{skew}$ is bounded by H-Tree physics.<br><br>
-      The ONLY variable CPU architects can control is $T_{comb}$. To reach higher frequencies, they must mathematically slash the number of logic gates in the longest chain. If an ALU has too many gates to finish in one cycle, they must cut the ALU in half, inserting a new flip-flop in the middle, splitting the work across <em>two</em> clock cycles. This is why modern CPUs have deeply pipelined 15 to 20 stages, increasing clock speed at the cost of massive branch misprediction penalties.
+      <ul>
+        <li>$T_{cq}$: Time lost waiting for the source flip-flop to output the data.</li>
+        <li>$T_{comb}$: The propagation delay of the longest, deepest chain of logic gates between the two registers
+          (The Critical Path).</li>
+        <li>$T_{setup}$: The mandatory early-arrival window for the destination flip-flop.</li>
+        <li>$T_{skew}$: The worst-case clock arrival delta between the source and destination registers.</li>
+      </ul>
+
+      <div class="callout interview">
+        <div class="callout-title">The Engineering Dilemma (Pink)</div>
+        If Intel wants to increase the clock speed from $4\text{ GHz}$ to $5\text{ GHz}$, they must reduce $T_{clk}$.
+        However, $T_{cq}$ and $T_{setup}$ are fixed properties of the silicon process node (e.g., TSMC 3nm). $T_{skew}$
+        is bounded by H-Tree physics.<br><br>
+        The ONLY variable CPU architects can control is $T_{comb}$. To reach higher frequencies, they must
+        mathematically slash the number of logic gates in the longest chain. If an ALU has too many gates to finish in
+        one cycle, they must cut the ALU in half, inserting a new flip-flop in the middle, splitting the work across
+        <em>two</em> clock cycles. This is why modern CPUs have deeply pipelined 15 to 20 stages, increasing clock speed
+        at the cost of massive branch misprediction penalties.
+      </div>
     </div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 18: WHITEBOARD 9
      ========================================================================== -->
-<div class="page-container">
-  <div class="whiteboard-page">
-    <div class="wb-header">
-      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
-      <div class="wb-ref">REF: CH03_CRITICAL_PATH_MATH</div>
+  <div class="page-container">
+    <div class="whiteboard-page">
+      <div class="wb-header">
+        <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+        <div class="wb-ref">REF: CH03_CRITICAL_PATH_MATH</div>
+      </div>
+      <div class="wb-invariants">
+        <div><b>Pipeline Depth:</b> The Pentium 4 chased aggressive frequency marketing (3.8 GHz in 2004) by stretching
+          its pipeline to an absurd 31 stages. While $T_{clk}$ was tiny, any branch misprediction flushed 31 stages of
+          work, destroying overall IPC throughput. AMD's shorter pipelines dominated it.</div>
+      </div>
+      <div class="wb-canvas"></div>
+      <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 18</span></div>
     </div>
-    <div class="wb-invariants">
-      <div><b>Pipeline Depth:</b> The Pentium 4 chased aggressive frequency marketing (3.8 GHz in 2004) by stretching its pipeline to an absurd 31 stages. While $T_{clk}$ was tiny, any branch misprediction flushed 31 stages of work, destroying overall IPC throughput. AMD's shorter pipelines dominated it.</div>
-    </div>
-    <div class="wb-canvas"></div>
-    <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 18</span></div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 19: METASTABILITY & CDC
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <h2>3.9 Metastability &amp; Cross-Domain Synchronization</h2>
-    <p>What actually happens if $T_{setup}$ or $T_{hold}$ is violated? If an input signal is actively transitioning from $0$ to $1$ at the exact moment the clock pulse triggers the latch, the flip-flop's internal feedback loop gets confused. The output ($Q$) does not snap to $0$ or $1$. It gets stuck halfway (e.g., $0.5\text{V}$).</p>
-    
-    <p>This state is called <strong>Metastability</strong>. The flip-flop acts like a coin balanced perfectly on its edge. It will eventually resolve to a 0 or 1 purely due to random thermal noise, but <em>the resolution time is mathematically unbounded</em>. If the metastable $0.5\text{V}$ signal propagates to the next stage of the ALU, half the gates will interpret it as a 0, and the other half as a 1. The CPU state irreparably fractures, and the operating system crashes instantly (Hardware Fault / BSOD).</p>
+  <div class="page-container content-flow">
+    <div>
+      <h2>3.9 Metastability &amp; Cross-Domain Synchronization</h2>
+      <p>What actually happens if $T_{setup}$ or $T_{hold}$ is violated? If an input signal is actively transitioning
+        from $0$ to $1$ at the exact moment the clock pulse triggers the latch, the flip-flop's internal feedback loop
+        gets confused. The output ($Q$) does not snap to $0$ or $1$. It gets stuck halfway (e.g., $0.5\text{V}$).</p>
 
-    <h3>Clock Domain Crossing (CDC)</h3>
-    <p>Metastability is the ultimate nightmare when bridging components that run at different frequencies. For example, your CPU runs at $4.0\text{ GHz}$, but it needs to read data from a PCIe Network Card running at $100\text{ MHz}$. The two clocks are completely asynchronous. Data arriving from the network card will inevitably violate the CPU's $T_{setup}$ window purely by random chance.</p>
+      <p>This state is called <strong>Metastability</strong>. The flip-flop acts like a coin balanced perfectly on its
+        edge. It will eventually resolve to a 0 or 1 purely due to random thermal noise, but <em>the resolution time is
+          mathematically unbounded</em>. If the metastable $0.5\text{V}$ signal propagates to the next stage of the ALU,
+        half the gates will interpret it as a 0, and the other half as a 1. The CPU state irreparably fractures, and the
+        operating system crashes instantly (Hardware Fault / BSOD).</p>
 
-    <h3>The 2-Flop Synchronizer</h3>
-    <p>To fix this, engineers use a <strong>Multi-Stage Synchronizer</strong>. When data crosses into the fast $4\text{ GHz}$ clock domain, it is fed into a flip-flop. This first flip-flop <em>will</em> occasionally go metastable. However, its output is fed directly into a second, identical flip-flop. The system gives the first flip-flop an entire clock cycle for the "balanced coin" to fall and resolve to a clean 0 or 1 before the second flip-flop reads it.</p>
-    
-    <p>The Mean Time Between Failures (MTBF) for a synchronizer is calculated as:</p>
-    $$MTBF = \frac{e^{t_r / \tau}}{T_w \cdot f_c \cdot f_d}$$
-    <p>By chaining two flip-flops, the MTBF is extended from "once every 3 seconds" to "once every billion years."</p>
+      <h3>Clock Domain Crossing (CDC)</h3>
+      <p>Metastability is the ultimate nightmare when bridging components that run at different frequencies. For
+        example, your CPU runs at $4.0\text{ GHz}$, but it needs to read data from a PCIe Network Card running at
+        $100\text{ MHz}$. The two clocks are completely asynchronous. Data arriving from the network card will
+        inevitably violate the CPU's $T_{setup}$ window purely by random chance.</p>
+
+      <h3>The 2-Flop Synchronizer</h3>
+      <p>To fix this, engineers use a <strong>Multi-Stage Synchronizer</strong>. When data crosses into the fast
+        $4\text{ GHz}$ clock domain, it is fed into a flip-flop. This first flip-flop <em>will</em> occasionally go
+        metastable. However, its output is fed directly into a second, identical flip-flop. The system gives the first
+        flip-flop an entire clock cycle for the "balanced coin" to fall and resolve to a clean 0 or 1 before the second
+        flip-flop reads it.</p>
+
+      <p>The Mean Time Between Failures (MTBF) for a synchronizer is calculated as:</p>
+      $$MTBF = \frac{e^{t_r / \tau}}{T_w \cdot f_c \cdot f_d}$$
+      <p>By chaining two flip-flops, the MTBF is extended from "once every 3 seconds" to "once every billion years."</p>
+    </div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 20: WHITEBOARD 10
      ========================================================================== -->
-<div class="page-container">
-  <div class="whiteboard-page">
-    <div class="wb-header">
-      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
-      <div class="wb-ref">REF: CH03_METASTABILITY_CDC</div>
+  <div class="page-container">
+    <div class="whiteboard-page">
+      <div class="wb-header">
+        <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+        <div class="wb-ref">REF: CH03_METASTABILITY_CDC</div>
+      </div>
+      <div class="wb-canvas"></div>
+      <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 20</span></div>
     </div>
-    <div class="wb-canvas"></div>
-    <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 20</span></div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 21: SOFTWARE RELEVANCY: HFT & PTP
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <h2>3.10 Software Relevancy: Clocks in Production Architecture</h2>
-    <p>Hardware clock math directly impacts high-level software engineering, specifically in performance benchmarking, distributed systems, and High-Frequency Trading (HFT).</p>
+  <div class="page-container content-flow">
+    <div>
+      <h2>3.10 Software Relevancy: Clocks in Production Architecture</h2>
+      <p>Hardware clock math directly impacts high-level software engineering, specifically in performance benchmarking,
+        distributed systems, and High-Frequency Trading (HFT).</p>
 
-    <h3>Time-of-Day vs. Monotonic Clocks</h3>
-    <p>Software provides two distinct ways to measure time. Understanding the hardware difference is critical:</p>
-    <ul>
-      <li><strong>Time-of-Day Clock (Wall Clock):</strong> Sourced from the motherboard's RTC (Real-Time Clock) battery. It returns the current human time (e.g., <code>DateTime.UtcNow</code>). <em>The Trap:</em> NTP (Network Time Protocol) servers will routinely adjust the wall clock backward or forward by milliseconds to correct drift. If you use a Wall Clock to measure the latency of an algorithm, NTP might adjust the clock backward during execution, resulting in a <em>negative</em> latency measurement.</li>
-      <li><strong>Monotonic Clock:</strong> Driven directly by CPU hardware performance counters (e.g., the <code>RDTSC</code> instruction on x86, which strictly counts CPU clock cycles since boot). This clock never jumps backward. Always use monotonic clocks (<code>Stopwatch.GetTimestamp()</code> or <code>System.nanoTime()</code>) for measuring code execution speed.</li>
-    </ul>
+      <h3>Time-of-Day vs. Monotonic Clocks</h3>
+      <p>Software provides two distinct ways to measure time. Understanding the hardware difference is critical:</p>
+      <ul>
+        <li><strong>Time-of-Day Clock (Wall Clock):</strong> Sourced from the motherboard's RTC (Real-Time Clock)
+          battery. It returns the current human time (e.g., <code>DateTime.UtcNow</code>). <em>The Trap:</em> NTP
+          (Network Time Protocol) servers will routinely adjust the wall clock backward or forward by milliseconds to
+          correct drift. If you use a Wall Clock to measure the latency of an algorithm, NTP might adjust the clock
+          backward during execution, resulting in a <em>negative</em> latency measurement.</li>
+        <li><strong>Monotonic Clock:</strong> Driven directly by CPU hardware performance counters (e.g., the
+          <code>RDTSC</code> instruction on x86, which strictly counts CPU clock cycles since boot). This clock never
+          jumps backward. Always use monotonic clocks (<code>Stopwatch.GetTimestamp()</code> or
+          <code>System.nanoTime()</code>) for measuring code execution speed.</li>
+      </ul>
 
-    <h3>High-Frequency Trading &amp; The Speed of Light</h3>
-    <p>In HFT algorithms, executing a trade 10 microseconds faster than a competitor nets millions in profit. The speed of light in fiber optic cables is $\approx 200 \text{ km/ms}$. Connecting an algorithm in Chicago to an exchange in New York ($1,100\text{ km}$) incurs a rigid $5.5\text{ ms}$ physics latency floor.</p>
-    
-    <p>Furthermore, maintaining distributed ledger consistency across these clusters requires extreme clock synchronization. Standard NTP is too sloppy (millisecond accuracy). HFT networks utilize <strong>PTP (Precision Time Protocol - IEEE 1588)</strong>, paired with physical GPS atomic clock antennas on the datacenter roof, synchronizing server clocks down to the sub-microsecond hardware level by directly timestamping packets inside the physical Network Interface Card (NIC) silicon.</p>
+      <h3>High-Frequency Trading &amp; The Speed of Light</h3>
+      <p>In HFT algorithms, executing a trade 10 microseconds faster than a competitor nets millions in profit. The
+        speed of light in fiber optic cables is $\approx 200 \text{ km/ms}$. Connecting an algorithm in Chicago to an
+        exchange in New York ($1,100\text{ km}$) incurs a rigid $5.5\text{ ms}$ physics latency floor.</p>
+
+      <p>Furthermore, maintaining distributed ledger consistency across these clusters requires extreme clock
+        synchronization. Standard NTP is too sloppy (millisecond accuracy). HFT networks utilize <strong>PTP (Precision
+          Time Protocol - IEEE 1588)</strong>, paired with physical GPS atomic clock antennas on the datacenter roof,
+        synchronizing server clocks down to the sub-microsecond hardware level by directly timestamping packets inside
+        the physical Network Interface Card (NIC) silicon.</p>
+    </div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 22: WHITEBOARD 11
      ========================================================================== -->
-<div class="page-container">
-  <div class="whiteboard-page">
-    <div class="wb-header">
-      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
-      <div class="wb-ref">REF: CH03_HFT_PTP_MONOTONIC</div>
+  <div class="page-container">
+    <div class="whiteboard-page">
+      <div class="wb-header">
+        <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+        <div class="wb-ref">REF: CH03_HFT_PTP_MONOTONIC</div>
+      </div>
+      <div class="wb-invariants">
+        <div><b>The <code>RDTSC</code> Instruction:</b> Read Time-Stamp Counter. It returns the 64-bit number of clock
+          cycles since reset. However, in modern multi-core systems, migrating a thread from Core 1 to Core 2 can
+          corrupt the measurement if the cores are not perfectly synchronized. OS kernels maintain invariant TSCs to
+          mask this.</div>
+      </div>
+      <div class="wb-canvas"></div>
+      <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 22</span></div>
     </div>
-    <div class="wb-invariants">
-      <div><b>The <code>RDTSC</code> Instruction:</b> Read Time-Stamp Counter. It returns the 64-bit number of clock cycles since reset. However, in modern multi-core systems, migrating a thread from Core 1 to Core 2 can corrupt the measurement if the cores are not perfectly synchronized. OS kernels maintain invariant TSCs to mask this.</div>
-    </div>
-    <div class="wb-canvas"></div>
-    <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 22</span></div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 23: REAL-WORLD: OVERCLOCKING & THERMAL LIMITS
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <h2>3.11 Real-World Operations: The Physics of Overclocking</h2>
-    <p>When PC enthusiasts "overclock" a CPU, they are directly manipulating the Critical Path Equation ($T_{clk} \ge T_{cq} + T_{comb} + T_{setup} + T_{skew}$). By reducing $T_{clk}$ via the PLL multiplier, they are intentionally choking the time available for the ALU to resolve combinational math.</p>
+  <div class="page-container content-flow">
+    <div>
+      <h2>3.11 Real-World Operations: The Physics of Overclocking</h2>
+      <p>When PC enthusiasts "overclock" a CPU, they are directly manipulating the Critical Path Equation ($T_{clk} \ge
+        T_{cq} + T_{comb} + T_{setup} + T_{skew}$). By reducing $T_{clk}$ via the PLL multiplier, they are intentionally
+        choking the time available for the ALU to resolve combinational math.</p>
 
-    <h3>Voltage Scaling ($V_{core}$)</h3>
-    <p>If $T_{clk}$ is too small, $T_{setup}$ is violated, and the CPU crashes into metastability. To fix this, overclockers increase the CPU core voltage ($V_{core}$). Why does this work?</p>
-    <ul>
-      <li>Higher voltage increases the electrical pressure forcing electrons through the logic gates.</li>
-      <li>This charges the internal gate capacitance faster, which physically decreases $T_{comb}$ (Propagation Delay).</li>
-      <li>By shrinking $T_{comb}$, the signal arrives earlier, satisfying the $T_{setup}$ window even under the faster clock speed.</li>
-    </ul>
+      <h3>Voltage Scaling ($V_{core}$)</h3>
+      <p>If $T_{clk}$ is too small, $T_{setup}$ is violated, and the CPU crashes into metastability. To fix this,
+        overclockers increase the CPU core voltage ($V_{core}$). Why does this work?</p>
+      <ul>
+        <li>Higher voltage increases the electrical pressure forcing electrons through the logic gates.</li>
+        <li>This charges the internal gate capacitance faster, which physically decreases $T_{comb}$ (Propagation
+          Delay).</li>
+        <li>By shrinking $T_{comb}$, the signal arrives earlier, satisfying the $T_{setup}$ window even under the faster
+          clock speed.</li>
+      </ul>
 
-    <h3>The Liquid Nitrogen Limit</h3>
-    <p>Raising voltage drastically increases dynamic power ($P \propto V^2$), which generates catastrophic heat. Heat creates a vicious feedback loop: as copper interconnects get hot, their electrical resistance increases. Increased resistance slows down electron flow, increasing $T_{comb}$, triggering the exact $T_{setup}$ violation we tried to avoid.</p>
-    
-    <p>To shatter world records (e.g., pushing CPUs past $8.0\text{ GHz}$), extreme overclockers submerge the CPU in Liquid Nitrogen ($-196^\circ\text{C}$). The extreme cold drops the copper resistance to near zero, plummeting $T_{comb}$ and allowing the CPU to safely complete math operations in the incredibly narrow $0.125\text{ ns}$ clock cycles.</p>
+      <h3>The Liquid Nitrogen Limit</h3>
+      <p>Raising voltage drastically increases dynamic power ($P \propto V^2$), which generates catastrophic heat. Heat
+        creates a vicious feedback loop: as copper interconnects get hot, their electrical resistance increases.
+        Increased resistance slows down electron flow, increasing $T_{comb}$, triggering the exact $T_{setup}$ violation
+        we tried to avoid.</p>
 
-    <div class="callout warn">
-      <div class="callout-title">Clock Stretching &amp; Throttling (Amber)</div>
-      Modern server CPUs proactively defend themselves. If thermal sensors detect the chip exceeding $95^\circ\text{C}$, the hardware microcode engages "Thermal Throttling." It actively stretches the clock pulses and drops the PLL multiplier, slowing the CPU from $4.0\text{ GHz}$ to $800\text{ MHz}$ to reduce dynamic power. In high-performance backend systems, sudden inexplicable $5\times$ latency spikes under load are frequently traced to hardware thermal throttling, not software bugs.
+      <p>To shatter world records (e.g., pushing CPUs past $8.0\text{ GHz}$), extreme overclockers submerge the CPU in
+        Liquid Nitrogen ($-196^\circ\text{C}$). The extreme cold drops the copper resistance to near zero, plummeting
+        $T_{comb}$ and allowing the CPU to safely complete math operations in the incredibly narrow $0.125\text{ ns}$
+        clock cycles.</p>
+
+      <div class="callout warn">
+        <div class="callout-title">Clock Stretching &amp; Throttling (Amber)</div>
+        Modern server CPUs proactively defend themselves. If thermal sensors detect the chip exceeding
+        $95^\circ\text{C}$, the hardware microcode engages "Thermal Throttling." It actively stretches the clock pulses
+        and drops the PLL multiplier, slowing the CPU from $4.0\text{ GHz}$ to $800\text{ MHz}$ to reduce dynamic power.
+        In high-performance backend systems, sudden inexplicable $5\times$ latency spikes under load are frequently
+        traced to hardware thermal throttling, not software bugs.
+      </div>
     </div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 24: WHITEBOARD 12
      ========================================================================== -->
-<div class="page-container">
-  <div class="whiteboard-page">
-    <div class="wb-header">
-      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
-      <div class="wb-ref">REF: CH03_OVERCLOCKING_PHYSICS</div>
+  <div class="page-container">
+    <div class="whiteboard-page">
+      <div class="wb-header">
+        <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+        <div class="wb-ref">REF: CH03_OVERCLOCKING_PHYSICS</div>
+      </div>
+      <div class="wb-canvas"></div>
+      <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 24</span></div>
     </div>
-    <div class="wb-canvas"></div>
-    <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 24</span></div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 25: CHAPTER VERIFICATION & CHECKLIST
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div style="flex: 0 0 60%;">
-    <h2>3.12 Chapter Verification, Checklist &amp; Quiz</h2>
+  <div class="page-container content-flow">
+    <div style="flex: 0 0 60%;">
+      <h2>3.12 Chapter Verification, Checklist &amp; Quiz</h2>
 
-    <div class="checklist">
-      <h3>Verification Checklist</h3>
-      <div class="check-item"><div class="checkbox"></div><div>I can explain the difference between Combinational Logic and Sequential Logic.</div></div>
-      <div class="check-item"><div class="checkbox"></div><div>I understand the Piezoelectric Effect and why quartz acts as a superior RLC tank circuit.</div></div>
-      <div class="check-item"><div class="checkbox"></div><div>I can describe the 4 core components of a Phase-Locked Loop (PLL) multiplier.</div></div>
-      <div class="check-item"><div class="checkbox"></div><div>I understand the purpose of H-Tree routing for mitigating clock skew.</div></div>
-      <div class="check-item"><div class="checkbox"></div><div>I can define Clock Skew (Spatial) vs. Clock Jitter (Temporal).</div></div>
-      <div class="check-item"><div class="checkbox"></div><div>I know how to calculate Clock Period ($T = 1/f$) from Frequency.</div></div>
-      <div class="check-item"><div class="checkbox"></div><div>I understand how the speed of light limits the physical size of 5 GHz processors.</div></div>
-      <div class="check-item"><div class="checkbox"></div><div>I can define $T_{setup}$, $T_{hold}$, and $T_{cq}$ for a D-Flip Flop.</div></div>
-      <div class="check-item"><div class="checkbox"></div><div>I can write out and explain the Critical Path Equation for maximum clock frequency.</div></div>
-      <div class="check-item"><div class="checkbox"></div><div>I understand Metastability and how a 2-Flop Synchronizer safely bridges clock domains.</div></div>
+      <div class="checklist">
+        <h3>Verification Checklist</h3>
+        <div class="check-item">
+          <div class="checkbox"></div>
+          <div>I can explain the difference between Combinational Logic and Sequential Logic.</div>
+        </div>
+        <div class="check-item">
+          <div class="checkbox"></div>
+          <div>I understand the Piezoelectric Effect and why quartz acts as a superior RLC tank circuit.</div>
+        </div>
+        <div class="check-item">
+          <div class="checkbox"></div>
+          <div>I can describe the 4 core components of a Phase-Locked Loop (PLL) multiplier.</div>
+        </div>
+        <div class="check-item">
+          <div class="checkbox"></div>
+          <div>I understand the purpose of H-Tree routing for mitigating clock skew.</div>
+        </div>
+        <div class="check-item">
+          <div class="checkbox"></div>
+          <div>I can define Clock Skew (Spatial) vs. Clock Jitter (Temporal).</div>
+        </div>
+        <div class="check-item">
+          <div class="checkbox"></div>
+          <div>I know how to calculate Clock Period ($T = 1/f$) from Frequency.</div>
+        </div>
+        <div class="check-item">
+          <div class="checkbox"></div>
+          <div>I understand how the speed of light limits the physical size of 5 GHz processors.</div>
+        </div>
+        <div class="check-item">
+          <div class="checkbox"></div>
+          <div>I can define $T_{setup}$, $T_{hold}$, and $T_{cq}$ for a D-Flip Flop.</div>
+        </div>
+        <div class="check-item">
+          <div class="checkbox"></div>
+          <div>I can write out and explain the Critical Path Equation for maximum clock frequency.</div>
+        </div>
+        <div class="check-item">
+          <div class="checkbox"></div>
+          <div>I understand Metastability and how a 2-Flop Synchronizer safely bridges clock domains.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="whiteboard-page wb-split">
+      <div class="wb-header">
+        <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+        <div class="wb-ref">REF: CH03_CHECKLIST_NOTES</div>
+      </div>
+      <div class="wb-canvas"></div>
+      <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 25</span></div>
     </div>
   </div>
 
-  <div class="whiteboard-page wb-split">
-    <div class="wb-header">
-      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
-      <div class="wb-ref">REF: CH03_CHECKLIST_NOTES</div>
-    </div>
-    <div class="wb-canvas"></div>
-    <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 25</span></div>
-  </div>
-</div>
-
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 26: QUIZ PART 1
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div style="flex: 0 0 50%;">
-    <h3>Comprehensive Examination</h3>
+  <div class="page-container content-flow">
+    <div style="flex: 0 0 50%;">
+      <h3>Comprehensive Examination</h3>
 
-    <div class="quiz-section" style="margin-top: 10px;">
-      <div class="quiz-question">
-        <p>1. Why is an AT-cut quartz crystal used as the foundational oscillator in modern computers instead of a standard electrical LC (Inductor-Capacitor) circuit?</p>
-        <div class="quiz-option">A) Quartz generates higher voltages natively, eliminating the need for a power supply.</div>
-        <div class="quiz-option">B) Quartz possesses an extremely high Q-factor ($10,000+$) providing unparalleled frequency stability against temperature and electrical noise.</div>
-        <div class="quiz-option">C) Quartz can naturally vibrate at 5.0 GHz, removing the need for a Phase-Locked Loop.</div>
-        <div class="quiz-option">D) Quartz is highly susceptible to the Direct Piezoelectric Effect, allowing software manipulation of the clock.</div>
-      </div>
+      <div class="quiz-section" style="margin-top: 10px;">
+        <div class="quiz-question">
+          <p>1. Why is an AT-cut quartz crystal used as the foundational oscillator in modern computers instead of a
+            standard electrical LC (Inductor-Capacitor) circuit?</p>
+          <div class="quiz-option">A) Quartz generates higher voltages natively, eliminating the need for a power
+            supply.</div>
+          <div class="quiz-option">B) Quartz possesses an extremely high Q-factor ($10,000+$) providing unparalleled
+            frequency stability against temperature and electrical noise.</div>
+          <div class="quiz-option">C) Quartz can naturally vibrate at 5.0 GHz, removing the need for a Phase-Locked
+            Loop.</div>
+          <div class="quiz-option">D) Quartz is highly susceptible to the Direct Piezoelectric Effect, allowing software
+            manipulation of the clock.</div>
+        </div>
 
-      <div class="quiz-question">
-        <p>2. What is the precise function of the Phase-Frequency Detector (PFD) inside a CPU's Phase-Locked Loop (PLL)?</p>
-        <div class="quiz-option">A) It multiplies the $100\text{ MHz}$ signal to $4.0\text{ GHz}$ directly using quartz resonance.</div>
-        <div class="quiz-option">B) It filters out high-frequency noise before the signal enters the ALU.</div>
-        <div class="quiz-option">C) It compares the rising edges of the reference clock and the divided VCO clock, directing the charge pump to speed up or slow down the VCO.</div>
-        <div class="quiz-option">D) It distributes the final clock signal across the H-Tree network to mitigate skew.</div>
+        <div class="quiz-question">
+          <p>2. What is the precise function of the Phase-Frequency Detector (PFD) inside a CPU's Phase-Locked Loop
+            (PLL)?</p>
+          <div class="quiz-option">A) It multiplies the $100\text{ MHz}$ signal to $4.0\text{ GHz}$ directly using
+            quartz resonance.</div>
+          <div class="quiz-option">B) It filters out high-frequency noise before the signal enters the ALU.</div>
+          <div class="quiz-option">C) It compares the rising edges of the reference clock and the divided VCO clock,
+            directing the charge pump to speed up or slow down the VCO.</div>
+          <div class="quiz-option">D) It distributes the final clock signal across the H-Tree network to mitigate skew.
+          </div>
+        </div>
       </div>
+    </div>
+
+    <div class="whiteboard-page wb-split">
+      <div class="wb-header">
+        <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+        <div class="wb-ref">REF: CH03_QUIZ_SCRATCHPAD_1</div>
+      </div>
+      <div class="wb-canvas"></div>
+      <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 26</span></div>
     </div>
   </div>
 
-  <div class="whiteboard-page wb-split">
-    <div class="wb-header">
-      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
-      <div class="wb-ref">REF: CH03_QUIZ_SCRATCHPAD_1</div>
-    </div>
-    <div class="wb-canvas"></div>
-    <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 26</span></div>
-  </div>
-</div>
-
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 27: QUIZ PART 2
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div style="flex: 0 0 50%;">
-    <div class="quiz-section" style="margin-top: 0;">
-      <div class="quiz-question">
-        <p>3. If a CPU operates at a clock frequency of $5.0\text{ GHz}$, and signals travel through the silicon die interconnects at roughly half the speed of light ($15\text{ cm/ns}$), what is the maximum physical distance a signal can travel within exactly one clock cycle?</p>
-        <div class="quiz-option">A) $15.0\text{ centimeters}$</div>
-        <div class="quiz-option">B) $7.5\text{ centimeters}$</div>
-        <div class="quiz-option">C) $3.0\text{ centimeters}$</div>
-        <div class="quiz-option">D) $0.5\text{ centimeters}$</div>
-      </div>
+  <div class="page-container content-flow">
+    <div style="flex: 0 0 50%;">
+      <div class="quiz-section" style="margin-top: 0;">
+        <div class="quiz-question">
+          <p>3. If a CPU operates at a clock frequency of $5.0\text{ GHz}$, and signals travel through the silicon die
+            interconnects at roughly half the speed of light ($15\text{ cm/ns}$), what is the maximum physical distance
+            a signal can travel within exactly one clock cycle?</p>
+          <div class="quiz-option">A) $15.0\text{ centimeters}$</div>
+          <div class="quiz-option">B) $7.5\text{ centimeters}$</div>
+          <div class="quiz-option">C) $3.0\text{ centimeters}$</div>
+          <div class="quiz-option">D) $0.5\text{ centimeters}$</div>
+        </div>
 
-      <div class="quiz-question">
-        <p>4. In D-Flip Flop hardware timing, what defines a "Setup Time ($T_{setup}$) Violation"?</p>
-        <div class="quiz-option">A) The input data transitions immediately after the clock edge hits, violating the latching sequence.</div>
-        <div class="quiz-option">B) The clock signal arrives at the destination flip-flop later than the source flip-flop due to H-Tree skew.</div>
-        <div class="quiz-option">C) The input data arrives too late and fails to remain stable for the required temporal window before the clock's rising edge strikes.</div>
-        <div class="quiz-option">D) The flip-flop requires too much voltage to transition its output state ($Q$).</div>
+        <div class="quiz-question">
+          <p>4. In D-Flip Flop hardware timing, what defines a "Setup Time ($T_{setup}$) Violation"?</p>
+          <div class="quiz-option">A) The input data transitions immediately after the clock edge hits, violating the
+            latching sequence.</div>
+          <div class="quiz-option">B) The clock signal arrives at the destination flip-flop later than the source
+            flip-flop due to H-Tree skew.</div>
+          <div class="quiz-option">C) The input data arrives too late and fails to remain stable for the required
+            temporal window before the clock's rising edge strikes.</div>
+          <div class="quiz-option">D) The flip-flop requires too much voltage to transition its output state ($Q$).
+          </div>
+        </div>
       </div>
+    </div>
+
+    <div class="whiteboard-page wb-split">
+      <div class="wb-header">
+        <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+        <div class="wb-ref">REF: CH03_QUIZ_SCRATCHPAD_2</div>
+      </div>
+      <div class="wb-canvas"></div>
+      <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 27</span></div>
     </div>
   </div>
 
-  <div class="whiteboard-page wb-split">
-    <div class="wb-header">
-      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
-      <div class="wb-ref">REF: CH03_QUIZ_SCRATCHPAD_2</div>
-    </div>
-    <div class="wb-canvas"></div>
-    <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 27</span></div>
-  </div>
-</div>
-
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 28: QUIZ PART 3 & PROMPTS
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div style="flex: 0 0 50%;">
-    <div class="quiz-section" style="margin-top: 0;">
-      <div class="quiz-question">
-        <p>5. How does a 2-Flop Synchronizer protect the operating system from Metastability crashes when crossing clock domains (e.g., reading a $100\text{ MHz}$ NIC from a $4\text{ GHz}$ CPU)?</p>
-        <div class="quiz-option">A) It guarantees that the input signal will never violate $T_{setup}$.</div>
-        <div class="quiz-option">B) It absorbs the metastable state in the first flip-flop, granting an entire clock cycle for the voltage to resolve to a stable binary 0 or 1 before the second flip-flop samples it.</div>
-        <div class="quiz-option">C) It buffers the signal via back-to-back NOT gates to increase the signal voltage.</div>
-        <div class="quiz-option">D) It aligns the $100\text{ MHz}$ phase directly to the $4\text{ GHz}$ phase using a secondary PLL.</div>
+  <div class="page-container content-flow">
+    <div style="flex: 0 0 50%;">
+      <div class="quiz-section" style="margin-top: 0;">
+        <div class="quiz-question">
+          <p>5. How does a 2-Flop Synchronizer protect the operating system from Metastability crashes when crossing
+            clock domains (e.g., reading a $100\text{ MHz}$ NIC from a $4\text{ GHz}$ CPU)?</p>
+          <div class="quiz-option">A) It guarantees that the input signal will never violate $T_{setup}$.</div>
+          <div class="quiz-option">B) It absorbs the metastable state in the first flip-flop, granting an entire clock
+            cycle for the voltage to resolve to a stable binary 0 or 1 before the second flip-flop samples it.</div>
+          <div class="quiz-option">C) It buffers the signal via back-to-back NOT gates to increase the signal voltage.
+          </div>
+          <div class="quiz-option">D) It aligns the $100\text{ MHz}$ phase directly to the $4\text{ GHz}$ phase using a
+            secondary PLL.</div>
+        </div>
+
+        <h3 style="margin-top: 24px;">Systems Writing Prompts</h3>
+
+        <p style="font-weight: 700; margin-bottom: 4px; font-size: 9.5pt;">Prompt 1: The Critical Path Physics</p>
+        <p style="font-size: 9pt;">Write out the Critical Path Equation for maximum clock frequency. If a CPU architect
+          wishes to increase the target frequency from $3\text{ GHz}$ to $4\text{ GHz}$, but the silicon foundry's
+          flip-flop metrics ($T_{cq}, T_{setup}$) are locked, what is the only architectural mitigation available, and
+          how does this affect pipeline depth?</p>
+
+        <p style="font-weight: 700; margin-top: 14px; margin-bottom: 4px; font-size: 9.5pt;">Prompt 2: Overclocking
+          Thermodynamics</p>
+        <p style="font-size: 9pt;">Explain the electrical physics behind increasing $V_{core}$ (Voltage) to achieve a
+          stable CPU overclock. Connect the increased voltage directly to the reduction of $T_{comb}$ (Propagation
+          Delay), and describe the catastrophic thermal feedback loop that results.</p>
       </div>
+    </div>
 
-      <h3 style="margin-top: 24px;">Systems Writing Prompts</h3>
-      
-      <p style="font-weight: 700; margin-bottom: 4px; font-size: 9.5pt;">Prompt 1: The Critical Path Physics</p>
-      <p style="font-size: 9pt;">Write out the Critical Path Equation for maximum clock frequency. If a CPU architect wishes to increase the target frequency from $3\text{ GHz}$ to $4\text{ GHz}$, but the silicon foundry's flip-flop metrics ($T_{cq}, T_{setup}$) are locked, what is the only architectural mitigation available, and how does this affect pipeline depth?</p>
-
-      <p style="font-weight: 700; margin-top: 14px; margin-bottom: 4px; font-size: 9.5pt;">Prompt 2: Overclocking Thermodynamics</p>
-      <p style="font-size: 9pt;">Explain the electrical physics behind increasing $V_{core}$ (Voltage) to achieve a stable CPU overclock. Connect the increased voltage directly to the reduction of $T_{comb}$ (Propagation Delay), and describe the catastrophic thermal feedback loop that results.</p>
+    <div class="whiteboard-page wb-split">
+      <div class="wb-header">
+        <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+        <div class="wb-ref">REF: CH03_PROMPT_SCRATCHPAD</div>
+      </div>
+      <div class="wb-canvas"></div>
+      <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 28</span></div>
     </div>
   </div>
 
-  <div class="whiteboard-page wb-split">
-    <div class="wb-header">
-      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
-      <div class="wb-ref">REF: CH03_PROMPT_SCRATCHPAD</div>
-    </div>
-    <div class="wb-canvas"></div>
-    <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 28</span></div>
-  </div>
-</div>
-
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 29: ANSWER KEY
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div style="flex: 0 0 50%;">
-    <div class="litmus-box" style="margin-top: 0; padding: 12px 14px; font-size: 8pt; line-height: 1.5;">
-      <div style="font-weight: 800; color: #4338CA; text-transform: uppercase; margin-bottom: 6px; font-size: 8.5pt;">Chapter 3 Technical Answer Key</div>
-      <div style="margin-bottom: 6px;"><b>1. (B)</b> Standard LC circuits suffer from energy loss, exhibiting low Q-factors that cause frequency drift. The Piezoelectric quartz crystal's extreme Q-factor guarantees that the motherboard's reference heartbeat remains unyielding against thermal fluctuations.</div>
-      <div style="margin-bottom: 6px;"><b>2. (C)</b> The PLL generates a fast, wild clock using a VCO, divides it down, and compares it to the perfect quartz reference via the PFD. The PFD's output drives the charge pump to continuously rein in the VCO, forming a flawless negative feedback loop.</div>
-      <div style="margin-bottom: 6px;"><b>3. (C)</b> At $5.0\text{ GHz}$, the period $T = 0.2\text{ ns}$. Traveling at $15\text{ cm/ns}$, the maximum distance is $15 \times 0.2 = 3.0\text{ cm}$. Any silicon path longer than this (e.g., reaching a distant L3 cache) inherently requires multiple clock cycles to traverse.</div>
-      <div style="margin-bottom: 6px;"><b>4. (C)</b> Setup Time ($T_{setup}$) requires the incoming voltage to stabilize on the $D$ input pin for a specific duration <i>before</i> the clock edge fires. If data arrives late, the flip-flop latches an unstable voltage, entering metastability.</div>
-      <div style="margin-bottom: 6px;"><b>5. (B)</b> Metastability cannot be mathematically prevented during asynchronous cross-domain reads. The 2-flop synchronizer isolates the metastable hazard in the first flip-flop, relying on the exponential probability (MTBF) that the voltage will organically resolve into a valid boolean state before the second flip-flop reads it one cycle later.</div>
+  <div class="page-container content-flow">
+    <div style="flex: 0 0 50%;">
+      <div class="litmus-box" style="margin-top: 0; padding: 12px 14px; font-size: 8pt; line-height: 1.5;">
+        <div style="font-weight: 800; color: #4338CA; text-transform: uppercase; margin-bottom: 6px; font-size: 8.5pt;">
+          Chapter 3 Technical Answer Key</div>
+        <div style="margin-bottom: 6px;"><b>1. (B)</b> Standard LC circuits suffer from energy loss, exhibiting low
+          Q-factors that cause frequency drift. The Piezoelectric quartz crystal's extreme Q-factor guarantees that the
+          motherboard's reference heartbeat remains unyielding against thermal fluctuations.</div>
+        <div style="margin-bottom: 6px;"><b>2. (C)</b> The PLL generates a fast, wild clock using a VCO, divides it
+          down, and compares it to the perfect quartz reference via the PFD. The PFD's output drives the charge pump to
+          continuously rein in the VCO, forming a flawless negative feedback loop.</div>
+        <div style="margin-bottom: 6px;"><b>3. (C)</b> At $5.0\text{ GHz}$, the period $T = 0.2\text{ ns}$. Traveling at
+          $15\text{ cm/ns}$, the maximum distance is $15 \times 0.2 = 3.0\text{ cm}$. Any silicon path longer than this
+          (e.g., reaching a distant L3 cache) inherently requires multiple clock cycles to traverse.</div>
+        <div style="margin-bottom: 6px;"><b>4. (C)</b> Setup Time ($T_{setup}$) requires the incoming voltage to
+          stabilize on the $D$ input pin for a specific duration <i>before</i> the clock edge fires. If data arrives
+          late, the flip-flop latches an unstable voltage, entering metastability.</div>
+        <div style="margin-bottom: 6px;"><b>5. (B)</b> Metastability cannot be mathematically prevented during
+          asynchronous cross-domain reads. The 2-flop synchronizer isolates the metastable hazard in the first
+          flip-flop, relying on the exponential probability (MTBF) that the voltage will organically resolve into a
+          valid boolean state before the second flip-flop reads it one cycle later.</div>
+      </div>
+    </div>
+
+    <div class="whiteboard-page wb-split">
+      <div class="wb-header">
+        <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+        <div class="wb-ref">REF: CH03_ANSWER_KEY_NOTES_1</div>
+      </div>
+      <div class="wb-canvas"></div>
+      <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 29</span></div>
     </div>
   </div>
 
-  <div class="whiteboard-page wb-split">
-    <div class="wb-header">
-      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
-      <div class="wb-ref">REF: CH03_ANSWER_KEY_NOTES_1</div>
-    </div>
-    <div class="wb-canvas"></div>
-    <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 29</span></div>
-  </div>
-</div>
-
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 30: ANSWER KEY 2 & SYNTHESIS
      ========================================================================== -->
-<div class="page-container">
-  <div class="litmus-box" style="margin-top: 0; margin-bottom: 12px; padding: 12px 14px; font-size: 8pt; line-height: 1.5;">
-    <div style="margin-bottom: 6px;"><b>Prompt 1:</b> $T_{clk} \ge T_{cq} + T_{comb} + T_{setup} + T_{skew}$. If the target frequency increases, $T_{clk}$ shrinks. Assuming static silicon properties for the registers and skew, the architect MUST reduce $T_{comb}$. The only way to reduce $T_{comb}$ is to physically slice the combinational logic chain in half by inserting an intermediate pipeline register. This deepens the overall CPU pipeline (e.g., from 10 to 15 stages), increasing overall frequency but exposing the CPU to devastating throughput penalties if a branch misprediction forces a 15-stage flush.</div>
-    <div><b>Prompt 2:</b> An overclock shrinks $T_{clk}$, directly threatening $T_{setup}$. By aggressively overvolting $V_{core}$, greater electrical pressure drives electrons through the logic gates faster, reducing the propagation delay ($T_{comb}$) so the signal arrives in time. However, dynamic power scales squarely with voltage ($P = C \cdot V^2 \cdot f$). The resulting exponential heat increases the copper interconnect resistance, slowing electrons back down and requiring extreme cooling (Liquid Nitrogen) to prevent the feedback loop from inducing a thermal crash.</div>
-  </div>
-
-  <div class="whiteboard-page wb-split">
-    <div class="wb-header">
-      <div class="wb-title">Whiteboard &amp; Synthesis Workspace</div>
-      <div class="wb-ref">REF: CH03_FINAL_SYNTHESIS</div>
+  <div class="page-container">
+    <div class="litmus-box"
+      style="margin-top: 0; margin-bottom: 12px; padding: 12px 14px; font-size: 8pt; line-height: 1.5;">
+      <div style="margin-bottom: 6px;"><b>Prompt 1:</b> $T_{clk} \ge T_{cq} + T_{comb} + T_{setup} + T_{skew}$. If the
+        target frequency increases, $T_{clk}$ shrinks. Assuming static silicon properties for the registers and skew,
+        the architect MUST reduce $T_{comb}$. The only way to reduce $T_{comb}$ is to physically slice the combinational
+        logic chain in half by inserting an intermediate pipeline register. This deepens the overall CPU pipeline (e.g.,
+        from 10 to 15 stages), increasing overall frequency but exposing the CPU to devastating throughput penalties if
+        a branch misprediction forces a 15-stage flush.</div>
+      <div><b>Prompt 2:</b> An overclock shrinks $T_{clk}$, directly threatening $T_{setup}$. By aggressively
+        overvolting $V_{core}$, greater electrical pressure drives electrons through the logic gates faster, reducing
+        the propagation delay ($T_{comb}$) so the signal arrives in time. However, dynamic power scales squarely with
+        voltage ($P = C \cdot V^2 \cdot f$). The resulting exponential heat increases the copper interconnect
+        resistance, slowing electrons back down and requiring extreme cooling (Liquid Nitrogen) to prevent the feedback
+        loop from inducing a thermal crash.</div>
     </div>
-    <div class="wb-canvas"></div>
-    <div class="wb-footer"><span>GIT GOOD &middot; CHAPTER 3 COMPLETE</span><span>PAGE 30</span></div>
+
+    <div class="whiteboard-page wb-split">
+      <div class="wb-header">
+        <div class="wb-title">Whiteboard &amp; Synthesis Workspace</div>
+        <div class="wb-ref">REF: CH03_FINAL_SYNTHESIS</div>
+      </div>
+      <div class="wb-canvas"></div>
+      <div class="wb-footer"><span>GIT GOOD &middot; CHAPTER 3 COMPLETE</span><span>PAGE 30</span></div>
+    </div>
   </div>
-</div>
 
 </body>
+
 </html>

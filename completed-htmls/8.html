@@ -1,634 +1,925 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-<meta charset="utf-8">
-<link rel="stylesheet" href="common.css">
-<title>Chapter 8: Superscalar, Out-of-Order Execution & The ROB</title>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="common.css">
+  <title>Chapter 8: Superscalar, Out-of-Order Execution & The ROB</title>
 </head>
+
 <body class="chapter-eight">
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 1: THE IPC BARRIER & SUPERSCALAR EXECUTION
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <div class="phase-label">Volume I &middot; Silicon, Machine Architecture &amp; Low-Level Math</div>
-    <div class="chapter-number">Chapter 8 (Day 8)</div>
-    <h1 class="chapter-title">Superscalar Execution, Out-of-Order Execution (OoO) &amp; The Reorder Buffer</h1>
+  <div class="page-container content-flow">
+    <div>
+      <div class="phase-label">Volume I &middot; Silicon, Machine Architecture &amp; Low-Level Math</div>
+      <div class="chapter-number">Chapter 8 (Day 8)</div>
+      <h1 class="chapter-title">Superscalar Execution, Out-of-Order Execution (OoO) &amp; The Reorder Buffer</h1>
 
-    <h2>8.0 The IPC Barrier &amp; The Limits of Scalar Pipelining</h2>
-    <p>In Chapter 6, we mathematically proved the fundamental limit of the classical 5-stage pipeline: As the number of instructions approaches infinity, the Instructions Per Cycle (IPC) approaches an absolute asymptotic ceiling of $1.0$. No matter how elegantly the code is written, a strict scalar pipeline can never retire more than one instruction per clock tick.</p>
+      <h2>8.0 The IPC Barrier &amp; The Limits of Scalar Pipelining</h2>
+      <p>In Chapter 6, we mathematically proved the fundamental limit of the classical 5-stage pipeline: As the number
+        of instructions approaches infinity, the Instructions Per Cycle (IPC) approaches an absolute asymptotic ceiling
+        of $1.0$. No matter how elegantly the code is written, a strict scalar pipeline can never retire more than one
+        instruction per clock tick.</p>
 
-    <p>By the late 1980s and early 1990s, hardware architects realized that simply making the clock frequency faster (shrinking the clock period $T_{clk}$) was pushing silicon into severe thermal constraints. To double the performance of a CPU without touching the clock frequency, engineers had to break the IPC $= 1.0$ barrier. The solution was <strong>Superscalar Architecture</strong>.</p>
+      <p>By the late 1980s and early 1990s, hardware architects realized that simply making the clock frequency faster
+        (shrinking the clock period $T_{clk}$) was pushing silicon into severe thermal constraints. To double the
+        performance of a CPU without touching the clock frequency, engineers had to break the IPC $= 1.0$ barrier. The
+        solution was <strong>Superscalar Architecture</strong>.</p>
 
-    <h3>Going Wider: The Superscalar Pipeline</h3>
-    <p>A superscalar processor achieves an IPC greater than 1.0 by physically duplicating the execution hardware on the silicon die. Instead of fetching 1 instruction, decoding 1 instruction, and feeding it to 1 ALU, the entire pipeline is widened.</p>
-    <ul>
-      <li><strong>N-Wide Fetch &amp; Decode:</strong> The L1i cache bus is widened to fetch 4, 6, or 8 instructions simultaneously. Multiple parallel decoders translate these instructions simultaneously.</li>
-      <li><strong>Parallel Execution Units:</strong> The Execute stage is packed with multiple, specialized ports (e.g., 4 Integer ALUs, 2 Floating Point Units, 2 Address Generation Units).</li>
-    </ul>
-    <p>If the CPU fetches four completely independent <code>add</code> instructions, it routes them to the four ALUs and executes them all in a single picosecond. The theoretical peak IPC jumps instantly from $1.0$ to $4.0$.</p>
+      <h3>Going Wider: The Superscalar Pipeline</h3>
+      <p>A superscalar processor achieves an IPC greater than 1.0 by physically duplicating the execution hardware on
+        the silicon die. Instead of fetching 1 instruction, decoding 1 instruction, and feeding it to 1 ALU, the entire
+        pipeline is widened.</p>
+      <ul>
+        <li><strong>N-Wide Fetch &amp; Decode:</strong> The L1i cache bus is widened to fetch 4, 6, or 8 instructions
+          simultaneously. Multiple parallel decoders translate these instructions simultaneously.</li>
+        <li><strong>Parallel Execution Units:</strong> The Execute stage is packed with multiple, specialized ports
+          (e.g., 4 Integer ALUs, 2 Floating Point Units, 2 Address Generation Units).</li>
+      </ul>
+      <p>If the CPU fetches four completely independent <code>add</code> instructions, it routes them to the four ALUs
+        and executes them all in a single picosecond. The theoretical peak IPC jumps instantly from $1.0$ to $4.0$.</p>
 
-    <h3>The VLIW Failure (Intel Itanium)</h3>
-    <p>Early attempts to utilize multiple ALUs relied entirely on the software compiler. <strong>VLIW (Very Long Instruction Word)</strong> architectures, like the infamous Intel Itanium (IA-64), demanded that the C++ compiler bundle perfectly independent instructions into massive 128-bit bundles before the code was even executed. The assumption was that the compiler, having full visibility of the code, could schedule parallel execution perfectly.</p>
-    
-    <p>The Itanium failed catastrophically. The compiler cannot predict <em>dynamic runtime behavior</em>. The compiler does not know if a memory pointer will trigger an L1 cache hit ($1\text{ ns}$) or an L3 cache miss ($20\text{ ns}$) until the program is physically running.</p>
+      <h3>The VLIW Failure (Intel Itanium)</h3>
+      <p>Early attempts to utilize multiple ALUs relied entirely on the software compiler. <strong>VLIW (Very Long
+          Instruction Word)</strong> architectures, like the infamous Intel Itanium (IA-64), demanded that the C++
+        compiler bundle perfectly independent instructions into massive 128-bit bundles before the code was even
+        executed. The assumption was that the compiler, having full visibility of the code, could schedule parallel
+        execution perfectly.</p>
+
+      <p>The Itanium failed catastrophically. The compiler cannot predict <em>dynamic runtime behavior</em>. The
+        compiler does not know if a memory pointer will trigger an L1 cache hit ($1\text{ ns}$) or an L3 cache miss
+        ($20\text{ ns}$) until the program is physically running.</p>
+    </div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 2: WHITEBOARD 1
      ========================================================================== -->
-<div class="page-container">
-  <div class="whiteboard-page">
-    <div class="wb-header">
-      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
-      <div class="wb-ref">REF: CH08_SUPERSCALAR_VLIW_LIMITS</div>
+  <div class="page-container">
+    <div class="whiteboard-page">
+      <div class="wb-header">
+        <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+        <div class="wb-ref">REF: CH08_SUPERSCALAR_VLIW_LIMITS</div>
+      </div>
+      <div class="wb-invariants">
+        <div><b>The Dynamic Dispatch Invariant:</b> Static compilers (VLIW) failed because they attempt to schedule
+          instructions at compile-time. Superscalar x86 architectures succeeded because they schedule instructions
+          dynamically at run-time, reacting instantly to unpredictable physical cache latencies.</div>
+      </div>
+      <div class="wb-canvas"></div>
+      <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 2</span></div>
     </div>
-    <div class="wb-invariants">
-      <div><b>The Dynamic Dispatch Invariant:</b> Static compilers (VLIW) failed because they attempt to schedule instructions at compile-time. Superscalar x86 architectures succeeded because they schedule instructions dynamically at run-time, reacting instantly to unpredictable physical cache latencies.</div>
-    </div>
-    <div class="wb-canvas"></div>
-    <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 2</span></div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 3: THE IN-ORDER STARVATION PROBLEM
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <h2>8.1 The In-Order Starvation Problem &amp; Data-Flow</h2>
-    <p>Moving away from VLIW, engineers built hardware that accepted standard sequential x86 assembly but attempted to dispatch it to multiple ALUs internally. The original Intel Pentium (1993) was an In-Order Superscalar processor. It had two execution pipelines (the U and V pipes). However, it executed code in strict programmatic order.</p>
+  <div class="page-container content-flow">
+    <div>
+      <h2>8.1 The In-Order Starvation Problem &amp; Data-Flow</h2>
+      <p>Moving away from VLIW, engineers built hardware that accepted standard sequential x86 assembly but attempted to
+        dispatch it to multiple ALUs internally. The original Intel Pentium (1993) was an In-Order Superscalar
+        processor. It had two execution pipelines (the U and V pipes). However, it executed code in strict programmatic
+        order.</p>
 
-    <h3>The Sequential Traffic Jam</h3>
-    <p>Consider the following sequence fetched by a 4-wide in-order CPU:</p>
-    <pre><code>Inst 1: load rax, [rcx]    // Cache Miss! Takes 200 cycles.
+      <h3>The Sequential Traffic Jam</h3>
+      <p>Consider the following sequence fetched by a 4-wide in-order CPU:</p>
+      <pre><code>Inst 1: load rax, [rcx]    // Cache Miss! Takes 200 cycles.
 Inst 2: add rbx, rax       // RAW Hazard. Must wait for Inst 1.
 Inst 3: sub r8, 5          // Mathematically Independent.
 Inst 4: xor r9, r9         // Mathematically Independent.</code></pre>
-    
-    <p>In a strict In-Order Superscalar CPU, Instruction 1 stalls the entire pipeline while it waits for main memory. Because Instruction 2 depends on 1, it cannot execute. But what about Instructions 3 and 4? They are completely independent. They need nothing from <code>RAX</code>. However, because the CPU enforces <em>In-Order Dispatch</em>, Instructions 3 and 4 are physically blocked from entering the empty ALUs until Instructions 1 and 2 clear the bottleneck.</p>
-    <p>A 4-wide in-order CPU spends 80% of its massive execution ports sitting totally idle, starving for data while waiting on sequential cache misses.</p>
 
-    <h3>The Out-of-Order (OoO) Paradigm Shift</h3>
-    <p>To keep a massive 6-wide or 8-wide superscalar engine fed, the CPU cannot stop for cache misses. It must look ahead in the instruction stream, find instructions that are ready to execute (like Inst 3 and Inst 4), and fire them into the ALUs immediately, bypassing the stalled instructions entirely.</p>
+      <p>In a strict In-Order Superscalar CPU, Instruction 1 stalls the entire pipeline while it waits for main memory.
+        Because Instruction 2 depends on 1, it cannot execute. But what about Instructions 3 and 4? They are completely
+        independent. They need nothing from <code>RAX</code>. However, because the CPU enforces <em>In-Order
+          Dispatch</em>, Instructions 3 and 4 are physically blocked from entering the empty ALUs until Instructions 1
+        and 2 clear the bottleneck.</p>
+      <p>A 4-wide in-order CPU spends 80% of its massive execution ports sitting totally idle, starving for data while
+        waiting on sequential cache misses.</p>
 
-    <ul>
-      <li><strong>Control-Flow (Software):</strong> "Execute Line 1, then Line 2, then Line 3."</li>
-      <li><strong>Data-Flow (Hardware):</strong> "Execute an instruction the absolute picosecond its required electrical voltages (operands) arrive, completely irrespective of where the instruction resides in the compiled binary."</li>
-    </ul>
+      <h3>The Out-of-Order (OoO) Paradigm Shift</h3>
+      <p>To keep a massive 6-wide or 8-wide superscalar engine fed, the CPU cannot stop for cache misses. It must look
+        ahead in the instruction stream, find instructions that are ready to execute (like Inst 3 and Inst 4), and fire
+        them into the ALUs immediately, bypassing the stalled instructions entirely.</p>
 
-    <p>By abandoning the programmer's sequence and adopting a pure Data-Flow execution model, the CPU maximizes ALU utilization. The challenge becomes how to safely execute code chaotically while maintaining the illusion of sequential logic to the OS.</p>
+      <ul>
+        <li><strong>Control-Flow (Software):</strong> "Execute Line 1, then Line 2, then Line 3."</li>
+        <li><strong>Data-Flow (Hardware):</strong> "Execute an instruction the absolute picosecond its required
+          electrical voltages (operands) arrive, completely irrespective of where the instruction resides in the
+          compiled binary."</li>
+      </ul>
+
+      <p>By abandoning the programmer's sequence and adopting a pure Data-Flow execution model, the CPU maximizes ALU
+        utilization. The challenge becomes how to safely execute code chaotically while maintaining the illusion of
+        sequential logic to the OS.</p>
+    </div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 4: WHITEBOARD 2
      ========================================================================== -->
-<div class="page-container">
-  <div class="whiteboard-page">
-    <div class="wb-header">
-      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
-      <div class="wb-ref">REF: CH08_IN_ORDER_STARVATION</div>
+  <div class="page-container">
+    <div class="whiteboard-page">
+      <div class="wb-header">
+        <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+        <div class="wb-ref">REF: CH08_IN_ORDER_STARVATION</div>
+      </div>
+      <div class="wb-invariants">
+        <div><b>The Wall of Memory:</b> CPU frequencies scaled 1000x over 30 years, while DRAM latency scaled barely
+          10x. Out-of-Order execution was not invented just to run code faster; it was invented specifically to hide the
+          catastrophic, ever-widening latency gap of main memory accesses.</div>
+      </div>
+      <div class="wb-canvas"></div>
+      <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 4</span></div>
     </div>
-    <div class="wb-invariants">
-      <div><b>The Wall of Memory:</b> CPU frequencies scaled 1000x over 30 years, while DRAM latency scaled barely 10x. Out-of-Order execution was not invented just to run code faster; it was invented specifically to hide the catastrophic, ever-widening latency gap of main memory accesses.</div>
-    </div>
-    <div class="wb-canvas"></div>
-    <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 4</span></div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 5: THE THREE-PART ENGINE & THE FRONT-END
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <h2>8.2 The Three-Part OoO Engine</h2>
-    <p>To execute chaos safely, modern architectures (like AMD Zen 4 or Apple M-Series) violently fracture the traditional 5-stage pipeline into three distinct phases:</p>
-    <ol>
-      <li><strong>The In-Order Front-End:</strong> Fetches and decodes instructions sequentially, predicting branches to keep a massive buffer of upcoming work filled.</li>
-      <li><strong>The Out-of-Order Execution Core:</strong> A chaotic waiting room. Instructions sit here monitoring data buses. As soon as their data arrives, they fire out of sequence.</li>
-      <li><strong>The In-Order Back-End:</strong> The architectural garbage collector. It takes the chaotically finished instructions, sorts them back into their original programmatic order, and commits them.</li>
-    </ol>
+  <div class="page-container content-flow">
+    <div>
+      <h2>8.2 The Three-Part OoO Engine</h2>
+      <p>To execute chaos safely, modern architectures (like AMD Zen 4 or Apple M-Series) violently fracture the
+        traditional 5-stage pipeline into three distinct phases:</p>
+      <ol>
+        <li><strong>The In-Order Front-End:</strong> Fetches and decodes instructions sequentially, predicting branches
+          to keep a massive buffer of upcoming work filled.</li>
+        <li><strong>The Out-of-Order Execution Core:</strong> A chaotic waiting room. Instructions sit here monitoring
+          data buses. As soon as their data arrives, they fire out of sequence.</li>
+        <li><strong>The In-Order Back-End:</strong> The architectural garbage collector. It takes the chaotically
+          finished instructions, sorts them back into their original programmatic order, and commits them.</li>
+      </ol>
 
-    <h2>8.3 The Front-End: Decoupling Fetch &amp; Decode</h2>
-    <p>The Front-End's only job is to aggressively decode x86 assembly into micro-operations ($\mu\text{ops}$) faster than the Execution Core can consume them. However, decoding variable-length CISC instructions is incredibly slow, complex, and power-hungry.</p>
+      <h2>8.3 The Front-End: Decoupling Fetch &amp; Decode</h2>
+      <p>The Front-End's only job is to aggressively decode x86 assembly into micro-operations ($\mu\text{ops}$) faster
+        than the Execution Core can consume them. However, decoding variable-length CISC instructions is incredibly
+        slow, complex, and power-hungry.</p>
 
-    <h3>The Micro-Op Queue ($\mu\text{op}$ Queue)</h3>
-    <p>If the Fetch unit suffers an L1i cache miss, or the Branch Predictor stalls for a cycle to evaluate a jump target, the decoders stop producing $\mu\text{ops}$. If the Front-End stops, the Execution Core starves instantly.</p>
-    
-    <p>To prevent this, architects place a massive FIFO buffer (the $\mu\text{op}$ Queue) between the Front-End and the Execution Core. The Front-End pumps decoded $\mu\text{ops}$ into the top of the queue. The Execution Core pulls $\mu\text{ops}$ from the bottom. This buffer mathematically decouples the two engines. The Front-End can stall for several cycles without the Execution Core ever noticing, as it simply continues eating from the buffer.</p>
+      <h3>The Micro-Op Queue ($\mu\text{op}$ Queue)</h3>
+      <p>If the Fetch unit suffers an L1i cache miss, or the Branch Predictor stalls for a cycle to evaluate a jump
+        target, the decoders stop producing $\mu\text{ops}$. If the Front-End stops, the Execution Core starves
+        instantly.</p>
 
-    <h3>The L0 Micro-Op Cache (Decoded ICache)</h3>
-    <p>Introduced effectively by Intel in the Sandy Bridge architecture, the L0 Micro-Op Cache bypasses the decoding penalty entirely. Decoding complex x86 instructions consumes up to 20% of the CPU's total thermal and power budget. </p>
-    <p>The L0 cache stores the post-decoded $\mu\text{ops}$ of recently executed instructions. If a C# <code>for</code> loop repeats, the CPU completely powers down the complex x86 Decoders. It fetches the pre-digested $\mu\text{ops}$ directly from the L0 cache, massively reducing heat, eliminating decode bottlenecks, and flooding the $\mu\text{op}$ Queue with ready-to-execute logic.</p>
+      <p>To prevent this, architects place a massive FIFO buffer (the $\mu\text{op}$ Queue) between the Front-End and
+        the Execution Core. The Front-End pumps decoded $\mu\text{ops}$ into the top of the queue. The Execution Core
+        pulls $\mu\text{ops}$ from the bottom. This buffer mathematically decouples the two engines. The Front-End can
+        stall for several cycles without the Execution Core ever noticing, as it simply continues eating from the
+        buffer.</p>
+
+      <h3>The L0 Micro-Op Cache (Decoded ICache)</h3>
+      <p>Introduced effectively by Intel in the Sandy Bridge architecture, the L0 Micro-Op Cache bypasses the decoding
+        penalty entirely. Decoding complex x86 instructions consumes up to 20% of the CPU's total thermal and power
+        budget. </p>
+      <p>The L0 cache stores the post-decoded $\mu\text{ops}$ of recently executed instructions. If a C#
+        <code>for</code> loop repeats, the CPU completely powers down the complex x86 Decoders. It fetches the
+        pre-digested $\mu\text{ops}$ directly from the L0 cache, massively reducing heat, eliminating decode
+        bottlenecks, and flooding the $\mu\text{op}$ Queue with ready-to-execute logic.</p>
+    </div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 6: WHITEBOARD 3
      ========================================================================== -->
-<div class="page-container">
-  <div class="whiteboard-page">
-    <div class="wb-header">
-      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
-      <div class="wb-ref">REF: CH08_FRONTEND_DECOUPLING</div>
+  <div class="page-container">
+    <div class="whiteboard-page">
+      <div class="wb-header">
+        <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+        <div class="wb-ref">REF: CH08_FRONTEND_DECOUPLING</div>
+      </div>
+      <div class="wb-invariants">
+        <div><b>The RISC Advantage:</b> ARM processors (like Apple M3) have a massive advantage in the Front-End.
+          Because ARM instructions are a fixed 32-bits, decoding is mechanically trivial. Apple can build 8-wide
+          decoders easily. Intel struggles to build decoders wider than 4 or 6 because finding the instruction
+          boundaries of variable-length x86 code requires massive, overlapping, power-hungry speculative decoding logic.
+        </div>
+      </div>
+      <div class="wb-canvas"></div>
+      <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 6</span></div>
     </div>
-    <div class="wb-invariants">
-      <div><b>The RISC Advantage:</b> ARM processors (like Apple M3) have a massive advantage in the Front-End. Because ARM instructions are a fixed 32-bits, decoding is mechanically trivial. Apple can build 8-wide decoders easily. Intel struggles to build decoders wider than 4 or 6 because finding the instruction boundaries of variable-length x86 code requires massive, overlapping, power-hungry speculative decoding logic.</div>
-    </div>
-    <div class="wb-canvas"></div>
-    <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 6</span></div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 7: ALLOCATION & REGISTER RENAMING (RAT)
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <h2>8.4 Allocation &amp; The Physical Register File (PRF)</h2>
-    <p>Once a $\mu\text{op}$ leaves the queue, it enters the <strong>Allocate/Rename Stage</strong>. This is the exact boundary where In-Order execution ends and Out-of-Order chaos begins. Before an instruction can be scrambled, its artificial dependencies must be severed.</p>
+  <div class="page-container content-flow">
+    <div>
+      <h2>8.4 Allocation &amp; The Physical Register File (PRF)</h2>
+      <p>Once a $\mu\text{op}$ leaves the queue, it enters the <strong>Allocate/Rename Stage</strong>. This is the exact
+        boundary where In-Order execution ends and Out-of-Order chaos begins. Before an instruction can be scrambled,
+        its artificial dependencies must be severed.</p>
 
-    <p>As discussed in Chapter 7, the x86 architecture is severely crippled by having only 16 general-purpose architectural registers (<code>RAX</code>, <code>RBX</code>, <code>RCX</code>, etc.). The software compiler is forced to aggressively reuse <code>RAX</code> over and over again, creating Write-After-Write (WAW) and Write-After-Read (WAR) hazards.</p>
+      <p>As discussed in Chapter 7, the x86 architecture is severely crippled by having only 16 general-purpose
+        architectural registers (<code>RAX</code>, <code>RBX</code>, <code>RCX</code>, etc.). The software compiler is
+        forced to aggressively reuse <code>RAX</code> over and over again, creating Write-After-Write (WAW) and
+        Write-After-Read (WAR) hazards.</p>
 
-    <h3>The Hardware Lie: The PRF</h3>
-    <p>To break these artificial shackles, the CPU possesses a massive <strong>Physical Register File (PRF)</strong> containing 160 to 300+ hidden silicon registers (e.g., <code>P0</code> through <code>P256</code>). The operating system and your compiled application have absolutely no knowledge of these registers. They are dynamically managed purely in hardware.</p>
+      <h3>The Hardware Lie: The PRF</h3>
+      <p>To break these artificial shackles, the CPU possesses a massive <strong>Physical Register File (PRF)</strong>
+        containing 160 to 300+ hidden silicon registers (e.g., <code>P0</code> through <code>P256</code>). The operating
+        system and your compiled application have absolutely no knowledge of these registers. They are dynamically
+        managed purely in hardware.</p>
 
-    <h2>8.5 The Register Alias Table (RAT) Mechanics</h2>
-    <p>The RAT is a lightning-fast hardware mapping table. It intercepts every single $\mu\text{op}$ entering the OoO core and rewrites its operands on the fly.</p>
-    
-    <p>Assume the following sequential C# code compiles to:</p>
-    <pre><code>Inst 1: mov eax, 5
+      <h2>8.5 The Register Alias Table (RAT) Mechanics</h2>
+      <p>The RAT is a lightning-fast hardware mapping table. It intercepts every single $\mu\text{op}$ entering the OoO
+        core and rewrites its operands on the fly.</p>
+
+      <p>Assume the following sequential C# code compiles to:</p>
+      <pre><code>Inst 1: mov eax, 5
 Inst 2: add ebx, eax
 Inst 3: mov eax, 10    // WAW Hazard! Compiler reused EAX.</code></pre>
 
-    <p><strong>Step 1: Allocation.</strong> The RAT processes Inst 1. It sees a write to <code>EAX</code>. It pops a clean, unused physical register off the hardware <strong>Free List</strong> (let's say <code>P42</code>). It records in its table: "EAX currently maps to P42". It alters the $\mu\text{op}$ to <code>mov P42, 5</code>.</p>
-    
-    <p><strong>Step 2: Consumption.</strong> The RAT processes Inst 2. It sees a read from <code>EAX</code>. It looks up its table, sees <code>EAX</code> maps to <code>P42</code>, and alters the instruction to <code>add ebx, P42</code>.</p>
+      <p><strong>Step 1: Allocation.</strong> The RAT processes Inst 1. It sees a write to <code>EAX</code>. It pops a
+        clean, unused physical register off the hardware <strong>Free List</strong> (let's say <code>P42</code>). It
+        records in its table: "EAX currently maps to P42". It alters the $\mu\text{op}$ to <code>mov P42, 5</code>.</p>
 
-    <p><strong>Step 3: Re-Allocation.</strong> The RAT processes Inst 3. It sees another write to <code>EAX</code>. Instead of overwriting <code>P42</code> (which would destroy Inst 2's dependency), it pops a brand new register from the Free List (e.g., <code>P89</code>). It updates the table: "EAX now maps to P89". The instruction becomes <code>mov P89, 10</code>.</p>
+      <p><strong>Step 2: Consumption.</strong> The RAT processes Inst 2. It sees a read from <code>EAX</code>. It looks
+        up its table, sees <code>EAX</code> maps to <code>P42</code>, and alters the instruction to
+        <code>add ebx, P42</code>.</p>
 
-    <p>By mapping the second <code>EAX</code> write to an entirely different physical silicon location (<code>P89</code>), the WAW hazard instantly evaporates. Instruction 3 can now execute out-of-order, completely bypassing Instruction 2, without corrupting the original value in <code>P42</code>. The RAT has transformed sequential assembly into a pure, dependency-free Data-Flow graph.</p>
+      <p><strong>Step 3: Re-Allocation.</strong> The RAT processes Inst 3. It sees another write to <code>EAX</code>.
+        Instead of overwriting <code>P42</code> (which would destroy Inst 2's dependency), it pops a brand new register
+        from the Free List (e.g., <code>P89</code>). It updates the table: "EAX now maps to P89". The instruction
+        becomes <code>mov P89, 10</code>.</p>
+
+      <p>By mapping the second <code>EAX</code> write to an entirely different physical silicon location
+        (<code>P89</code>), the WAW hazard instantly evaporates. Instruction 3 can now execute out-of-order, completely
+        bypassing Instruction 2, without corrupting the original value in <code>P42</code>. The RAT has transformed
+        sequential assembly into a pure, dependency-free Data-Flow graph.</p>
+    </div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 8: WHITEBOARD 4
      ========================================================================== -->
-<div class="page-container">
-  <div class="whiteboard-page">
-    <div class="wb-header">
-      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
-      <div class="wb-ref">REF: CH08_RAT_AND_PRF</div>
+  <div class="page-container">
+    <div class="whiteboard-page">
+      <div class="wb-header">
+        <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+        <div class="wb-ref">REF: CH08_RAT_AND_PRF</div>
+      </div>
+      <div class="wb-invariants">
+        <div><b>Static Single Assignment (SSA):</b> If you study compiler optimization (LLVM), you know compilers
+          translate your code into SSA form, where every variable is assigned exactly once (e.g., <code>x1</code>,
+          <code>x2</code>). The RAT is literally executing SSA transformation in real-time physical hardware at 5
+          billion times a second.</div>
+      </div>
+      <div class="wb-canvas"></div>
+      <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 8</span></div>
     </div>
-    <div class="wb-invariants">
-      <div><b>Static Single Assignment (SSA):</b> If you study compiler optimization (LLVM), you know compilers translate your code into SSA form, where every variable is assigned exactly once (e.g., <code>x1</code>, <code>x2</code>). The RAT is literally executing SSA transformation in real-time physical hardware at 5 billion times a second.</div>
-    </div>
-    <div class="wb-canvas"></div>
-    <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 8</span></div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 9: RESERVATION STATIONS & THE SCHEDULER
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <h2>8.6 Reservation Stations &amp; The Scheduler</h2>
-    <p>After the RAT severs the false dependencies, the $\mu\text{op}$ is dispatched into the <strong>Scheduler</strong>, physically landing in a <strong>Reservation Station (RS)</strong>. Reservation Stations were first introduced in 1967 in Robert Tomasulo's legendary algorithm for the IBM System/360 Model 91 floating-point unit.</p>
+  <div class="page-container content-flow">
+    <div>
+      <h2>8.6 Reservation Stations &amp; The Scheduler</h2>
+      <p>After the RAT severs the false dependencies, the $\mu\text{op}$ is dispatched into the
+        <strong>Scheduler</strong>, physically landing in a <strong>Reservation Station (RS)</strong>. Reservation
+        Stations were first introduced in 1967 in Robert Tomasulo's legendary algorithm for the IBM System/360 Model 91
+        floating-point unit.</p>
 
-    <h3>The Holding Pen</h3>
-    <p>Think of Reservation Stations as the ultimate waiting room. A $\mu\text{op}$ sits in its slot, holding its physical register names. </p>
-    <ul>
-      <li>If its data is already computed (e.g., adding two constants, or reading a register that was populated cycles ago), the $\mu\text{op}$ is immediately marked <em>Ready</em>.</li>
-      <li>If it is waiting on data (e.g., waiting for <code>P42</code> to be computed by an ALU, or waiting for a massive L3 cache miss to return), it sits completely dormant. It does not block the pipeline. It simply waits, continuously listening to the internal broadcast network.</li>
-    </ul>
+      <h3>The Holding Pen</h3>
+      <p>Think of Reservation Stations as the ultimate waiting room. A $\mu\text{op}$ sits in its slot, holding its
+        physical register names. </p>
+      <ul>
+        <li>If its data is already computed (e.g., adding two constants, or reading a register that was populated cycles
+          ago), the $\mu\text{op}$ is immediately marked <em>Ready</em>.</li>
+        <li>If it is waiting on data (e.g., waiting for <code>P42</code> to be computed by an ALU, or waiting for a
+          massive L3 cache miss to return), it sits completely dormant. It does not block the pipeline. It simply waits,
+          continuously listening to the internal broadcast network.</li>
+      </ul>
 
-    <h2>8.7 The Common Data Bus (CDB) Wakeup &amp; Select</h2>
-    <p>The Common Data Bus (CDB) is the massive internal broadcast network of the Execution Core. It connects the output pins of every single ALU, FPU, and Cache directly to the inputs of all Reservation Stations simultaneously.</p>
+      <h2>8.7 The Common Data Bus (CDB) Wakeup &amp; Select</h2>
+      <p>The Common Data Bus (CDB) is the massive internal broadcast network of the Execution Core. It connects the
+        output pins of every single ALU, FPU, and Cache directly to the inputs of all Reservation Stations
+        simultaneously.</p>
 
-    <h3>The Wakeup Phase</h3>
-    <p>When an ALU finishes a calculation (e.g., it computes that <code>P42</code> equals <code>0xFF</code>), it broadcasts this payload across the entire die via the CDB: <strong>[Tag: P42, Value: 0xFF]</strong>.</p>
-    <p>Every single dormant $\mu\text{op}$ sitting in a Reservation Station is physically wired to compare its required operand tags against the broadcast tag. If a $\mu\text{op}$ is waiting for <code>P42</code>, the hardware comparator fires, and the $\mu\text{op}$ instantly latches the broadcasted voltage <code>0xFF</code> into its local buffer. The $\mu\text{op}$'s state flips to <em>Ready</em>. This is the <strong>Wakeup</strong>.</p>
+      <h3>The Wakeup Phase</h3>
+      <p>When an ALU finishes a calculation (e.g., it computes that <code>P42</code> equals <code>0xFF</code>), it
+        broadcasts this payload across the entire die via the CDB: <strong>[Tag: P42, Value: 0xFF]</strong>.</p>
+      <p>Every single dormant $\mu\text{op}$ sitting in a Reservation Station is physically wired to compare its
+        required operand tags against the broadcast tag. If a $\mu\text{op}$ is waiting for <code>P42</code>, the
+        hardware comparator fires, and the $\mu\text{op}$ instantly latches the broadcasted voltage <code>0xFF</code>
+        into its local buffer. The $\mu\text{op}$'s state flips to <em>Ready</em>. This is the <strong>Wakeup</strong>.
+      </p>
 
-    <h3>The Select Phase</h3>
-    <p>Every single clock cycle ($0.2\text{ ns}$), the hardware Scheduler scans all the Reservation Stations. It looks for $\mu\text{ops}$ that have all their operands marked <em>Ready</em>. It selects the absolute oldest ready $\mu\text{ops}$ and forcefully injects them into the Execution Ports (ALUs).</p>
+      <h3>The Select Phase</h3>
+      <p>Every single clock cycle ($0.2\text{ ns}$), the hardware Scheduler scans all the Reservation Stations. It looks
+        for $\mu\text{ops}$ that have all their operands marked <em>Ready</em>. It selects the absolute oldest ready
+        $\mu\text{ops}$ and forcefully injects them into the Execution Ports (ALUs).</p>
 
-    <div class="callout tip">
-      <div class="callout-title">Superscalar Burst Fire (Emerald)</div>
-      If an L3 cache miss finally resolves and broadcasts a highly contended piece of data on the CDB, it might wake up 6 different $\mu\text{ops}$ simultaneously. On the very next clock cycle, the Select logic will pull all 6 disparate, out-of-order $\mu\text{ops}$ and fire them into 6 different ALUs concurrently, achieving an IPC of 6.0 for that specific nanosecond, perfectly compensating for the previous stalls.
-    </div>
-    <div class="callout tip">
-      <div><b>Tomasulo's Algorithm:</b> The combination of Register Renaming to break WAW/WAR dependencies, Reservation Stations to queue instructions dynamically, and the Common Data Bus to broadcast results is the holy trinity of Out-of-Order execution, collectively known as Tomasulo's Algorithm.</div>
+      <div class="callout tip">
+        <div class="callout-title">Superscalar Burst Fire (Emerald)</div>
+        If an L3 cache miss finally resolves and broadcasts a highly contended piece of data on the CDB, it might wake
+        up 6 different $\mu\text{ops}$ simultaneously. On the very next clock cycle, the Select logic will pull all 6
+        disparate, out-of-order $\mu\text{ops}$ and fire them into 6 different ALUs concurrently, achieving an IPC of
+        6.0 for that specific nanosecond, perfectly compensating for the previous stalls.
+      </div>
+      <div class="callout tip">
+        <div><b>Tomasulo's Algorithm:</b> The combination of Register Renaming to break WAW/WAR dependencies,
+          Reservation Stations to queue instructions dynamically, and the Common Data Bus to broadcast results is the
+          holy trinity of Out-of-Order execution, collectively known as Tomasulo's Algorithm.</div>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 11: MEMORY DISAMBIGUATION & LSQ
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <h2>8.8 Memory Disambiguation: The Load/Store Queue (LSQ)</h2>
-    <p>Executing ALUs out of order is mathematically safe thanks to the RAT. Registers have explicit names (EAX). But reading and writing to RAM out of order is an architectural nightmare. Memory addresses are dynamic; the CPU does not know the physical memory address of a pointer until the Address Generation Unit (AGU) actually executes the math to compute it.</p>
+  <div class="page-container content-flow">
+    <div>
+      <h2>8.8 Memory Disambiguation: The Load/Store Queue (LSQ)</h2>
+      <p>Executing ALUs out of order is mathematically safe thanks to the RAT. Registers have explicit names (EAX). But
+        reading and writing to RAM out of order is an architectural nightmare. Memory addresses are dynamic; the CPU
+        does not know the physical memory address of a pointer until the Address Generation Unit (AGU) actually executes
+        the math to compute it.</p>
 
-    <h3>The Pointer Aliasing Hazard</h3>
-    <pre><code>Inst 1: STORE 0xFF -> [RAX]
+      <h3>The Pointer Aliasing Hazard</h3>
+      <pre><code>Inst 1: STORE 0xFF -> [RAX]
 Inst 2: LOAD  [RBX] -> RCX</code></pre>
-    <p>Can the Out-of-Order engine execute the LOAD (Inst 2) before the STORE (Inst 1)? If <code>RAX</code> and <code>RBX</code> point to completely different memory addresses, yes. This is safe and massively boosts throughput. But what if <code>RAX == RBX</code>? This is called <strong>Pointer Aliasing</strong>.</p>
-    <p>If the CPU executes the LOAD from <code>RBX</code> before the STORE to <code>RAX</code> completes, the LOAD grabs stale, corrupted data from the cache. The program's state is ruined.</p>
+      <p>Can the Out-of-Order engine execute the LOAD (Inst 2) before the STORE (Inst 1)? If <code>RAX</code> and
+        <code>RBX</code> point to completely different memory addresses, yes. This is safe and massively boosts
+        throughput. But what if <code>RAX == RBX</code>? This is called <strong>Pointer Aliasing</strong>.</p>
+      <p>If the CPU executes the LOAD from <code>RBX</code> before the STORE to <code>RAX</code> completes, the LOAD
+        grabs stale, corrupted data from the cache. The program's state is ruined.</p>
 
-    <h3>The Load/Store Queue (LSQ)</h3>
-    <p>To resolve this, memory operations bypass standard Reservation Stations and enter a highly specialized buffer called the <strong>Load/Store Queue (LSQ)</strong>. The LSQ enforces strict memory ordering models while permitting extreme speculation.</p>
-    
-    <ul>
-      <li>When a LOAD $\mu\text{op}$ computes its physical address in the AGU, it scans the Store portion of the LSQ. It asks: <em>"Are there any older STOREs waiting to execute whose memory addresses are currently unknown?"</em></li>
-      <li><strong>Memory Disambiguation:</strong> Modern CPUs aggressively gamble. The hardware assumes <code>RAX != RBX</code> (that pointers rarely overlap). It allows the LOAD to execute speculatively, fetching the data from the L1d cache, even if older STOREs haven't resolved their addresses yet.</li>
-    </ul>
+      <h3>The Load/Store Queue (LSQ)</h3>
+      <p>To resolve this, memory operations bypass standard Reservation Stations and enter a highly specialized buffer
+        called the <strong>Load/Store Queue (LSQ)</strong>. The LSQ enforces strict memory ordering models while
+        permitting extreme speculation.</p>
 
-    <h3>Memory Ordering Models (TSO vs. Weak)</h3>
-    <p>The rules the LSQ must follow depend on the ISA. x86-64 uses <strong>Total Store Ordering (TSO)</strong>. Under TSO, LOADs can execute before older STOREs (as long as they don't alias), but STOREs can never execute before older STOREs. ARM architectures use a Weakly Ordered model, allowing the LSQ to aggressively reorder both LOADs and STOREs, placing the burden of memory fencing entirely on the software developer.</p>
+      <ul>
+        <li>When a LOAD $\mu\text{op}$ computes its physical address in the AGU, it scans the Store portion of the LSQ.
+          It asks: <em>"Are there any older STOREs waiting to execute whose memory addresses are currently
+            unknown?"</em></li>
+        <li><strong>Memory Disambiguation:</strong> Modern CPUs aggressively gamble. The hardware assumes
+          <code>RAX != RBX</code> (that pointers rarely overlap). It allows the LOAD to execute speculatively, fetching
+          the data from the L1d cache, even if older STOREs haven't resolved their addresses yet.</li>
+      </ul>
+
+      <h3>Memory Ordering Models (TSO vs. Weak)</h3>
+      <p>The rules the LSQ must follow depend on the ISA. x86-64 uses <strong>Total Store Ordering (TSO)</strong>. Under
+        TSO, LOADs can execute before older STOREs (as long as they don't alias), but STOREs can never execute before
+        older STOREs. ARM architectures use a Weakly Ordered model, allowing the LSQ to aggressively reorder both LOADs
+        and STOREs, placing the burden of memory fencing entirely on the software developer.</p>
+    </div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 12: WHITEBOARD 6
      ========================================================================== -->
-<div class="page-container">
-  <div class="whiteboard-page">
-    <div class="wb-header">
-      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
-      <div class="wb-ref">REF: CH08_LSQ_MEMORY_DISAMBIGUATION</div>
+  <div class="page-container">
+    <div class="whiteboard-page">
+      <div class="wb-header">
+        <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+        <div class="wb-ref">REF: CH08_LSQ_MEMORY_DISAMBIGUATION</div>
+      </div>
+      <div class="wb-invariants">
+        <div><b>Memory Ordering Violations:</b> What happens when the CPU guesses wrong? Eventually, the older STORE
+          computes its address and realizes <code>RAX == RBX</code>. The LSQ hardware detects that a younger LOAD stole
+          data from the cache prematurely. The Memory Order Buffer (MOB) triggers a catastrophic pipeline flush,
+          destroying all speculative work and forcing the LOAD to re-execute.</div>
+      </div>
+      <div class="wb-canvas"></div>
+      <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 12</span></div>
     </div>
-    <div class="wb-invariants">
-      <div><b>Memory Ordering Violations:</b> What happens when the CPU guesses wrong? Eventually, the older STORE computes its address and realizes <code>RAX == RBX</code>. The LSQ hardware detects that a younger LOAD stole data from the cache prematurely. The Memory Order Buffer (MOB) triggers a catastrophic pipeline flush, destroying all speculative work and forcing the LOAD to re-execute.</div>
-    </div>
-    <div class="wb-canvas"></div>
-    <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 12</span></div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 13: STORE-TO-LOAD FORWARDING
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <h2>8.9 Store-to-Load Forwarding</h2>
-    <p>Let's look at the opposite scenario in the Load/Store Queue. What happens if the CPU knows for an absolute fact that the pointers <em>do</em> overlap?</p>
+  <div class="page-container content-flow">
+    <div>
+      <h2>8.9 Store-to-Load Forwarding</h2>
+      <p>Let's look at the opposite scenario in the Load/Store Queue. What happens if the CPU knows for an absolute fact
+        that the pointers <em>do</em> overlap?</p>
 
-    <pre><code>Inst 1: STORE 0xFF -> [RAX]
+      <pre><code>Inst 1: STORE 0xFF -> [RAX]
 Inst 2: LOAD  [RAX] -> RCX</code></pre>
 
-    <p>Instruction 1 wants to write to an address. Instruction 2 wants to read from that exact same address immediately after. In a naive pipeline, Instruction 2 must wait for Instruction 1 to send the data all the way to the L1 Data Cache, and then Instruction 2 must issue a cache read to pull it back out. This round-trip to the L1 Cache takes 4 to 5 clock cycles.</p>
+      <p>Instruction 1 wants to write to an address. Instruction 2 wants to read from that exact same address
+        immediately after. In a naive pipeline, Instruction 2 must wait for Instruction 1 to send the data all the way
+        to the L1 Data Cache, and then Instruction 2 must issue a cache read to pull it back out. This round-trip to the
+        L1 Cache takes 4 to 5 clock cycles.</p>
 
-    <p>To avoid this massive latency penalty, the LSQ utilizes <strong>Store-to-Load Forwarding</strong>. When the LOAD (Inst 2) calculates its address in the AGU, it snoops the Store Queue. It finds Inst 1 sitting in the queue, waiting to be written to memory. Because the addresses perfectly match, the LSQ physically intercepts the <code>0xFF</code> data payload sitting inside the pending Store Buffer and wires it <em>directly</em> into the LOAD's destination physical register.</p>
+      <p>To avoid this massive latency penalty, the LSQ utilizes <strong>Store-to-Load Forwarding</strong>. When the
+        LOAD (Inst 2) calculates its address in the AGU, it snoops the Store Queue. It finds Inst 1 sitting in the
+        queue, waiting to be written to memory. Because the addresses perfectly match, the LSQ physically intercepts the
+        <code>0xFF</code> data payload sitting inside the pending Store Buffer and wires it <em>directly</em> into the
+        LOAD's destination physical register.</p>
 
-    <p>The LOAD instruction executes instantly in 0 cycles, completely bypassing the L1 Cache hierarchy. The STORE still eventually commits to the L1 cache in the background, but the pipeline throughput is completely unblocked.</p>
+      <p>The LOAD instruction executes instantly in 0 cycles, completely bypassing the L1 Cache hierarchy. The STORE
+        still eventually commits to the L1 cache in the background, but the pipeline throughput is completely unblocked.
+      </p>
 
-    <div class="callout warn">
-      <div class="callout-title">The Forwarding Failure (Orange)</div>
-      Store-to-Load forwarding only works if the LOAD perfectly aligns with the STORE. If you store a 64-bit integer, but then attempt to LOAD the upper 32-bits of that address, the hardware forwarding logic usually cannot handle the byte-offset translation dynamically. The forward fails, and the CPU suffers a massive stall, forcing the LOAD to wait for the STORE to fully flush to the L1 cache before reading it.
+      <div class="callout warn">
+        <div class="callout-title">The Forwarding Failure (Orange)</div>
+        Store-to-Load forwarding only works if the LOAD perfectly aligns with the STORE. If you store a 64-bit integer,
+        but then attempt to LOAD the upper 32-bits of that address, the hardware forwarding logic usually cannot handle
+        the byte-offset translation dynamically. The forward fails, and the CPU suffers a massive stall, forcing the
+        LOAD to wait for the STORE to fully flush to the L1 cache before reading it.
+      </div>
     </div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 14: WHITEBOARD 7
      ========================================================================== -->
-<div class="page-container">
-  <div class="whiteboard-page">
-    <div class="wb-header">
-      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
-      <div class="wb-ref">REF: CH08_STORE_TO_LOAD_FORWARDING</div>
+  <div class="page-container">
+    <div class="whiteboard-page">
+      <div class="wb-header">
+        <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+        <div class="wb-ref">REF: CH08_STORE_TO_LOAD_FORWARDING</div>
+      </div>
+      <div class="wb-canvas"></div>
+      <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 14</span></div>
     </div>
-    <div class="wb-canvas"></div>
-    <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 14</span></div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 15: THE REORDER BUFFER (ROB) & RETIREMENT
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <h2>8.10 The Back-End: The Reorder Buffer (ROB) &amp; Retirement</h2>
-    <p>If instructions execute chaotically out of order, how does a debugger step through code line by line? How does the operating system survive a Page Fault if the memory access occurred on an instruction that executed 10 cycles ahead of schedule?</p>
+  <div class="page-container content-flow">
+    <div>
+      <h2>8.10 The Back-End: The Reorder Buffer (ROB) &amp; Retirement</h2>
+      <p>If instructions execute chaotically out of order, how does a debugger step through code line by line? How does
+        the operating system survive a Page Fault if the memory access occurred on an instruction that executed 10
+        cycles ahead of schedule?</p>
 
-    <p>The answer is the <strong>Reorder Buffer (ROB)</strong>. The ROB is the ultimate guarantor of architectural sanity. It enforces the golden rule of modern processors: <em>Chaos in execution, perfect order in retirement.</em></p>
+      <p>The answer is the <strong>Reorder Buffer (ROB)</strong>. The ROB is the ultimate guarantor of architectural
+        sanity. It enforces the golden rule of modern processors: <em>Chaos in execution, perfect order in
+          retirement.</em></p>
 
-    <h3>The Circular Queue</h3>
-    <p>The ROB is a massive hardware circular queue (often 200 to 300 entries deep). When a $\mu\text{op}$ is decoded in the In-Order Front-End, it is sequentially allocated a slot at the tail of the ROB. It receives a physical ROB Ticket.</p>
+      <h3>The Circular Queue</h3>
+      <p>The ROB is a massive hardware circular queue (often 200 to 300 entries deep). When a $\mu\text{op}$ is decoded
+        in the In-Order Front-End, it is sequentially allocated a slot at the tail of the ROB. It receives a physical
+        ROB Ticket.</p>
 
-    <p>When the $\mu\text{op}$ fires out-of-order in the Execution Core, it computes its result. However, it <strong>does not</strong> write this result to the architectural state (the registers the OS can actually see, like the true <code>RAX</code>). It writes the result only to its hidden Physical Register (PRF) and marks its ROB Ticket as <em>Completed</em>.</p>
+      <p>When the $\mu\text{op}$ fires out-of-order in the Execution Core, it computes its result. However, it
+        <strong>does not</strong> write this result to the architectural state (the registers the OS can actually see,
+        like the true <code>RAX</code>). It writes the result only to its hidden Physical Register (PRF) and marks its
+        ROB Ticket as <em>Completed</em>.</p>
 
-    <h3>The Architectural Commit (Retirement)</h3>
-    <p>The In-Order Back-End of the CPU monitors the <em>Head</em> of the ROB. The CPU only allows an instruction to <strong>Retire</strong> (officially map its Physical Register back to the Architectural Register state) if:</p>
-    <ol>
-      <li>It is located exactly at the Head of the ROB.</li>
-      <li>It has successfully completed execution without exceptions.</li>
-      <li>All instructions sequentially older than it have already retired.</li>
-    </ol>
-    
-    <p>If a fast XOR instruction finishes in 1 cycle, but is sitting behind a slow LOAD instruction waiting on a 200-cycle RAM fetch, the fast instruction sits completely trapped in the ROB. It cannot retire until the slow instruction finishes and leaves the queue. The architectural state updates purely, strictly sequentially.</p>
+      <h3>The Architectural Commit (Retirement)</h3>
+      <p>The In-Order Back-End of the CPU monitors the <em>Head</em> of the ROB. The CPU only allows an instruction to
+        <strong>Retire</strong> (officially map its Physical Register back to the Architectural Register state) if:</p>
+      <ol>
+        <li>It is located exactly at the Head of the ROB.</li>
+        <li>It has successfully completed execution without exceptions.</li>
+        <li>All instructions sequentially older than it have already retired.</li>
+      </ol>
+
+      <p>If a fast XOR instruction finishes in 1 cycle, but is sitting behind a slow LOAD instruction waiting on a
+        200-cycle RAM fetch, the fast instruction sits completely trapped in the ROB. It cannot retire until the slow
+        instruction finishes and leaves the queue. The architectural state updates purely, strictly sequentially.</p>
+    </div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 16: WHITEBOARD 8
      ========================================================================== -->
-<div class="page-container">
-  <div class="whiteboard-page">
-    <div class="wb-header">
-      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
-      <div class="wb-ref">REF: CH08_ROB_AND_RETIREMENT</div>
+  <div class="page-container">
+    <div class="whiteboard-page">
+      <div class="wb-header">
+        <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+        <div class="wb-ref">REF: CH08_ROB_AND_RETIREMENT</div>
+      </div>
+      <div class="wb-invariants">
+        <div><b>ROB Exhaustion:</b> If a cache miss takes 400 cycles, the OoO core keeps executing younger instructions
+          and stuffing their completed results into the ROB. Eventually, the 200-slot ROB fills completely up. The
+          Allocation stage hits a wall, and the entire CPU hard-stalls. This is why scaling cache misses is devastating;
+          it physically overflows the CPU's ability to buffer chaos.</div>
+      </div>
+      <div class="wb-canvas"></div>
+      <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 16</span></div>
     </div>
-    <div class="wb-invariants">
-      <div><b>ROB Exhaustion:</b> If a cache miss takes 400 cycles, the OoO core keeps executing younger instructions and stuffing their completed results into the ROB. Eventually, the 200-slot ROB fills completely up. The Allocation stage hits a wall, and the entire CPU hard-stalls. This is why scaling cache misses is devastating; it physically overflows the CPU's ability to buffer chaos.</div>
-    </div>
-    <div class="wb-canvas"></div>
-    <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 16</span></div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 17: PRECISE EXCEPTIONS & SPECULATION RECOVERY
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <h2>8.11 Precise Exceptions &amp; Speculation Recovery</h2>
-    <p>The true genius of the Reorder Buffer is not just ordering; it is the implementation of <strong>Precise Exceptions</strong> and the flawless recovery from branch mispredictions.</p>
+  <div class="page-container content-flow">
+    <div>
+      <h2>8.11 Precise Exceptions &amp; Speculation Recovery</h2>
+      <p>The true genius of the Reorder Buffer is not just ordering; it is the implementation of <strong>Precise
+          Exceptions</strong> and the flawless recovery from branch mispredictions.</p>
 
-    <h3>Handling Hardware Faults</h3>
-    <p>Imagine an Out-of-Order execution core evaluating a <code>div eax, ebx</code> instruction. The ALU executes the math, but <code>EBX</code> is zero. The ALU triggers a Hardware Divide-by-Zero Exception. </p>
-    
-    <p>Because the CPU is out-of-order, there might be 50 younger instructions that have already executed speculatively <em>after</em> the divide instruction. If the CPU panicked instantly, those 50 instructions would corrupt the memory state before the OS could handle the crash.</p>
-    
-    <p>Instead, the Execute unit simply flags the Divide instruction's ROB entry as "Poisoned with Exception". The instruction sits quietly in the queue. Only when the poisoned instruction reaches the absolute <em>Head</em> of the ROB does the CPU trigger the actual interrupt to the OS. Because it is at the head, the architectural state is mathematically perfectly pristine—exactly as it was immediately prior to the crash. The OS fault handler takes over safely.</p>
+      <h3>Handling Hardware Faults</h3>
+      <p>Imagine an Out-of-Order execution core evaluating a <code>div eax, ebx</code> instruction. The ALU executes the
+        math, but <code>EBX</code> is zero. The ALU triggers a Hardware Divide-by-Zero Exception. </p>
 
-    <h3>Branch Misprediction Recovery</h3>
-    <p>The exact same physical mechanic handles Branch Prediction.</p>
-    <p>If the Front-End guesses a branch wrong, it fetches and executes 100 instructions down the wrong path. They finish out-of-order and sit in the ROB. When the actual branch instruction finally evaluates in the ALU and realizes the misprediction, it flags itself in the ROB.</p>
-    <p>When the branch reaches the Head of the ROB, the CPU clears the entire ROB queue behind it. It resets the RAT (abandoning all the newly mapped Physical Registers, dumping them back onto the Free List). The 100 speculative instructions are vaporized before they can ever Retire. The architectural state remains perfectly isolated from the speculative chaos.</p>
+      <p>Because the CPU is out-of-order, there might be 50 younger instructions that have already executed
+        speculatively <em>after</em> the divide instruction. If the CPU panicked instantly, those 50 instructions would
+        corrupt the memory state before the OS could handle the crash.</p>
+
+      <p>Instead, the Execute unit simply flags the Divide instruction's ROB entry as "Poisoned with Exception". The
+        instruction sits quietly in the queue. Only when the poisoned instruction reaches the absolute <em>Head</em> of
+        the ROB does the CPU trigger the actual interrupt to the OS. Because it is at the head, the architectural state
+        is mathematically perfectly pristine—exactly as it was immediately prior to the crash. The OS fault handler
+        takes over safely.</p>
+
+      <h3>Branch Misprediction Recovery</h3>
+      <p>The exact same physical mechanic handles Branch Prediction.</p>
+      <p>If the Front-End guesses a branch wrong, it fetches and executes 100 instructions down the wrong path. They
+        finish out-of-order and sit in the ROB. When the actual branch instruction finally evaluates in the ALU and
+        realizes the misprediction, it flags itself in the ROB.</p>
+      <p>When the branch reaches the Head of the ROB, the CPU clears the entire ROB queue behind it. It resets the RAT
+        (abandoning all the newly mapped Physical Registers, dumping them back onto the Free List). The 100 speculative
+        instructions are vaporized before they can ever Retire. The architectural state remains perfectly isolated from
+        the speculative chaos.</p>
+    </div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 18: WHITEBOARD 9
      ========================================================================== -->
-<div class="page-container">
-  <div class="whiteboard-page">
-    <div class="wb-header">
-      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
-      <div class="wb-ref">REF: CH08_PRECISE_EXCEPTIONS_RECOVERY</div>
+  <div class="page-container">
+    <div class="whiteboard-page">
+      <div class="wb-header">
+        <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+        <div class="wb-ref">REF: CH08_PRECISE_EXCEPTIONS_RECOVERY</div>
+      </div>
+      <div class="wb-canvas"></div>
+      <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 18</span></div>
     </div>
-    <div class="wb-canvas"></div>
-    <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 18</span></div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 19: THE SPECTRE VULNERABILITY DEEP DIVE
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <h2>8.12 The Vulnerability of Speculation: Spectre</h2>
-    <p>In 2018, the computer science world was shaken by the disclosure of the <strong>Spectre</strong> and <strong>Meltdown</strong> hardware vulnerabilities. They were not software bugs; they were fundamental physics exploits leveraging the Reorder Buffer (ROB) and Out-of-Order execution.</p>
+  <div class="page-container content-flow">
+    <div>
+      <h2>8.12 The Vulnerability of Speculation: Spectre</h2>
+      <p>In 2018, the computer science world was shaken by the disclosure of the <strong>Spectre</strong> and
+        <strong>Meltdown</strong> hardware vulnerabilities. They were not software bugs; they were fundamental physics
+        exploits leveraging the Reorder Buffer (ROB) and Out-of-Order execution.</p>
 
-    <h3>The Microarchitectural Footprint</h3>
-    <p>We established that if the CPU speculatively executes down the wrong branch path, the ROB perfectly vaporizes the <em>Architectural State</em> (the Registers) when the misprediction is caught. The software execution history is pristine.</p>
-    
-    <p>However, the ROB only rolls back registers. It does <strong>not</strong> roll back <em>Microarchitectural State</em>. If a speculative instruction executes a memory LOAD, the physical hardware pulls that data from Main RAM and places it into the <strong>L1 Data Cache</strong>. When the ROB flushes, it clears the register, but the data remains physically sitting inside the L1 Cache.</p>
+      <h3>The Microarchitectural Footprint</h3>
+      <p>We established that if the CPU speculatively executes down the wrong branch path, the ROB perfectly vaporizes
+        the <em>Architectural State</em> (the Registers) when the misprediction is caught. The software execution
+        history is pristine.</p>
 
-    <h3>The Flush+Reload Attack Vector</h3>
-    <p>A hacker writes a malicious script with an <code>if (x &lt; array_size)</code> bounds check. They train the CPU's branch predictor to assume the check is always true. Then, they request an out-of-bounds read (e.g., stealing a kernel password at <code>array_size + offset</code>).</p>
-    
-    <p>The branch predictor guesses true, speculatively executing the malicious read out-of-order. The CPU fetches the password into the L1 Cache. It then uses the value of the password to load a secondary array: <code>dummy_array[password_byte]</code>.</p>
-    
-    <p>A few cycles later, the ALU resolves the <code>if</code> condition, realizes <code>x</code> was out-of-bounds, and triggers a ROB flush. The registers are vaporized. But the cache lines for <code>dummy_array[password_byte]</code> remain loaded.</p>
+      <p>However, the ROB only rolls back registers. It does <strong>not</strong> roll back <em>Microarchitectural
+          State</em>. If a speculative instruction executes a memory LOAD, the physical hardware pulls that data from
+        Main RAM and places it into the <strong>L1 Data Cache</strong>. When the ROB flushes, it clears the register,
+        but the data remains physically sitting inside the L1 Cache.</p>
 
-    <p>The hacker then iterates through every index of <code>dummy_array</code>, measuring the exact nanosecond timing of the memory accesses. The index that returns instantly (because it is in the L1 cache) is the value of the password byte. By abusing the OoO engine's quest for extreme IPC, attackers shattered the fundamental security isolation of modern processors.</p>
+      <h3>The Flush+Reload Attack Vector</h3>
+      <p>A hacker writes a malicious script with an <code>if (x &lt; array_size)</code> bounds check. They train the
+        CPU's branch predictor to assume the check is always true. Then, they request an out-of-bounds read (e.g.,
+        stealing a kernel password at <code>array_size + offset</code>).</p>
+
+      <p>The branch predictor guesses true, speculatively executing the malicious read out-of-order. The CPU fetches the
+        password into the L1 Cache. It then uses the value of the password to load a secondary array:
+        <code>dummy_array[password_byte]</code>.</p>
+
+      <p>A few cycles later, the ALU resolves the <code>if</code> condition, realizes <code>x</code> was out-of-bounds,
+        and triggers a ROB flush. The registers are vaporized. But the cache lines for
+        <code>dummy_array[password_byte]</code> remain loaded.</p>
+
+      <p>The hacker then iterates through every index of <code>dummy_array</code>, measuring the exact nanosecond timing
+        of the memory accesses. The index that returns instantly (because it is in the L1 cache) is the value of the
+        password byte. By abusing the OoO engine's quest for extreme IPC, attackers shattered the fundamental security
+        isolation of modern processors.</p>
+    </div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 20: WHITEBOARD 10
      ========================================================================== -->
-<div class="page-container">
-  <div class="whiteboard-page">
-    <div class="wb-header">
-      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
-      <div class="wb-ref">REF: CH08_SPECTRE_FLUSH_RELOAD</div>
+  <div class="page-container">
+    <div class="whiteboard-page">
+      <div class="wb-header">
+        <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+        <div class="wb-ref">REF: CH08_SPECTRE_FLUSH_RELOAD</div>
+      </div>
+      <div class="wb-invariants">
+        <div><b>Hardware Mitigations:</b> Fixing Spectre required massive microcode updates that forced the CPU to
+          insert artificial serialization barriers (lfence/mfence), aggressively preventing the OoO engine from
+          speculating on sensitive memory loads. This caused severe performance regressions (10-20%) across cloud
+          datacenters globally.</div>
+      </div>
+      <div class="wb-canvas"></div>
+      <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 20</span></div>
     </div>
-    <div class="wb-invariants">
-      <div><b>Hardware Mitigations:</b> Fixing Spectre required massive microcode updates that forced the CPU to insert artificial serialization barriers (lfence/mfence), aggressively preventing the OoO engine from speculating on sensitive memory loads. This caused severe performance regressions (10-20%) across cloud datacenters globally.</div>
-    </div>
-    <div class="wb-canvas"></div>
-    <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 20</span></div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 21: SOFTWARE RELEVANCY (ILP & RESTRICT)
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <h2>8.13 Software Relevancy: Maximizing IPC in Code</h2>
-    <p>The Out-of-Order core is a miracle of engineering, but it has finite limits. The ROB can only hold ~200 instructions. The Reservation Stations can only hold ~100. If your code features a tight dependency chain of 30 sequential math operations, the OoO core cannot parallelize it. The Reservation Stations will fill up with dormant instructions waiting on the CDB, the allocator will stall, and the massive 6-wide superscalar engine will drop from a theoretical IPC of 6.0 down to an abysmal IPC of 0.5.</p>
+  <div class="page-container content-flow">
+    <div>
+      <h2>8.13 Software Relevancy: Maximizing IPC in Code</h2>
+      <p>The Out-of-Order core is a miracle of engineering, but it has finite limits. The ROB can only hold ~200
+        instructions. The Reservation Stations can only hold ~100. If your code features a tight dependency chain of 30
+        sequential math operations, the OoO core cannot parallelize it. The Reservation Stations will fill up with
+        dormant instructions waiting on the CDB, the allocator will stall, and the massive 6-wide superscalar engine
+        will drop from a theoretical IPC of 6.0 down to an abysmal IPC of 0.5.</p>
 
-    <h3>Pointer Aliasing &amp; The <code>restrict</code> Keyword (C/C++)</h3>
-    <p>We discussed how the Load/Store Queue (LSQ) must guess if pointers alias (overlap). In languages like C and C++, the compiler must be deeply pessimistic. If you pass two array pointers into a function, the compiler assumes they might overlap, forcing the CPU to serialize the memory accesses to prevent Memory Ordering Violations.</p>
+      <h3>Pointer Aliasing &amp; The <code>restrict</code> Keyword (C/C++)</h3>
+      <p>We discussed how the Load/Store Queue (LSQ) must guess if pointers alias (overlap). In languages like C and
+        C++, the compiler must be deeply pessimistic. If you pass two array pointers into a function, the compiler
+        assumes they might overlap, forcing the CPU to serialize the memory accesses to prevent Memory Ordering
+        Violations.</p>
 
-    <pre><code>void AddArrays(int* restrict a, int* restrict b, int* restrict result, int len) {
+      <pre><code>void AddArrays(int* restrict a, int* restrict b, int* restrict result, int len) {
     for (int i = 0; i < len; i++) {
         result[i] = a[i] + b[i];
     }
 }</code></pre>
-    
-    <p>By adding the <code>restrict</code> keyword, the software engineer provides a legally binding contract to the compiler that these pointers will never alias. The compiler aggressively reorders the assembly, and the LSQ violently parallelizes the memory fetches, often resulting in a 3x to 4x throughput increase via vectorization.</p>
-    
-    <div class="callout tip">
-      <div class="callout-title">The Rust Advantage (Emerald)</div>
-      This aliasing problem is exactly why idiomatic Rust frequently achieves tighter optimization and higher IPC than C++. Rust's strict borrowing and ownership rules mathematically guarantee to the LLVM compiler that there is no mutable aliasing at compile time. The compiler automatically emits <code>noalias</code> flags, unleashing the full parallel fury of the CPU's Out-of-Order execution core without manual annotation.
+
+      <p>By adding the <code>restrict</code> keyword, the software engineer provides a legally binding contract to the
+        compiler that these pointers will never alias. The compiler aggressively reorders the assembly, and the LSQ
+        violently parallelizes the memory fetches, often resulting in a 3x to 4x throughput increase via vectorization.
+      </p>
+
+      <div class="callout tip">
+        <div class="callout-title">The Rust Advantage (Emerald)</div>
+        This aliasing problem is exactly why idiomatic Rust frequently achieves tighter optimization and higher IPC than
+        C++. Rust's strict borrowing and ownership rules mathematically guarantee to the LLVM compiler that there is no
+        mutable aliasing at compile time. The compiler automatically emits <code>noalias</code> flags, unleashing the
+        full parallel fury of the CPU's Out-of-Order execution core without manual annotation.
+      </div>
     </div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 22: WHITEBOARD 11
      ========================================================================== -->
-<div class="page-container">
-  <div class="whiteboard-page">
-    <div class="wb-header">
-      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
-      <div class="wb-ref">REF: CH08_ILP_POINTER_ALIASING</div>
+  <div class="page-container">
+    <div class="whiteboard-page">
+      <div class="wb-header">
+        <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+        <div class="wb-ref">REF: CH08_ILP_POINTER_ALIASING</div>
+      </div>
+      <div class="wb-canvas"></div>
+      <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 22</span></div>
     </div>
-    <div class="wb-canvas"></div>
-    <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 22</span></div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 23: CHECKLIST & VERIFICATION
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <h2>8.14 Chapter Verification, Checklist &amp; Quiz</h2>
+  <div class="page-container content-flow">
+    <div>
+      <h2>8.14 Chapter Verification, Checklist &amp; Quiz</h2>
 
-    <div class="checklist">
-      <h3>Verification Checklist</h3>
-      <div class="check-item"><div class="checkbox"></div><div>I can explain why the IPC = 1.0 limit of a scalar pipeline forced the invention of Superscalar processors.</div></div>
-      <div class="check-item"><div class="checkbox"></div><div>I understand why VLIW architectures (Itanium) failed compared to dynamic Superscalar x86 architectures.</div></div>
-      <div class="check-item"><div class="checkbox"></div><div>I can explain the shift from Control-Flow (sequential code) to Data-Flow (execute when ready) in OoO cores.</div></div>
-      <div class="check-item"><div class="checkbox"></div><div>I understand how the $\mu\text{op}$ Queue decouples the In-Order Front-End from the OoO Core.</div></div>
-      <div class="check-item"><div class="checkbox"></div><div>I can explain how the RAT maps Architectural Registers to the Physical Register File (PRF).</div></div>
-      <div class="check-item"><div class="checkbox"></div><div>I can describe the Wakeup &amp; Select logic of Reservation Stations monitoring the Common Data Bus (CDB).</div></div>
-      <div class="check-item"><div class="checkbox"></div><div>I understand the Pointer Aliasing hazard and why Memory Disambiguation is required in the LSQ.</div></div>
-      <div class="check-item"><div class="checkbox"></div><div>I can explain Store-to-Load Forwarding within the Load/Store Queue.</div></div>
-      <div class="check-item"><div class="checkbox"></div><div>I understand the fundamental rule of the Reorder Buffer (ROB): Chaos in Execution, Order in Retirement.</div></div>
-      <div class="check-item"><div class="checkbox"></div><div>I understand how the Spectre vulnerability exploits the microarchitectural L1 Cache footprint left behind by speculative execution flushes.</div></div>
+      <div class="checklist">
+        <h3>Verification Checklist</h3>
+        <div class="check-item">
+          <div class="checkbox"></div>
+          <div>I can explain why the IPC = 1.0 limit of a scalar pipeline forced the invention of Superscalar
+            processors.</div>
+        </div>
+        <div class="check-item">
+          <div class="checkbox"></div>
+          <div>I understand why VLIW architectures (Itanium) failed compared to dynamic Superscalar x86 architectures.
+          </div>
+        </div>
+        <div class="check-item">
+          <div class="checkbox"></div>
+          <div>I can explain the shift from Control-Flow (sequential code) to Data-Flow (execute when ready) in OoO
+            cores.</div>
+        </div>
+        <div class="check-item">
+          <div class="checkbox"></div>
+          <div>I understand how the $\mu\text{op}$ Queue decouples the In-Order Front-End from the OoO Core.</div>
+        </div>
+        <div class="check-item">
+          <div class="checkbox"></div>
+          <div>I can explain how the RAT maps Architectural Registers to the Physical Register File (PRF).</div>
+        </div>
+        <div class="check-item">
+          <div class="checkbox"></div>
+          <div>I can describe the Wakeup &amp; Select logic of Reservation Stations monitoring the Common Data Bus
+            (CDB).</div>
+        </div>
+        <div class="check-item">
+          <div class="checkbox"></div>
+          <div>I understand the Pointer Aliasing hazard and why Memory Disambiguation is required in the LSQ.</div>
+        </div>
+        <div class="check-item">
+          <div class="checkbox"></div>
+          <div>I can explain Store-to-Load Forwarding within the Load/Store Queue.</div>
+        </div>
+        <div class="check-item">
+          <div class="checkbox"></div>
+          <div>I understand the fundamental rule of the Reorder Buffer (ROB): Chaos in Execution, Order in Retirement.
+          </div>
+        </div>
+        <div class="check-item">
+          <div class="checkbox"></div>
+          <div>I understand how the Spectre vulnerability exploits the microarchitectural L1 Cache footprint left behind
+            by speculative execution flushes.</div>
+        </div>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 24: WHITEBOARD 12
      ========================================================================== -->
-<div class="page-container">
-  <div class="whiteboard-page">
-    <div class="wb-header">
-      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
-      <div class="wb-ref">REF: CH08_CHECKLIST_NOTES</div>
+  <div class="page-container">
+    <div class="whiteboard-page">
+      <div class="wb-header">
+        <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+        <div class="wb-ref">REF: CH08_CHECKLIST_NOTES</div>
+      </div>
+      <div class="wb-canvas"></div>
+      <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 24</span></div>
     </div>
-    <div class="wb-canvas"></div>
-    <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 24</span></div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 25: QUIZ PART 1 (MCQs 1-4)
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <h3>Comprehensive Examination</h3>
+  <div class="page-container content-flow">
+    <div>
+      <h3>Comprehensive Examination</h3>
 
-    <div class="quiz-section">
-      <div class="quiz-question">
-        <p>1. What was the fatal flaw of early "In-Order" Superscalar processors (like the original Pentium) that prevented them from fully utilizing their parallel execution units?</p>
-        <div class="quiz-option">A) They lacked sufficient L1 Cache size to feed multiple ALUs.</div>
-        <div class="quiz-option">B) They required programmers to manually thread assembly code across execution units.</div>
-        <div class="quiz-option">C) A single data dependency or cache miss on the leading instruction would rigidly block all subsequent, mathematically independent instructions from entering the ALUs, starving the parallel ports.</div>
-        <div class="quiz-option">D) The Register Alias Table (RAT) was too slow to map 16 architectural registers.</div>
-      </div>
+      <div class="quiz-section">
+        <div class="quiz-question">
+          <p>1. What was the fatal flaw of early "In-Order" Superscalar processors (like the original Pentium) that
+            prevented them from fully utilizing their parallel execution units?</p>
+          <div class="quiz-option">A) They lacked sufficient L1 Cache size to feed multiple ALUs.</div>
+          <div class="quiz-option">B) They required programmers to manually thread assembly code across execution units.
+          </div>
+          <div class="quiz-option">C) A single data dependency or cache miss on the leading instruction would rigidly
+            block all subsequent, mathematically independent instructions from entering the ALUs, starving the parallel
+            ports.</div>
+          <div class="quiz-option">D) The Register Alias Table (RAT) was too slow to map 16 architectural registers.
+          </div>
+        </div>
 
-      <div class="quiz-question">
-        <p>2. What was the primary reason Intel's Itanium (IA-64) VLIW architecture failed in the market compared to AMD's dynamic Superscalar architecture?</p>
-        <div class="quiz-option">A) VLIW CPUs consumed too much power.</div>
-        <div class="quiz-option">B) VLIW relied strictly on the software compiler to schedule parallel instruction bundles at compile-time. Compilers cannot predict dynamic runtime cache misses, causing the bundles to shatter and stall the CPU.</div>
-        <div class="quiz-option">C) VLIW instructions could not be translated into micro-operations ($\mu\text{ops}$).</div>
-        <div class="quiz-option">D) The OS kernels refused to support 128-bit instructions.</div>
-      </div>
+        <div class="quiz-question">
+          <p>2. What was the primary reason Intel's Itanium (IA-64) VLIW architecture failed in the market compared to
+            AMD's dynamic Superscalar architecture?</p>
+          <div class="quiz-option">A) VLIW CPUs consumed too much power.</div>
+          <div class="quiz-option">B) VLIW relied strictly on the software compiler to schedule parallel instruction
+            bundles at compile-time. Compilers cannot predict dynamic runtime cache misses, causing the bundles to
+            shatter and stall the CPU.</div>
+          <div class="quiz-option">C) VLIW instructions could not be translated into micro-operations ($\mu\text{ops}$).
+          </div>
+          <div class="quiz-option">D) The OS kernels refused to support 128-bit instructions.</div>
+        </div>
 
-      <div class="quiz-question">
-        <p>3. In the Out-of-Order core, what specific event triggers an instruction sitting in a Reservation Station to transition to the "Ready" state (The Wakeup phase)?</p>
-        <div class="quiz-option">A) The Reorder Buffer (ROB) signals that the instruction has reached the head of the queue.</div>
-        <div class="quiz-option">B) The Instruction Fetch unit retrieves the next cache line.</div>
-        <div class="quiz-option">C) Another ALU completes a calculation and broadcasts the required physical register ID and its voltage onto the Common Data Bus (CDB).</div>
-        <div class="quiz-option">D) The LSQ confirms that there are no pointer aliasing hazards.</div>
-      </div>
+        <div class="quiz-question">
+          <p>3. In the Out-of-Order core, what specific event triggers an instruction sitting in a Reservation Station
+            to transition to the "Ready" state (The Wakeup phase)?</p>
+          <div class="quiz-option">A) The Reorder Buffer (ROB) signals that the instruction has reached the head of the
+            queue.</div>
+          <div class="quiz-option">B) The Instruction Fetch unit retrieves the next cache line.</div>
+          <div class="quiz-option">C) Another ALU completes a calculation and broadcasts the required physical register
+            ID and its voltage onto the Common Data Bus (CDB).</div>
+          <div class="quiz-option">D) The LSQ confirms that there are no pointer aliasing hazards.</div>
+        </div>
 
-      <div class="quiz-question">
-        <p>4. Why must memory operations (LOADs and STOREs) bypass standard Reservation Stations and enter a dedicated Load/Store Queue (LSQ)?</p>
-        <div class="quiz-option">A) Memory operations require 64-bit ALUs, whereas Reservation Stations only support 32-bit operations.</div>
-        <div class="quiz-option">B) The CPU cannot statically determine if two memory pointers point to the exact same physical RAM address until execution. This creates Pointer Aliasing hazards that require specialized disambiguation logic to prevent data corruption.</div>
-        <div class="quiz-option">C) The LSQ encrypts memory payloads before writing them to the L1 Cache.</div>
-        <div class="quiz-option">D) Memory operations do not use Physical Registers (PRF).</div>
+        <div class="quiz-question">
+          <p>4. Why must memory operations (LOADs and STOREs) bypass standard Reservation Stations and enter a dedicated
+            Load/Store Queue (LSQ)?</p>
+          <div class="quiz-option">A) Memory operations require 64-bit ALUs, whereas Reservation Stations only support
+            32-bit operations.</div>
+          <div class="quiz-option">B) The CPU cannot statically determine if two memory pointers point to the exact same
+            physical RAM address until execution. This creates Pointer Aliasing hazards that require specialized
+            disambiguation logic to prevent data corruption.</div>
+          <div class="quiz-option">C) The LSQ encrypts memory payloads before writing them to the L1 Cache.</div>
+          <div class="quiz-option">D) Memory operations do not use Physical Registers (PRF).</div>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 26: WHITEBOARD 13
      ========================================================================== -->
-<div class="page-container">
-  <div class="whiteboard-page">
-    <div class="wb-header">
-      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
-      <div class="wb-ref">REF: CH08_QUIZ_SCRATCHPAD_1</div>
+  <div class="page-container">
+    <div class="whiteboard-page">
+      <div class="wb-header">
+        <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+        <div class="wb-ref">REF: CH08_QUIZ_SCRATCHPAD_1</div>
+      </div>
+      <div class="wb-canvas"></div>
+      <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 26</span></div>
     </div>
-    <div class="wb-canvas"></div>
-    <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 26</span></div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 27: QUIZ PART 2 & PROMPTS (MCQs 5-6)
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <div class="quiz-section" style="margin-top: 0;">
-      <div class="quiz-question">
-        <p>5. An instruction triggers a Divide-by-Zero exception in the Execute stage of an Out-of-Order CPU. However, 15 younger instructions have already speculatively executed out-of-sequence. How does the CPU recover perfectly?</p>
-        <div class="quiz-option">A) It throws a hardware interrupt and immediately kills the OS thread.</div>
-        <div class="quiz-option">B) The CPU flags the instruction as "poisoned" inside the Reorder Buffer (ROB). When the poisoned instruction reaches the head of the ROB to Retire, the CPU throws the exception and flushes the entire ROB, ensuring none of the 15 speculative instructions ever update the architectural state.</div>
-        <div class="quiz-option">C) The CPU relies on the L1 cache to revert the physical memory state.</div>
-        <div class="quiz-option">D) It uses the Common Data Bus to broadcast an undo command to the ALUs.</div>
+  <div class="page-container content-flow">
+    <div>
+      <div class="quiz-section" style="margin-top: 0;">
+        <div class="quiz-question">
+          <p>5. An instruction triggers a Divide-by-Zero exception in the Execute stage of an Out-of-Order CPU. However,
+            15 younger instructions have already speculatively executed out-of-sequence. How does the CPU recover
+            perfectly?</p>
+          <div class="quiz-option">A) It throws a hardware interrupt and immediately kills the OS thread.</div>
+          <div class="quiz-option">B) The CPU flags the instruction as "poisoned" inside the Reorder Buffer (ROB). When
+            the poisoned instruction reaches the head of the ROB to Retire, the CPU throws the exception and flushes the
+            entire ROB, ensuring none of the 15 speculative instructions ever update the architectural state.</div>
+          <div class="quiz-option">C) The CPU relies on the L1 cache to revert the physical memory state.</div>
+          <div class="quiz-option">D) It uses the Common Data Bus to broadcast an undo command to the ALUs.</div>
+        </div>
+
+        <div class="quiz-question">
+          <p>6. How did the Spectre vulnerability fundamentally exploit the physical mechanics of the Reorder Buffer
+            (ROB) and Out-of-Order speculation?</p>
+          <div class="quiz-option">A) By overflowing the ROB's 200-entry capacity to trigger an integer overflow.</div>
+          <div class="quiz-option">B) By altering the Free List of the RAT to map user registers to kernel memory
+            addresses.</div>
+          <div class="quiz-option">C) By recognizing that while the ROB perfectly rolls back architectural registers
+            during a flush, it leaves microarchitectural footprints (data pulled into the L1 Cache) fully intact, which
+            can be extracted via timing side-channels.</div>
+          <div class="quiz-option">D) By corrupting the Wakeup & Select logic in the Reservation Stations.</div>
+        </div>
+
+        <h3 style="margin-top: 24px;">Systems Writing Prompts</h3>
+
+        <p style="font-weight: 700; margin-bottom: 4px; font-size: 9.5pt;">Prompt 1: Tracking the OoO Lifecycle</p>
+        <p style="font-size: 9pt;">Trace the exact lifecycle of an instruction through an Out-of-Order CPU. Specifically
+          highlight its interactions with the $\mu\text{op}$ Queue, the RAT (Physical Register Allocation), the
+          Reservation Stations (CDB Wakeup), and its ultimate retirement at the Reorder Buffer.</p>
+
+        <p style="font-weight: 700; margin-top: 14px; margin-bottom: 4px; font-size: 9.5pt;">Prompt 2: LSQ Store-to-Load
+          Forwarding</p>
+        <p style="font-size: 9pt;">Explain the physics of Store-to-Load Forwarding. If Instruction 1 is
+          <code>STORE [Address X]</code> and Instruction 2 is <code>LOAD [Address X]</code>, how does the Load/Store
+          Queue intercept this dependency to save latency without waiting for the L1d cache to actually ingest the Store
+          data?</p>
       </div>
-
-      <div class="quiz-question">
-        <p>6. How did the Spectre vulnerability fundamentally exploit the physical mechanics of the Reorder Buffer (ROB) and Out-of-Order speculation?</p>
-        <div class="quiz-option">A) By overflowing the ROB's 200-entry capacity to trigger an integer overflow.</div>
-        <div class="quiz-option">B) By altering the Free List of the RAT to map user registers to kernel memory addresses.</div>
-        <div class="quiz-option">C) By recognizing that while the ROB perfectly rolls back architectural registers during a flush, it leaves microarchitectural footprints (data pulled into the L1 Cache) fully intact, which can be extracted via timing side-channels.</div>
-        <div class="quiz-option">D) By corrupting the Wakeup & Select logic in the Reservation Stations.</div>
-      </div>
-
-      <h3 style="margin-top: 24px;">Systems Writing Prompts</h3>
-      
-      <p style="font-weight: 700; margin-bottom: 4px; font-size: 9.5pt;">Prompt 1: Tracking the OoO Lifecycle</p>
-      <p style="font-size: 9pt;">Trace the exact lifecycle of an instruction through an Out-of-Order CPU. Specifically highlight its interactions with the $\mu\text{op}$ Queue, the RAT (Physical Register Allocation), the Reservation Stations (CDB Wakeup), and its ultimate retirement at the Reorder Buffer.</p>
-
-      <p style="font-weight: 700; margin-top: 14px; margin-bottom: 4px; font-size: 9.5pt;">Prompt 2: LSQ Store-to-Load Forwarding</p>
-      <p style="font-size: 9pt;">Explain the physics of Store-to-Load Forwarding. If Instruction 1 is <code>STORE [Address X]</code> and Instruction 2 is <code>LOAD [Address X]</code>, how does the Load/Store Queue intercept this dependency to save latency without waiting for the L1d cache to actually ingest the Store data?</p>
     </div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 28: WHITEBOARD 14
      ========================================================================== -->
-<div class="page-container">
-  <div class="whiteboard-page">
-    <div class="wb-header">
-      <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
-      <div class="wb-ref">REF: CH08_QUIZ_SCRATCHPAD_2</div>
+  <div class="page-container">
+    <div class="whiteboard-page">
+      <div class="wb-header">
+        <div class="wb-title">Whiteboard &amp; Systems Workspace</div>
+        <div class="wb-ref">REF: CH08_QUIZ_SCRATCHPAD_2</div>
+      </div>
+      <div class="wb-canvas"></div>
+      <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 28</span></div>
     </div>
-    <div class="wb-canvas"></div>
-    <div class="wb-footer"><span>GIT GOOD &middot; SYSTEMS VERIFICATION</span><span>PAGE 28</span></div>
   </div>
-</div>
 
-<!-- ==========================================================================
+  <!-- ==========================================================================
      PAGE 29: ANSWER KEY (PART 1)
      ========================================================================== -->
-<div class="page-container content-flow">
-  <div>
-    <div class="litmus-box" style="margin-top: 0; padding: 12px 14px; font-size: 8pt; line-height: 1.5;">
-      <div style="font-weight: 800; color: #4338CA; text-transform: uppercase; margin-bottom: 6px; font-size: 8.5pt;">Chapter 8 Technical Answer Key</div>
-      <div style="margin-bottom: 6px;"><b>1. (C)</b> In-order execution forces rigid dependency resolution. If 4 execution ports are ready, but the leading instruction misses the cache, the entire 4-wide block stalls. Out-of-Order execution was mandatory to bypass these stalled instructions and feed the starving execution ports with mathematically independent work located further down the code stream.</div>
-      <div style="margin-bottom: 6px;"><b>2. (B)</b> VLIW relied on software compilers to perfectly schedule parallel execution. However, compilers cannot predict dynamic memory behaviors (cache misses, page faults). When the compiled bundle encountered a runtime delay, the entire rigid bundle stalled. Superscalar x86 delegates this scheduling to the hardware (the Scheduler/ROB), which adapts to cache misses in real-time by firing independent instructions instead.</div>
-      <div style="margin-bottom: 6px;"><b>3. (C)</b> Reservation Stations act as a waiting room monitoring the Common Data Bus (CDB). When an ALU finishes computing a physical register (e.g., P42), it broadcasts the ID and voltage across the die. Any dormant instruction waiting for P42 "wakes up", latches the data, and alerts the Scheduler that it is ready to fire.</div>
-      <div style="margin-bottom: 6px;"><b>4. (B)</b> Registers have static names (EAX). Memory addresses are dynamic variables calculated at runtime by the Address Generation Unit. The CPU cannot definitively know if a STORE to <code>[RAX]</code> and a LOAD from <code>[RBX]</code> collide until the math executes. The LSQ enforces order, disambiguates pointers, and handles the catastrophic MOB flush if a speculative LOAD illegally read from RAM before an older overlapping STORE wrote to it.</div>
-      <div style="margin-bottom: 6px;"><b>5. (B)</b> The ROB acts as a strict sequential filter protecting the architectural state. Speculative instructions write to physical registers, not architectural ones. When the poisoned Divide-by-Zero instruction reaches the head of the ROB, the OS fault is triggered, and all subsequent physical registers in the ROB are instantly dumped back into the Free List.</div>
-      <div style="margin-bottom: 6px;"><b>6. (C)</b> Speculative execution alters the physical state of the L1 Cache. Spectre leverages this by mis-training the branch predictor to execute an illegal, out-of-bounds array read. The ROB catches the error and cleanly flushes the registers, but the illegally accessed data now resides in the hyper-fast L1 cache. The attacker extracts it using cache-timing attacks (Flush+Reload), deducing the secret by observing how fast subsequent memory reads respond.</div>
-    <div style="margin-bottom: 6px;"><b>Prompt 1:</b> The Front-End decodes x86 into $\mu\text{ops}$ and banks them in the $\mu\text{op}$ Queue. The RAT allocates a fresh physical register (PRF) and maps the architectural name to it. The $\mu\text{op}$ is dispatched to a Reservation Station while simultaneously claiming a slot at the tail of the ROB. It waits on the CDB for data. Once awake, the Scheduler fires it into an ALU. It computes, broadcasts its result on the CDB to wake others, and marks its ROB ticket as completed. Finally, when it becomes the absolute oldest instruction at the Head of the ROB, it "Retires", permanently committing its physical register to the visible architectural state.</div>
-    <div><b>Prompt 2:</b> When the LSQ AGU calculates the physical pointer for the LOAD, it scans the pending STORE queue. It discovers an older STORE targeting the exact same physical address that hasn't officially retired to the L1 cache yet. To prevent a memory ordering violation, the LSQ intercepts the payload sitting inside the pending STORE buffer and physically wires it directly into the LOAD's destination register. The LOAD executes instantly without ever touching the actual L1 Cache hierarchy, saving massive latency.</div>
+  <div class="page-container content-flow">
+    <div>
+      <div class="litmus-box" style="margin-top: 0; padding: 12px 14px; font-size: 8pt; line-height: 1.5;">
+        <div style="font-weight: 800; color: #4338CA; text-transform: uppercase; margin-bottom: 6px; font-size: 8.5pt;">
+          Chapter 8 Technical Answer Key</div>
+        <div style="margin-bottom: 6px;"><b>1. (C)</b> In-order execution forces rigid dependency resolution. If 4
+          execution ports are ready, but the leading instruction misses the cache, the entire 4-wide block stalls.
+          Out-of-Order execution was mandatory to bypass these stalled instructions and feed the starving execution
+          ports with mathematically independent work located further down the code stream.</div>
+        <div style="margin-bottom: 6px;"><b>2. (B)</b> VLIW relied on software compilers to perfectly schedule parallel
+          execution. However, compilers cannot predict dynamic memory behaviors (cache misses, page faults). When the
+          compiled bundle encountered a runtime delay, the entire rigid bundle stalled. Superscalar x86 delegates this
+          scheduling to the hardware (the Scheduler/ROB), which adapts to cache misses in real-time by firing
+          independent instructions instead.</div>
+        <div style="margin-bottom: 6px;"><b>3. (C)</b> Reservation Stations act as a waiting room monitoring the Common
+          Data Bus (CDB). When an ALU finishes computing a physical register (e.g., P42), it broadcasts the ID and
+          voltage across the die. Any dormant instruction waiting for P42 "wakes up", latches the data, and alerts the
+          Scheduler that it is ready to fire.</div>
+        <div style="margin-bottom: 6px;"><b>4. (B)</b> Registers have static names (EAX). Memory addresses are dynamic
+          variables calculated at runtime by the Address Generation Unit. The CPU cannot definitively know if a STORE to
+          <code>[RAX]</code> and a LOAD from <code>[RBX]</code> collide until the math executes. The LSQ enforces order,
+          disambiguates pointers, and handles the catastrophic MOB flush if a speculative LOAD illegally read from RAM
+          before an older overlapping STORE wrote to it.</div>
+        <div style="margin-bottom: 6px;"><b>5. (B)</b> The ROB acts as a strict sequential filter protecting the
+          architectural state. Speculative instructions write to physical registers, not architectural ones. When the
+          poisoned Divide-by-Zero instruction reaches the head of the ROB, the OS fault is triggered, and all subsequent
+          physical registers in the ROB are instantly dumped back into the Free List.</div>
+        <div style="margin-bottom: 6px;"><b>6. (C)</b> Speculative execution alters the physical state of the L1 Cache.
+          Spectre leverages this by mis-training the branch predictor to execute an illegal, out-of-bounds array read.
+          The ROB catches the error and cleanly flushes the registers, but the illegally accessed data now resides in
+          the hyper-fast L1 cache. The attacker extracts it using cache-timing attacks (Flush+Reload), deducing the
+          secret by observing how fast subsequent memory reads respond.</div>
+        <div style="margin-bottom: 6px;"><b>Prompt 1:</b> The Front-End decodes x86 into $\mu\text{ops}$ and banks them
+          in the $\mu\text{op}$ Queue. The RAT allocates a fresh physical register (PRF) and maps the architectural name
+          to it. The $\mu\text{op}$ is dispatched to a Reservation Station while simultaneously claiming a slot at the
+          tail of the ROB. It waits on the CDB for data. Once awake, the Scheduler fires it into an ALU. It computes,
+          broadcasts its result on the CDB to wake others, and marks its ROB ticket as completed. Finally, when it
+          becomes the absolute oldest instruction at the Head of the ROB, it "Retires", permanently committing its
+          physical register to the visible architectural state.</div>
+        <div><b>Prompt 2:</b> When the LSQ AGU calculates the physical pointer for the LOAD, it scans the pending STORE
+          queue. It discovers an older STORE targeting the exact same physical address that hasn't officially retired to
+          the L1 cache yet. To prevent a memory ordering violation, the LSQ intercepts the payload sitting inside the
+          pending STORE buffer and physically wires it directly into the LOAD's destination register. The LOAD executes
+          instantly without ever touching the actual L1 Cache hierarchy, saving massive latency.</div>
+      </div>
     </div>
   </div>
-</div>
 
 </body>
+
 </html>
