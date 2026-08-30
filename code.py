@@ -37,8 +37,7 @@ else:
 		if not html_file.read_text(encoding="utf-8").strip():
 			# print(f"Skipped (empty HTML): {html_file.name}")
 			continue
-		# if pdf_file.exists():
-		# 	print(f"Skipped (already exists): {pdf_file.name}")
-		# 	continue
+		if pdf_file.exists():
+			continue
 		HTML(filename=str(html_file), base_url=str(HTML_DIR)).write_pdf(str(pdf_file))
 		print(f"Created: {pdf_file.name}")
