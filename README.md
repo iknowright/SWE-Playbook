@@ -30,28 +30,28 @@ html/366. Module 20.html     -> pdfs/366. Module 20.pdf
 
 Module names and markers reflect our updated 365-day engineering architecture:
 
-| Marker file | Module name | Days |
+| Marker file | Module name | Lessons |
 | --- | --- | ---: |
-| `13. Module 1.html` | Computing History &amp; Foundations | 1-12 |
-| `26. Module 2.html` | Terminal, Version Control &amp; Collaboration | 13-25 |
-| `31. Module 3.html` | Web Substrates (HTML, CSS, Tailwind &amp; JavaScript) | 26-30 |
-| `59. Module 4.html` | C# Language Core &amp; Advanced Mechanics | 31-58 |
-| `72. Module 5.html` | Clean Code, Complexity &amp; Static Analysis (Sonar Ecosystem) | 59-71 |
-| `90. Module 6.html` | Python Full-Track (Beginner to Intermediate &amp; AI Libs) | 72-89 |
-| `99. Module 7.html` | Design Patterns &amp; Clean Architecture | 90-98 |
-| `115. Module 8.html` | Relational Databases &amp; Azure SQL Platform | 99-114 |
-| `136. Module 9.html` | Web APIs, OData &amp; Kiota SDKs | 115-135 |
-| `145. Module 10.html` | Microsoft Graph &amp; Enterprise Integration | 136-144 |
-| `176. Module 11.html` | Microsoft Fabric &amp; Data Engineering | 145-175 |
-| `189. Module 12.html` | Containers, Kubernetes, Service Mesh, GitOps &amp; Kafka | 176-188 |
-| `202. Module 13.html` | Enterprise Security, OAuth2 &amp; Microsoft Entra ID | 189-201 |
-| `219. Module 14.html` | Azure Compute, Serverless &amp; Cert Sandbox | 202-218 |
-| `239. Module 15.html` | Multi-Agent AI Systems, Local LLMs, Vector DBs &amp; RAG | 219-238 |
-| `266. Module 16.html` | Tier-1 Data Structures &amp; Algorithms (DSA) | 239-265 |
-| `289. Module 17.html` | Low-Level (LLD) &amp; High-Level System Design (HLD) | 266-288 |
-| `299. Module 18.html` | Client UI (.NET MAUI &amp; Blazor) | 289-298 |
-| `309. Module 19.html` | Performance Profiling, Observability &amp; Compilers | 299-308 |
-| `366. Module 20.html` | DevOps, IaC, Roslyn &amp; The Enterprise Mega Capstone | 309-365 |
+| `13` | Computing History &amp; Foundations | 1-12 |
+| `26` | Terminal, Version Control &amp; Collaboration | 13-25 |
+| `31` | Web Substrates (HTML, CSS, Tailwind &amp; JavaScript) | 26-30 |
+| `59` | C# Language Core &amp; Advanced Mechanics | 31-58 |
+| `72` | Clean Code, Complexity &amp; Static Analysis (Sonar Ecosystem) | 59-71 |
+| `90` | Python Full-Track (Beginner to Intermediate &amp; AI Libs) | 72-89 |
+| `99` | Design Patterns &amp; Clean Architecture | 90-98 |
+| `115` | Relational Databases &amp; Azure SQL Platform | 99-114 |
+| `136` | Web APIs, OData &amp; Kiota SDKs | 115-135 |
+| `145` | Microsoft Graph &amp; Enterprise Integration | 136-144 |
+| `176` | Microsoft Fabric &amp; Data Engineering | 145-175 |
+| `189` | Containers, Kubernetes, Service Mesh, GitOps &amp; Kafka | 176-188 |
+| `202` | Enterprise Security, OAuth2 &amp; Microsoft Entra ID | 189-201 |
+| `219` | Azure Compute, Serverless &amp; Cert Sandbox | 202-218 |
+| `239` | Multi-Agent AI Systems, Local LLMs, Vector DBs &amp; RAG | 219-238 |
+| `266` | Tier-1 Data Structures &amp; Algorithms (DSA) | 239-265 |
+| `289` | Low-Level (LLD) &amp; High-Level System Design (HLD) | 266-288 |
+| `299` | Client UI (.NET MAUI &amp; Blazor) | 289-298 |
+| `309` | Performance Profiling, Observability &amp; Compilers | 299-308 |
+| `366` | DevOps, IaC, Roslyn &amp; The Enterprise Mega Capstone | 309-365 |
 
 The marker is placed after the preceding numbered day when sorted. All marker files and numbered day files are empty until content is added. Only files ending in `.html` inside the `html` folder are processed.
 
