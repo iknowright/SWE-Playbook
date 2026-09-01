@@ -17,43 +17,42 @@ The folders are created automatically by `code.py` if they do not already exist.
 
 ## File naming
 
-`html/0.html` is the curriculum index. Each day has its own numbered HTML file. Each module also has a lesson marker named with the first day after the module:
+`html/0.html` is the curriculum index. Each day has its own numbered HTML file. Each module also has a marker file named with the first day of that module:
 
 ```text
-html/0.html                  -> pdfs/0.pdf
-html/1.html                  -> pdfs/1.pdf
-html/25.html                 -> pdfs/25.pdf
-html/26. Module 2.html       -> pdfs/26. Module 2.pdf
-html/365.html                -> pdfs/365.pdf
-html/366. Module 20.html     -> pdfs/366. Module 20.pdf
+html/0.html           -> pdfs/0.pdf
+html/1.html           -> pdfs/1.pdf
+html/1. Module 1.html -> pdfs/1. Module 1.pdf
+html/16. Module 2.html -> pdfs/16. Module 2.pdf
+html/365.html         -> pdfs/365.pdf
+html/310. Module 19.html -> pdfs/310. Module 19.pdf
 ```
 
-Module names and markers reflect our updated 365-day engineering architecture:
+Module names and markers reflect the 365-day engineering architecture:
 
-| Marker file | Module name | Lessons |
+| Marker file | Module name | Days |
 | --- | --- | ---: |
-| `13` | Computing History &amp; Foundations | 1-12 |
-| `26` | Terminal, Version Control &amp; Collaboration | 13-25 |
-| `31` | Web Substrates (HTML, CSS, Tailwind &amp; JavaScript) | 26-30 |
-| `59` | C# Language Core &amp; Advanced Mechanics | 31-58 |
-| `72` | Clean Code, Complexity &amp; Static Analysis (Sonar Ecosystem) | 59-71 |
-| `90` | Python Full-Track (Beginner to Intermediate &amp; AI Libs) | 72-89 |
-| `99` | Design Patterns &amp; Clean Architecture | 90-98 |
-| `115` | Relational Databases &amp; Azure SQL Platform | 99-114 |
-| `136` | Web APIs, OData &amp; Kiota SDKs | 115-135 |
-| `145` | Microsoft Graph &amp; Enterprise Integration | 136-144 |
-| `176` | Microsoft Fabric &amp; Data Engineering | 145-175 |
-| `189` | Containers, Kubernetes, Service Mesh, GitOps &amp; Kafka | 176-188 |
-| `202` | Enterprise Security, OAuth2 &amp; Microsoft Entra ID | 189-201 |
-| `219` | Azure Compute, Serverless &amp; Cert Sandbox | 202-218 |
-| `239` | Multi-Agent AI Systems, Local LLMs, Vector DBs &amp; RAG | 219-238 |
-| `266` | Tier-1 Data Structures &amp; Algorithms (DSA) | 239-265 |
-| `289` | Low-Level (LLD) &amp; High-Level System Design (HLD) | 266-288 |
-| `299` | Client UI (.NET MAUI &amp; Blazor) | 289-298 |
-| `309` | Performance Profiling, Observability &amp; Compilers | 299-308 |
-| `366` | DevOps, IaC, Roslyn &amp; The Enterprise Mega Capstone | 309-365 |
+| `Module 1.html` | Foundations, Tooling &amp; Terminal Mastery | 1-15 |
+| `Module 2.html` | Client-Side Scripting, UI &amp; Extension Development | 16-23 |
+| `Module 3.html` | Scripting Languages &amp; Enterprise Automation (Python &amp; C# Core) | 24-47 |
+| `Module 4.html` | Code Quality, Static Analysis &amp; Architectural Patterns | 48-60 |
+| `Module 5.html` | Relational Databases &amp; Storage Engines | 61-75 |
+| `Module 6.html` | Web APIs, Protocols &amp; Enterprise Integration | 76-99 |
+| `Module 7.html` | Microsoft Fabric &amp; Big Data Engineering | 100-120 |
+| `Module 8.html` | Containers, Kubernetes, Messaging &amp; GitOps | 121-138 |
+| `Module 9.html` | Enterprise Security, Authentication &amp; Cryptography | 139-150 |
+| `Module 10.html` | Cloud Infrastructure, IaC &amp; Serverless Computing | 151-167 |
+| `Module 11.html` | Artificial Intelligence, LLMs, Vector DBs &amp; Multi-Agent Systems | 168-191 |
+| `Module 12.html` | Client UI (.NET MAUI &amp; Blazor) | 192-197 |
+| `Module 13.html` | Core Data Structures &amp; Algorithms (DSA) | 198-219 |
+| `Module 14.html` | Applied FAANG Execution &amp; LeetCode Hard Patterns | 220-229 |
+| `Module 15.html` | Low-Level (LLD) &amp; High-Level System Design (HLD) | 230-249 |
+| `Module 16.html` | Performance Profiling, Observability &amp; Compilers | 250-261 |
+| `Module 17.html` | Advanced Systems Engineering, Kernels &amp; Storage Internals | 262-294 |
+| `Module 18.html` | DevOps, Enterprise Operations &amp; Leadership | 295-309 |
+| `Module 19.html` | Additional Engineering Projects &amp; The Mega Capstone | 310-365 |
 
-The marker is placed after the preceding numbered day when sorted. All marker files and numbered day files are empty until content is added. Only files ending in `.html` inside the `html` folder are processed.
+The marker is placed at the first day of each module. All marker files and numbered day files are empty until content is added. Only files ending in `.html` inside the `html` folder are processed.
 
 Module pages use the shared `html/common.css` stylesheet instead of duplicating their common CSS in every file.
 
