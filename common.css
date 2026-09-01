@@ -1,46 +1,56 @@
-/* ==========================================================================
-   1. PAGE DEFINITIONS & BASE STYLES (APPLE DARK MODE)
-   ========================================================================== */
+/* 1. PAGE DEFINITIONS & BASE STYLES (APPLE DARK MODE) */
 @page {
   /* Standard iPad/Textbook sizing */
   size: 7.76in 10.35in;
-  
+
   /* Physical margins applied to the paper itself. 
      This automatically aligns both .page-container and 0.html front-matter. */
-  margin: 0.7in 0.65in 0.6in 0.65in; 
-  
+  margin: 0.7in 0.65in 0.6in 0.65in;
+
   /* WeasyPrint Fix: Dyes the physical paper margins to match the dark mode theme */
-  background: #1C1C1E; 
+  background: #1C1C1E;
 
   @bottom-right {
     content: counter(page);
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
     font-size: 8.5pt;
     font-weight: 500;
-    color: #86868B; /* Apple System Gray 4 */
+    color: #86868B;
+    /* Apple System Gray 4 */
   }
 }
 
 @page cover {
-  margin: 0; /* Cover remains absolute full-bleed */
+  margin: 0;
+  /* Cover remains absolute full-bleed */
   background: #000000;
-  @bottom-right { content: ""; } /* No page number on cover */
+
+  @bottom-right {
+    content: "";
+  }
+
+  /* No page number on cover */
 }
 
 @page backcover {
   margin: 0;
   background: #000000;
-  @bottom-right { content: ""; }
+
+  @bottom-right {
+    content: "";
+  }
 }
 
-* { 
-  box-sizing: border-box; 
+* {
+  box-sizing: border-box;
 }
 
-html, body {
+html,
+body {
   /* Unified macOS System Gray 6 */
-  background-color: #1C1C1E !important; 
-  color: #EBEBF5; /* Apple Primary Label Color (Soft White for reduced eye strain) */
+  background-color: #1C1C1E !important;
+  color: #EBEBF5;
+  /* Apple Primary Label Color (Soft White for reduced eye strain) */
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
   font-size: 10.5pt;
   line-height: 1.65;
@@ -50,14 +60,13 @@ html, body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ==========================================================================
-   2. PAGE CONTAINERS & AUTO-PAGINATION
-   ========================================================================== */
+/* 2. PAGE CONTAINERS & AUTO-PAGINATION */
 .page-container {
   width: 100%;
   /* Strict height kept ONLY for dedicated, single-page whiteboards */
-  height: 9.05in; 
-  padding: 0; /* Internal padding removed; @page physical margins handle it */
+  height: 9.05in;
+  padding: 0;
+  /* Internal padding removed; @page physical margins handle it */
   page-break-after: always;
   break-after: page;
   display: flex;
@@ -65,11 +74,12 @@ html, body {
   justify-content: space-between;
   position: relative;
   background-color: transparent !important;
-  box-shadow: none; /* Removes the "box-in-a-box" artifact */
+  box-shadow: none;
+  /* Removes the "box-in-a-box" artifact */
 }
 
 /* Prevents flexbox from squishing elements when vertical space gets tight */
-.page-container > * {
+.page-container>* {
   flex-shrink: 0;
 }
 
@@ -89,14 +99,13 @@ html, body {
   break-before: page;
 }
 
-/* ==========================================================================
-   3. TYPOGRAPHY & HEADINGS
-   ========================================================================== */
+/* 3. TYPOGRAPHY & HEADINGS */
 .phase-label {
   font-size: 8.5pt;
   letter-spacing: 0.8px;
   text-transform: uppercase;
-  color: #0A84FF; /* Apple System Blue */
+  color: #0A84FF;
+  /* Apple System Blue */
   font-weight: 600;
   margin-bottom: 4px;
 }
@@ -110,7 +119,8 @@ html, body {
 
 h1.chapter-title {
   font-size: 22pt;
-  color: #FFFFFF; /* Pure white reserved ONLY for top-level headers */
+  color: #FFFFFF;
+  /* Pure white reserved ONLY for top-level headers */
   margin: 0 0 12px 0;
   line-height: 1.2;
   font-weight: 700;
@@ -140,13 +150,23 @@ h3 {
   font-weight: 600;
 }
 
-p { margin: 0 0 12px 0; color: #C7C7CC; }
-ul, ol { margin: 4px 0 12px 0; padding-left: 20px; color: #C7C7CC; }
-li { margin-bottom: 6px; }
+p {
+  margin: 0 0 12px 0;
+  color: #C7C7CC;
+}
 
-/* ==========================================================================
-   4. FRONT MATTER & COVER (0.html)
-   ========================================================================== */
+ul,
+ol {
+  margin: 4px 0 12px 0;
+  padding-left: 20px;
+  color: #C7C7CC;
+}
+
+li {
+  margin-bottom: 6px;
+}
+
+/* 4. FRONT MATTER & COVER (0.html) */
 .cover {
   page: cover;
   width: 100%;
@@ -162,7 +182,10 @@ li { margin-bottom: 6px; }
   page-break-after: always;
 }
 
-.cover .top-block, .cover .bottom-block { width: 100%; }
+.cover .top-block,
+.cover .bottom-block {
+  width: 100%;
+}
 
 .cover .kicker {
   font-size: 9.5pt;
@@ -191,8 +214,17 @@ li { margin-bottom: 6px; }
   font-weight: 400;
 }
 
-.cover .byline { font-size: 11pt; color: #D1D1D6; font-weight: 500; }
-.cover .year { font-size: 9.5pt; color: #636366; margin-top: 4px; }
+.cover .byline {
+  font-size: 11pt;
+  color: #D1D1D6;
+  font-weight: 500;
+}
+
+.cover .year {
+  font-size: 9.5pt;
+  color: #636366;
+  margin-top: 4px;
+}
 
 .cover .terminal-tag {
   background: rgba(0, 0, 0, 0.4);
@@ -201,7 +233,8 @@ li { margin-bottom: 6px; }
   padding: 10px 14px;
   font-family: 'SF Mono', Consolas, Monaco, monospace;
   font-size: 9pt;
-  color: #32D74B; /* Apple System Green */
+  color: #32D74B;
+  /* Apple System Green */
   max-width: 5.8in;
   margin-top: 12px;
 }
@@ -227,10 +260,24 @@ li { margin-bottom: 6px; }
   font-weight: 600;
 }
 
-.fm-body { font-size: 10.5pt; line-height: 1.7; margin: 0 0 12px 0; color: #C7C7CC; }
-.fm-lead { text-align: center; font-style: italic; color: #86868B; margin-bottom: 24px; }
+.fm-body {
+  font-size: 10.5pt;
+  line-height: 1.7;
+  margin: 0 0 12px 0;
+  color: #C7C7CC;
+}
 
-.toc-block { margin-bottom: 14px; }
+.fm-lead {
+  text-align: center;
+  font-style: italic;
+  color: #86868B;
+  margin-bottom: 24px;
+}
+
+.toc-block {
+  margin-bottom: 14px;
+}
+
 .toc-phase {
   font-size: 11pt;
   font-weight: 600;
@@ -242,8 +289,16 @@ li { margin-bottom: 6px; }
   page-break-after: avoid;
   break-after: avoid;
 }
-.toc-chapters { font-size: 9.5pt; color: #A1A1A6; }
-.toc-chapters div { padding: 6px 8px; border-bottom: 1px solid #38383A; }
+
+.toc-chapters {
+  font-size: 9.5pt;
+  color: #A1A1A6;
+}
+
+.toc-chapters div {
+  padding: 6px 8px;
+  border-bottom: 1px solid #38383A;
+}
 
 .legend-item {
   display: flex;
@@ -254,6 +309,7 @@ li { margin-bottom: 6px; }
   break-inside: avoid;
   color: #C7C7CC;
 }
+
 .legend-dot {
   width: 12px;
   height: 12px;
@@ -262,9 +318,7 @@ li { margin-bottom: 6px; }
   margin-top: 4px;
 }
 
-/* ==========================================================================
-   5. CALLOUT BOXES (APPLE SEMANTIC GLASS STYLE)
-   ========================================================================== */
+/* 5. CALLOUT BOXES (APPLE SEMANTIC GLASS STYLE) */
 .callout {
   border-radius: 12px;
   padding: 14px 16px;
@@ -284,24 +338,46 @@ li { margin-bottom: 6px; }
 }
 
 /* Key Invariant: Deep System Blue */
-.callout.key { background: #00204A; border: 1px solid #003875; }
-.callout.key .callout-title { color: #64D2FF; }
+.callout.key {
+  background: #00204A;
+  border: 1px solid #003875;
+}
+
+.callout.key .callout-title {
+  color: #64D2FF;
+}
 
 /* Warning / Misconception: Deep System Orange */
-.callout.warn { background: #4A2B00; border: 1px solid #754500; }
-.callout.warn .callout-title { color: #FFD60A; }
+.callout.warn {
+  background: #4A2B00;
+  border: 1px solid #754500;
+}
+
+.callout.warn .callout-title {
+  color: #FFD60A;
+}
 
 /* Interview Angle: Deep System Red */
-.callout.interview { background: #4A0F0D; border: 1px solid #751A16; }
-.callout.interview .callout-title { color: #FF6961; }
+.callout.interview {
+  background: #4A0F0D;
+  border: 1px solid #751A16;
+}
+
+.callout.interview .callout-title {
+  color: #FF6961;
+}
 
 /* Tip: Deep System Green */
-.callout.tip { background: #093311; border: 1px solid #125420; }
-.callout.tip .callout-title { color: #30D158; }
+.callout.tip {
+  background: #093311;
+  border: 1px solid #125420;
+}
 
-/* ==========================================================================
-   6. TABLES & DATA MATRICES
-   ========================================================================== */
+.callout.tip .callout-title {
+  color: #30D158;
+}
+
+/* 6. TABLES & DATA MATRICES */
 table {
   width: 100%;
   border-collapse: collapse;
@@ -311,21 +387,32 @@ table {
   break-inside: avoid;
 }
 
-th, td {
+th,
+td {
   border: 1px solid #38383A;
   padding: 10px 14px;
   text-align: left;
   vertical-align: top;
 }
-th { background: #2C2C2E; color: #FFFFFF; font-weight: 600; }
-tr:nth-child(even) { background: #151516; }
-tr:nth-child(odd) { background: #1C1C1E; }
 
-/* ==========================================================================
-   7. CODE BLOCKS & MONOSPACE
-   ========================================================================== */
+th {
+  background: #2C2C2E;
+  color: #FFFFFF;
+  font-weight: 600;
+}
+
+tr:nth-child(even) {
+  background: #151516;
+}
+
+tr:nth-child(odd) {
+  background: #1C1C1E;
+}
+
+/* 7. CODE BLOCKS & MONOSPACE */
 pre {
-  background: #000000; /* Pure black insets the code block to create depth */
+  background: #000000;
+  /* Pure black insets the code block to create depth */
   color: #EBEBF5;
   padding: 16px 18px;
   border-radius: 12px;
@@ -343,16 +430,20 @@ code {
   font-family: 'SF Mono', Consolas, Monaco, monospace;
   font-size: 8.5pt;
   background: #2C2C2E;
-  color: #FF9F0A; /* System Orange for inline snippets */
+  color: #FF9F0A;
+  /* System Orange for inline snippets */
   padding: 2.5px 6px;
   border-radius: 6px;
   border: none;
 }
-pre code { background: transparent; color: inherit; padding: 0; }
 
-/* ==========================================================================
-   8. WHITEBOARD WORKSPACE (IPAD FREEFORM STYLE)
-   ========================================================================== */
+pre code {
+  background: transparent;
+  color: inherit;
+  padding: 0;
+}
+
+/* 8. WHITEBOARD WORKSPACE (IPAD FREEFORM STYLE) */
 .whiteboard-page {
   background-color: #1C1C1E;
   border: 1px solid #38383A;
@@ -375,8 +466,18 @@ pre code { background: transparent; color: inherit; padding: 0; }
   margin-bottom: 12px;
 }
 
-.wb-title { font-size: 10pt; font-weight: 600; color: #FFFFFF; letter-spacing: 0.5px; }
-.wb-ref { font-size: 7.5pt; font-family: 'SF Mono', Consolas, monospace; color: #86868B; }
+.wb-title {
+  font-size: 10pt;
+  font-weight: 600;
+  color: #FFFFFF;
+  letter-spacing: 0.5px;
+}
+
+.wb-ref {
+  font-size: 7.5pt;
+  font-family: 'SF Mono', Consolas, monospace;
+  color: #86868B;
+}
 
 .wb-invariants {
   background: #2C2C2E;
@@ -389,11 +490,16 @@ pre code { background: transparent; color: inherit; padding: 0; }
   color: #D1D1D6;
   margin-bottom: 12px;
 }
-.wb-invariants b { color: #FFFFFF; font-weight: 600; }
+
+.wb-invariants b {
+  color: #FFFFFF;
+  font-weight: 600;
+}
 
 .whiteboard-page.wb-split {
   height: auto;
-  flex: none; /* Disables flex stretch so it behaves organically */
+  flex: none;
+  /* Disables flex stretch so it behaves organically */
   margin-top: 16px;
   margin-bottom: 16px;
 }
@@ -401,11 +507,13 @@ pre code { background: transparent; color: inherit; padding: 0; }
 .wb-canvas {
   flex: 1;
   width: 100%;
-  background-color: #000000; /* Pure OLED Black for maximum stylus ink contrast */
+  background-color: #000000;
+  /* Pure OLED Black for maximum stylus ink contrast */
   border: 1px solid #38383A;
   border-radius: 12px;
   position: relative;
-  min-height: 2.75in; /* Guarantees drawing space even if pushed to a new page */
+  min-height: 2.75in;
+  /* Guarantees drawing space even if pushed to a new page */
   /* Soft, subdued dot pattern to prevent visual distraction */
   background-image: radial-gradient(#1C1C1E 1.5px, transparent 1.5px);
   background-size: 20px 20px;
@@ -422,11 +530,11 @@ pre code { background: transparent; color: inherit; padding: 0; }
   margin-top: 12px;
 }
 
-/* ==========================================================================
-   9. QUIZZES, CHECKLISTS & ANSWER KEY
-   ========================================================================== */
-.litmus-box, .checklist {
-  background: #242426 !important; /* Lifts off the background slightly */
+/* 9. QUIZZES, CHECKLISTS & ANSWER KEY */
+.litmus-box,
+.checklist {
+  background: #242426 !important;
+  /* Lifts off the background slightly */
   border: 1px solid #38383A !important;
   border-radius: 12px;
   padding: 16px 20px !important;
@@ -436,7 +544,9 @@ pre code { background: transparent; color: inherit; padding: 0; }
 }
 
 /* ANTI-HALATION OVERRIDE: Forces small, hazy HTML text up to readable 10pt */
-.litmus-box, .litmus-box div, .litmus-box b {
+.litmus-box,
+.litmus-box div,
+.litmus-box b {
   font-size: 10pt !important;
   line-height: 1.6 !important;
   color: #EBEBF5 !important;
@@ -450,19 +560,32 @@ pre code { background: transparent; color: inherit; padding: 0; }
   letter-spacing: 0.5px !important;
 }
 
-.check-item { display: flex; align-items: flex-start; margin-bottom: 8px; color: #C7C7CC; }
-.checkbox {
-  width: 14px; height: 14px; border: 1.5px solid #86868B;
-  margin-right: 12px; margin-top: 4px; border-radius: 3px;
+.check-item {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 8px;
+  color: #C7C7CC;
 }
 
-.quiz-section { margin-top: 16px; }
-.quiz-question p { 
-  font-weight: 600; 
-  color: #FFFFFF; 
-  margin-bottom: 10px; 
-  margin-top: 24px; 
-  font-size: 10pt; 
+.checkbox {
+  width: 14px;
+  height: 14px;
+  border: 1.5px solid #86868B;
+  margin-right: 12px;
+  margin-top: 4px;
+  border-radius: 3px;
+}
+
+.quiz-section {
+  margin-top: 16px;
+}
+
+.quiz-question p {
+  font-weight: 600;
+  color: #FFFFFF;
+  margin-bottom: 10px;
+  margin-top: 24px;
+  font-size: 10pt;
 }
 
 .quiz-option {
