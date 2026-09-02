@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="../common.css">
+    <title>Day 1: Hardware Architecture, Universal Turing Machines & Instruction Set Execution</title>
+</head>
+<body>
+
+<!-- ==========================================================================
+     PAGE 1: FOUNDATIONS & THE ORIGIN OF COMPUTING
+     ========================================================================== -->
+<div class="page-container content-flow">
+  <div>
+    <div class="phase-label">Module 1 &middot; Absolute Foundations & Machine Architecture</div>
+    <div class="chapter-number">Day 1</div>
+    <h1 class="chapter-title">Hardware Architecture, Universal Turing Machines & Instruction Set Execution</h1>
+
+    <p>Welcome to the foundation. To engineer Staff-level systems, you cannot treat the hardware as a magic box. When a user says "my computer is lagging," a junior developer blames the network; a Staff engineer looks at memory bus saturation, garbage collection pauses, and thermal throttling. We will synthesize the theoretical limits of computation with the physical realities of silicon, memory physics, and virtual machines.</p>
+
+    <h2>1.0 The Origin of Computing: From Gears to Silicon</h2>
+    <p>Before we analyze the nanosecond timings of modern L1 caches, we must understand how computation evolved from abstract philosophy into physical reality[cite: 3].</p>
+
+    <h3>The Mechanical Pioneers & Boolean Logic</h3>
+    <p>In 1837, <strong>Charles Babbage</strong> proposed the <em>Analytical Engine</em>, a mechanical computer containing an Arithmetic Logic Unit and conditional branching[cite: 3]. <strong>Ada Lovelace</strong> wrote the world's first machine algorithm for it, realizing such machines could manipulate general symbols, not just numbers[cite: 3]. In 1854, <strong>George Boole</strong> proved classical logic could be reduced to algebraic equations using only <code>True (1)</code> and <code>False (0)</code>[cite: 3].</p>
+
+    <p>In 1937, MIT student <strong>Claude Shannon</strong> wrote a master's thesis proving Boolean algebra perfectly mapped to electrical switches[cite: 3]. By arranging switches in series (AND) and parallel (OR), he birthed modern digital circuit design[cite: 3].</p>
+
+    <h3>Alan Turing & The Universal Turing Machine</h3>
+    <p>In 1936, <strong>Alan Turing</strong> published his paper defining a theoretical device: an infinite tape with a read/write head transitioning states based on rules[cite: 3]. He proved a <em>Universal Turing Machine</em> could simulate any calculating machine[cite: 3]. <strong>Every modern CPU is a physical implementation of a Universal Turing Machine[cite: 3].</strong> Turing later built the Bombe machine to mathematically eliminate millions of Enigma settings, breaking German naval codes and saving millions of lives during WWII[cite: 3].</p>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 2: SOLID-STATE PHYSICS & SYSTEM TOPOLOGY
+     ========================================================================== -->
+<div class="page-container content-flow">
+  <div>
+    <h2>1.1 Solid-State Physics & System Topology</h2>
+    <p>A computer only knows how to block or permit the flow of electrons[cite: 3]. We use <strong>Silicon</strong> because it is a <em>semiconductor</em>. By doping it with impurities, we control when it conducts electricity by applying a voltage to a "Gate," creating a <strong>MOSFET (Metal-Oxide-Semiconductor Field-Effect Transistor)</strong>[cite: 3]. Modern chips pack billions of transistors; at "3nm" nodes, they require less voltage, generate less heat, and run at higher frequencies.</p>
+
+    <h3>CMOS & The Power Wall</h3>
+    <p>CPUs use <strong>CMOS (Complementary Metal-Oxide-Semiconductor)</strong> logic, pairing NMOS (pull-down) and PMOS (pull-up) transistors so that zero static current flows when idle[cite: 3]. However, dynamic power ($P = C \cdot V^2 \cdot f$) generates massive heat when switching[cite: 3]. By 2005, scaling single-core clocks to 5 GHz caused chips to generate more heat density than a nuclear reactor, forcing the industry to pivot to multi-core architectures[cite: 3].</p>
+
+    <h3>System Topology: What Connects What?</h3>
+    <p>The motherboard is the city grid, and the <strong>PCIe lanes</strong> are the highways.</p>
+    <ul>
+        <li><strong>The CPU (Central Processing Unit):</strong> The general-purpose boss. It has a few extremely fast cores designed to execute complex, unpredictable logic.</li>
+        <li><strong>The GPU (Graphics Processing Unit):</strong> The assembly line worker. It has thousands of slow, simple cores. Terrible at sequential logic, but incredible at parallel math (drawing pixels, AI matrix multiplication).</li>
+        <li><strong>The Memory Controller & RAM:</strong> Now built directly into the CPU die to reduce physical electrical distance, managing signals to fetch data from memory.</li>
+    </ul>
+
+    <div class="callout tip">
+      <div class="callout-title">IRL Analogy: The Kitchen</div>
+      <strong>The CPU</strong> is the Master Chef (very smart, but only has two hands).<br>
+      <strong>The GPU</strong> is a team of 3,000 interns who can only chop carrots, but can do it simultaneously.<br>
+      <strong>The RAM</strong> is the kitchen countertop (immediate working space).<br>
+      <strong>The SSD/Hard Drive</strong> is the basement pantry (holds everything, but takes forever to retrieve).
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 3: THE MEMORY REALITY & DIAGNOSTICS
+     ========================================================================== -->
+<div class="page-container content-flow">
+  <div>
+    <h2>1.2 The Memory Reality & Diagnostics</h2>
+    
+    <h3>Why 16GB is the Bare Minimum Today</h3>
+    <p>Five years ago, 8GB of RAM was standard. Today, 16GB is the bare minimum, and 32GB is the developer baseline. This bloat is driven by:</p>
+    <ul>
+        <li><strong>The Electron Epidemic:</strong> Desktop apps (Slack, VS Code) spin up embedded Chromium browser instances, hoarding hundreds of megabytes just to render a UI.</li>
+        <li><strong>Containerization:</strong> Docker Desktop spins up a lightweight Linux VM (WSL2), reserving 2GB-4GB of RAM before a container even launches.</li>
+        <li><strong>OS SuperFetch:</strong> Windows proactively pre-loads your most used applications into unused RAM before you click on them, eliminating disk latency.</li>
+    </ul>
+
+    <h3>RAM Pricing, Mixing, and Overclocking</h3>
+    <p>RAM relies on dynamic capacitors that leak charge and must be constantly refreshed. With the AI boom, data centers are hoarding High Bandwidth Memory (HBM) for GPUs, squeezing consumer DDR5 fab lines and keeping prices high. <strong>Never mix RAM kits.</strong> Pairing a 3200MHz stick with a 3600MHz stick forces the motherboard to run both at the lowest JEDEC baseline (e.g., 2133MHz) to prevent electrical crashes. Furthermore, "6000MHz" RAM requires enabling XMP/EXPO in the BIOS to safely overvolt and apply the factory overclock.</p>
+
+    <h3>Why Do Computers Actually Lag?</h3>
+    <p>When a PC locks up, it is almost always one of three physical bottlenecks:</p>
+    
+    <div class="callout warn">
+      <div class="callout-title">1. Thermal Throttling</div>
+      Modern CPUs have thermal sensors triggering at ~95°C. If breached, the firmware aggressively downclocks the frequency (e.g., 5.0GHz to 1.5GHz) to prevent silicon melting. A game running great for 10 minutes before crawling to 15 FPS is classic thermal throttling.
+    </div>
+
+    <div class="callout warn">
+      <div class="callout-title">2. Paging / Swapping</div>
+      If you exceed your physical RAM, the OS quietly moves the least-used memory pages to your SSD. RAM latency is ~70ns; SSD latency is ~50,000ns. This 1,000x slowdown manifests as a frozen UI while the hard drive activity light pegs to 100%.
+    </div>
+
+    <div class="callout warn">
+      <div class="callout-title">3. Garbage Collection (GC) Pauses</div>
+      In managed languages (C#, Java), if an application allocates memory too fast, the runtime halts all execution threads to sweep the heap. This causes a 200ms "hiccup" in an otherwise smooth system.
+    </div>
+
+    <h3>Hardware Forensics</h3>
+    <p>To diagnose system faults, Staff engineers use targeted tools: <strong>MemTest86</strong> for random BSODs (writing to every byte of RAM to catch bit-flips), <strong>CrystalDiskInfo</strong> to read SMART logs for dying SSD sectors, and <strong>Sysinternals Autoruns/Process Explorer</strong> to hunt rootkits by verifying cryptographic signatures of running DLLs.</p>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 4: THE ALU, CLOCKS & METASTABILITY
+     ========================================================================== -->
+<div class="page-container content-flow">
+  <div>
+    <h2>1.3 The ALU, Hardware Clocks & Metastability</h2>
+
+    <h3>The Arithmetic Logic Unit (ALU) & Carry-Lookahead Adders</h3>
+    <p>The ALU performs math using logic gates[cite: 3]. A basic Half-Adder uses XOR and AND gates to add two bits[cite: 3]. However, chaining 64 of these creates a <em>Ripple-Carry Adder</em>, which takes $O(N)$ time[cite: 3]. At 4 GHz (0.25ns per cycle), waiting for the carry bit to physically ripple through 64 gates is impossible[cite: 3].</p>
+    <p>Modern CPUs use <strong>Carry-Lookahead Adders (CLA)</strong>[cite: 3]. By expanding the Boolean algebra, the CLA computes whether each bit position will <em>Generate</em> or <em>Propagate</em> a carry instantly, in parallel[cite: 3]. It trades immense physical silicon space (millions of extra transistors) to flatten a linear $O(N)$ delay into a near-instant $O(\log N)$ operation[cite: 3].</p>
+
+    <h3>The Hardware Clock & Quartz Oscillators</h3>
+    <p>To prevent race conditions, the CPU uses a Clock[cite: 3]. A piezoelectric quartz crystal vibrates at a base frequency, which a Phase-Locked Loop (PLL) multiplies up to gigahertz speeds[cite: 3]. At 4 GHz, electricity only travels about 5 centimeters per cycle[cite: 3]. This physical limit of locality is why L1 caches must be etched directly onto the CPU die—RAM is simply too far away[cite: 3].</p>
+
+    <div class="callout key">
+      <div class="callout-title">Metastability (The Schrödinger's Cat of Hardware)</div>
+      CPU registers are made of flip-flops that require signals to arrive and stabilize before the clock pulse hits (Setup Time)[cite: 3]. If overclocking pushes the frequency too high, the ALU can't finish its math in time[cite: 3]. The arriving signal violates setup time, and the flip-flop enters <strong>Metastability</strong> (stuck at 0.5V, neither 0 nor 1), corrupting the OS and causing an instant crash[cite: 3].
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 5: THE INSTRUCTION ENGINE & PIPELINE HAZARDS
+     ========================================================================== -->
+<div class="page-container content-flow">
+  <div>
+    <h2>1.4 The Instruction Engine & 5-Stage Pipeline</h2>
+    <p>Early computers executed one instruction completely before starting the next. If an instruction took 5 clock cycles, throughput was crippled. Modern CPUs use an assembly-line architecture known as <strong>Instruction Pipelining</strong>[cite: 3].</p>
+
+    <h3>The Classic 5-Stage RISC Pipeline</h3>
+    <ol>
+      <li><strong>Instruction Fetch (IF):</strong> The CPU reads the Program Counter (<code>RIP</code> register), goes to the L1 Instruction Cache, and pulls down the next binary opcode bytes[cite: 3].</li>
+      <li><strong>Instruction Decode (ID):</strong> The hardware decodes the raw bytes into micro-operations, sign-extends constants, and reads required registers[cite: 3].</li>
+      <li><strong>Execute (EX):</strong> The ALU performs math, or calculates the physical memory address for a pointer dereference[cite: 3].</li>
+      <li><strong>Memory Access (MEM):</strong> If reading/writing to RAM, the L1 Data Cache is accessed here[cite: 3].</li>
+      <li><strong>Write-Back (WB):</strong> The final computed value is latched permanently into the destination register[cite: 3].</li>
+    </ol>
+
+    <h3>Pipeline Hazards & Hardware Mitigations</h3>
+    <p>Because multiple instructions flow simultaneously, physics and logic collide to create <strong>Hazards</strong>[cite: 3].</p>
+    <ul>
+      <li><strong>Data Hazards (RAW - Read After Write):</strong> If Instruction 2 needs <code>RAX</code> while Instruction 1 is still computing it in the Execute stage, the CPU must physically stall[cite: 3]. <em>Hardware Solution:</em> <strong>Operand Forwarding.</strong> The CPU wires the output of the ALU directly back into its own input, bypassing the register file entirely to save cycles[cite: 3].</li>
+      <li><strong>Control Hazards:</strong> <code>if (x == 0)</code> forces a branch. The CPU doesn't know which path to fetch until the comparison completes in the EX stage[cite: 3]. <em>Hardware Solution:</em> <strong>Branch Prediction.</strong> The CPU uses machine learning to guess the outcome and fetches speculatively[cite: 3]. If it guesses wrong, a massive 15-20 cycle pipeline flush penalty occurs[cite: 3].</li>
+    </ul>
+
+    <div class="callout tip">
+      <div class="callout-title">Software Engineering Relevancy (Green)</div>
+      If you process a massive array with an <code>if (data[i] > 128)</code> condition, an unsorted array causes the Branch Predictor to guess randomly (50% fail rate), resulting in millions of pipeline flushes[cite: 3]. Processing a <em>sorted</em> array achieves 99.9% accuracy. Benchmarks show processing a sorted array is often <strong>6x faster</strong> purely due to hardware branch prediction[cite: 3]!
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 6: REGISTERS, CACHE LINES & MEMORY MECHANICS
+     ========================================================================== -->
+<div class="page-container content-flow">
+  <div>
+    <h2>1.5 CPU Registers, Flags & Cache Lines</h2>
+    <p>Registers are the absolute top of the memory hierarchy, built from 6-Transistor SRAM cells offering sub-nanosecond response times[cite: 3].</p>
+
+    <h3>x86-64 Sub-Register Slicing & The Zero-Extension Rule</h3>
+    <p>Because x86 is backwards-compatible with 16-bit processors from the 1970s, its 64-bit registers (like <code>RAX</code>) are physically sliced[cite: 3]. You can address the lower 32-bits (<code>EAX</code>), lower 16-bits (<code>AX</code>), or even lower 8-bits (<code>AL</code>)[cite: 3].</p>
+
+    <div class="callout key">
+      <div class="callout-title">The 32-Bit Zero-Extension Rule (Indigo)</div>
+      If you write to an 8-bit or 16-bit register, the upper bits of RAX remain untouched[cite: 3]. However, <strong>writing to a 32-bit register (<code>mov eax, 0xFFFFFFFF</code>) automatically forces the hardware to zero-out the upper 32 bits of RAX[cite: 3].</strong> This breaks false dependencies in the Out-of-Order execution engine, allowing the CPU to rename the register without waiting for the old upper 32 bits to retire[cite: 3].
+    </div>
+
+    <h3>The 64-Byte Cache Line Reality</h3>
+    <p>The memory bus transfers data in fixed-size <strong>64-byte Cache Lines</strong>. If you request a 1-byte boolean from RAM, the memory controller fetches that byte <em>and the 63 adjacent bytes</em> into the L1 cache. In C#, <code>structs</code> are contiguous (cache-friendly), while <code>classes</code> are scattered on the heap (causing cache misses/pointer chasing).</p>
+
+<pre><code class="language-csharp">using System.Diagnostics;
+
+public class CacheLineMechanics
+{
+    public static void RunBenchmark()
+    {
+        const int size = 10_000_000;
+        int[] array = new int[size];
+        var sw = new Stopwatch();
+
+        // SCENARIO 1: Cache Friendly (Sequential)
+        // Fetches a 64-byte cache line (16 ints). Next 15 loops hit L1 instantly.
+        sw.Start();
+        for (int i = 0; i < size; i++) array[i] *= 3; 
+        sw.Stop();
+
+        // SCENARIO 2: Cache Unfriendly (Strided)
+        // Jumps by 64 bytes. EVERY loop forces a cache miss and a slow DRAM fetch.
+        sw.Restart();
+        for (int i = 0; i < size; i += 16) array[i] *= 3; 
+        sw.Stop();
+        
+        // Scenario 2 does 16x LESS math, but takes the SAME or MORE time!
+    }
+}</code></pre>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 7: TRANSLATION STACK, ABIs & THE ISA
+     ========================================================================== -->
+<div class="page-container content-flow">
+  <div>
+    <h2>1.6 The ISA, Translation Stack & OS ABIs</h2>
+    
+    <h3>The Instruction Set Architecture (CISC vs. RISC)</h3>
+    <ul>
+        <li><strong>CISC (Intel/AMD x86_64):</strong> Instructions are variable length. The CPU requires a massive, power-hungry decoder circuit to translate these complex instructions into simpler micro-operations.</li>
+        <li><strong>RISC (Apple Silicon / ARM64):</strong> Every instruction is exactly 4 bytes long. The CPU perfectly predicts instruction boundaries, pipelining them with drastically lower power consumption.</li>
+    </ul>
+
+    <h3>The Application Binary Interface (ABI) Boundary</h3>
+    <p>You cannot copy a compiled Linux executable to a Windows machine and run it, even if both have identical Intel Core i9 CPUs. The OS enforces a strict ABI[cite: 3].</p>
+    <ul>
+      <li><strong>Microsoft x64 ABI (Windows):</strong> Function arguments 1-4 go in <code>RCX</code>, <code>RDX</code>, <code>R8</code>, <code>R9</code>[cite: 3]. The caller MUST allocate a 32-byte <strong>Shadow Space</strong> on the stack before calling a function, providing a safe place to dump registers during a hardware interrupt[cite: 3].</li>
+      <li><strong>System V AMD64 ABI (Linux):</strong> Arguments 1-6 go in <code>RDI</code>, <code>RSI</code>, <code>RDX</code>, <code>RCX</code>, <code>R8</code>, <code>R9</code>[cite: 3]. It uses a 128-byte <strong>Red Zone</strong> below the Stack Pointer, saving clock cycles for leaf functions[cite: 3].</li>
+    </ul>
+
+    <h3>AOT vs. JIT Compilation</h3>
+    <p>When compiling C#, Roslyn generates CPU-agnostic MSIL bytecode. The .NET <strong>JIT (Just-In-Time)</strong> compiler (RyuJIT) translates this to bare-metal machine code at runtime, allowing it to apply Profile-Guided Optimizations and target specific hardware (like AVX-512). <strong>AOT (Ahead-of-Time)</strong> compilation skips MSIL and compiles directly to machine code during the build. It starts instantly and uses less RAM, but sacrifices hardware-specific runtime optimizations.</p>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 8: THE VIRTUAL CPU IMPLEMENTATION
+     ========================================================================== -->
+<div class="page-container content-flow">
+  <div>
+    <h2>1.7 Production Implementation: The Virtual CPU</h2>
+    <p>To truly understand how a physical CPU or the .NET CLR executes bytecode, we will build a Turing-complete, Stack-Based Virtual Machine in C#.</p>
+
+<pre><code class="language-csharp">using System;
+
+public class VirtualCPU
+{
+    // 1. Define our custom Instruction Set Architecture
+    public enum OpCode : byte
+    {
+        HALT = 0x00,      // Stop execution
+        PUSH = 0x01,      // Push a 1-byte value onto the stack
+        ADD  = 0x02,      // Pop 2 values, add them, push result
+        MUL  = 0x03,      // Pop 2 values, multiply them, push result
+        PRINT = 0x04,     // Pop 1 value and print to console
+        JMP_IF_ZERO = 0x05 // Pop 1 value. If 0, jump IP to operand address
+    }
+
+    public void Run(byte[] memory)
+    {
+        int[] stack = new int[256]; // The CPU Stack (Registers/L1 equivalent)
+        int sp = -1;                // Stack Pointer
+        int ip = 0;                 // Instruction Pointer
+
+        bool isRunning = true;
+
+        // The Hardware Clock Loop
+        while (isRunning && ip < memory.Length)
+        {
+            byte instruction = memory[ip++]; // FETCH
+
+            switch ((OpCode)instruction) // DECODE & EXECUTE
+            {
+                case OpCode.HALT: isRunning = false; break;
+                
+                case OpCode.PUSH: 
+                    stack[++sp] = memory[ip++]; 
+                    break;
+                
+                case OpCode.ADD:
+                    int addB = stack[sp--]; 
+                    int addA = stack[sp--];
+                    stack[++sp] = addA + addB;
+                    break;
+                
+                case OpCode.MUL:
+                    int mulB = stack[sp--]; 
+                    int mulA = stack[sp--];
+                    stack[++sp] = mulA * mulB;
+                    break;
+
+
+
+                    
+
+                case OpCode.PRINT:
+                    Console.WriteLine($"[CPU OUT]: {stack[sp--]}");
+                    break;
+                
+                case OpCode.JMP_IF_ZERO:
+                    byte jumpTarget = memory[ip++];
+                    if (stack[sp--] == 0) ip = jumpTarget;
+                    break;
+
+                default: throw new Exception($"Fault at {ip - 1}");
+            }
+        }
+    }
+}
+</code></pre>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 9: FORENSICS & HARDWARE EXPLOITS
+     ========================================================================== -->
+<div class="page-container content-flow">
+  <div>
+    <h2>1.8 Production Hazards & Debugger Forensics</h2>
+
+    <h3>The Thread Pool Starvation Cascade</h3>
+    <p>Abstract code frequently collides with physical hardware reality[cite: 3]. Consider a web server incrementing a global counter: <code>Interlocked.Increment(ref globalCounter)</code>[cite: 3]. Because the counter sits in a single 64-byte cache line, when Core 1 locks it, Cores 2, 3, and 4 stall[cite: 3]. The hardware Bus Snooper forces cache line flushes across the die[cite: 3]. The Thread Pool sees requests backing up and spawns more threads, adding more contention to the exact same cache line, triggering thermal throttling and taking down the cluster[cite: 3].</p>
+
+    <h3>Debugger Forensics (The <code>0xCC</code> Interrupt)</h3>
+    <p>When you set a red breakpoint in Visual Studio, it doesn't inject an <code>if</code> statement. It overwrites that exact byte in live RAM with the Opcode <code>0xCC</code> (known in x86 as <code>INT 3</code>). When the CPU decodes <code>0xCC</code>, it triggers a <strong>Hardware Interrupt</strong>, halting execution, saving registers to a context struct, and alerting the OS Kernel. VS then maps the raw memory state back to your C# source code.</p>
+
+    <div class="callout warn">
+      <div class="callout-title">The Spectre & Meltdown Vulnerabilities</div>
+      When a CPU encounters an <code>if</code> statement, it Speculatively Executes the code before it knows the true condition to avoid stalling[cite: 3]. If it guesses wrong, it reverts the registers—<strong>but it forgets to revert the L1 Cache.</strong> Hackers forced CPUs to speculatively read secret kernel memory and use those bytes as array indexes. By timing how fast their own arrays loaded, they stole kernel passwords entirely by measuring memory physics[cite: 3].
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 10: CHAPTER VERIFICATION & QUIZ
+     ========================================================================== -->
+<div class="page-container content-flow">
+  <div>
+    <h2>1.9 Chapter Verification, Checklist & Quiz</h2>
+
+    <div class="checklist">
+      <h3>Verification Checklist</h3>
+      <div class="check-item"><div class="checkbox"></div><div>I can explain Turing's Universal Machine and its relation to modern CPUs.</div></div>
+      <div class="check-item"><div class="checkbox"></div><div>I understand how Thermal Throttling, GC Pauses, and Swapping cause lag.</div></div>
+      <div class="check-item"><div class="checkbox"></div><div>I can explain why sorting an array drastically speeds up Branch Prediction.</div></div>
+      <div class="check-item"><div class="checkbox"></div><div>I understand the x86-64 32-bit zero-extension rule for registers like EAX.</div></div>
+      <div class="check-item"><div class="checkbox"></div><div>I can contrast the System V AMD64 ABI with the Microsoft x64 ABI.</div></div>
+      <div class="check-item"><div class="checkbox"></div><div>I understand how the Fetch-Decode-Execute loop powers Virtual Machines.</div></div>
+      <div class="check-item"><div class="checkbox"></div><div>I know how Visual Studio uses INT 3 (0xCC) to trigger hardware breakpoints.</div></div>
+    </div>
+
+    <h3>Comprehensive Examination</h3>
+    <div class="quiz-section">
+      <div class="quiz-question">
+        <p>1. Why are Ripple-Carry Adders physically incapable of supporting modern 4 GHz clock speeds for 64-bit math?</p>
+        <div class="quiz-option">A) They consume excessive amounts of static power.</div>
+        <div class="quiz-option">B) The carry bit propagation delay scales linearly $O(N)$, exceeding the ~0.25ns clock period limit.</div>
+        <div class="quiz-option">C) They cannot handle Two's Complement negative numbers.</div>
+      </div>
+
+      <div class="quiz-question">
+        <p>2. In the x86-64 architecture, what happens physically when an instruction writes a value to the 32-bit <code>EAX</code> register?</p>
+        <div class="quiz-option">A) The upper 32 bits of the 64-bit <code>RAX</code> register remain unchanged.</div>
+        <div class="quiz-option">B) The CPU utilizes the 32-byte Shadow Space to store the remainder.</div>
+        <div class="quiz-option">C) The hardware automatically zeroes out the upper 32 bits of <code>RAX</code> to break false dependencies in out-of-order execution.</div>
+      </div>
+
+      <div class="quiz-question">
+        <p>3. Why is an array of structs in C# significantly faster to iterate over than an array of classes?</p>
+        <div class="quiz-option">A) Structs allocate sequentially, allowing the 64-byte cache line to prefetch data into L1. Classes cause random heap pointer chasing.</div>
+        <div class="quiz-option">B) Structs skip the JIT compilation phase entirely.</div>
+        <div class="quiz-option">C) Structs are processed directly by the GPU's ALU.</div>
+      </div>
+
+      <h3 style="margin-top: 24px;">Systems Writing Prompts</h3>
+      
+      <p style="font-weight: 700; margin-bottom: 4px; font-size: 9.5pt;">Prompt 1: The Pipeline Hazard</p>
+      <p style="font-size: 9pt;">Explain the mechanical difference between a Data Hazard (RAW) and a Control Hazard[cite: 3]. Describe the hardware mitigation strategy for both (Bypassing vs. Prediction) and the resulting penalty if the mitigation fails[cite: 3].</p>
+
+      <p style="font-weight: 700; margin-top: 18px; margin-bottom: 4px; font-size: 9.5pt;">Prompt 2: The Turing Legacy</p>
+      <p style="font-size: 9pt;">Summarize Alan Turing's contribution to WWII cryptography via the Bombe machine[cite: 3]. Explain how this relates to narrowing a computational search space in modern algorithms[cite: 3].</p>
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PAGE 11: ANSWER KEY
+     ========================================================================== -->
+<div class="page-container">
+  <div class="litmus-box" style="margin-top: 0; margin-bottom: 12px; padding: 12px 14px; font-size: 7.5pt; line-height: 1.45;">
+    <div style="font-weight: 800; color: #4338CA; text-transform: uppercase; margin-bottom: 6px; font-size: 8pt;">Day 1 Technical Answer Key</div>
+    <div style="margin-bottom: 4px;"><b>1. (B)</b> A 64-bit ripple-carry requires the final bit to wait for 63 previous AND/OR operations, causing a latency that physically cannot resolve within a 0.25ns window[cite: 3].</div>
+    <div style="margin-bottom: 4px;"><b>2. (C)</b> Writing to 32-bit sub-registers (EAX, ECX) triggers hardware zero-extension of the upper 32-bits to facilitate register renaming in Out-of-Order execution[cite: 3].</div>
+    <div style="margin-bottom: 4px;"><b>3. (A)</b> Array of structs allocate contiguously. Fetching index 0 pulls indexes 1-15 into the L1 cache via the 64-byte cache line. Classes only hold memory pointers, causing massive cache misses.</div>
+    <div style="margin-bottom: 8px;"><b>ABI Distinctions:</b> The Linux ABI (System V) is heavily register-optimized (RDI, RSI, RDX, RCX, R8, R9) and utilizes a 128B Red Zone[cite: 3]. Windows enforces 4 registers (RCX, RDX, R8, R9) and strict 32B caller shadow space[cite: 3].</div>
+    <div style="margin-bottom: 4px;"><b>Prompt 1:</b> Data hazards occur when Inst B needs data that Inst A hasn't finished writing[cite: 3]. Mitigation: Operand Forwarding[cite: 3]. Penalty: Pipeline stall[cite: 3]. Control hazards occur on conditional jumps before the condition resolves[cite: 3]. Mitigation: Branch Prediction[cite: 3]. Penalty: Massive pipeline flush[cite: 3].</div>
+    <div><b>Prompt 2:</b> Turing's Bombe used known plaintext ("cribs") and logical contradictions to eliminate millions of impossible settings concurrently[cite: 3]. This is the ultimate example of algorithmic pruning, proving that brute force is inferior to mathematical space reduction[cite: 3].</div>
+  </div>
+</div>
+</body>
+</html>
