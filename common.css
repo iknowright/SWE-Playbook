@@ -322,7 +322,7 @@ li {
 .callout {
   border-radius: 12px;
   padding: 14px 16px;
-  margin: 16px 0;
+  margin: 32px 0 24px 0; /* Updated for proper breathing room */
   font-size: 9.5pt;
   line-height: 1.55;
   page-break-inside: avoid;
