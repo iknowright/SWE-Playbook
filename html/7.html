@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="../common.css">
+    <title>Chapter 7: SSH Configuration, Cryptography & Session Multiplexing</title>
+</head>
+
+<body>
+
+    <!-- ==========================================================================
+     SECTION 7.0: THE SSH PROTOCOL & CRYPTOGRAPHY
+     ========================================================================== -->
+    <div class="page-container content-flow">
+        <div>
+            <div class="phase-label">Module 7 &middot; Secure Access & Remote Workspaces</div>
+            <h1 class="chapter-title">SSH Configuration, Key Management & Tmux Multiplexing</h1>
+
+            <p>Secure Shell (SSH) is the bedrock of modern infrastructure. It is not just a terminal emulator; it is a
+                complex cryptographic tunnel capable of routing X11 graphics, local ports, and UNIX sockets across
+                hostile networks. A Staff engineer must understand the underlying math, the operating system daemon
+                architecture, and the catastrophic vulnerabilities introduced by poor key management.</p>
+
+            <h2>7.0 The SSH Protocol & Cryptographic Handshake</h2>
+            <p>When you type <code>ssh user@server</code>, the ensuing connection is not instantaneous. It requires a
+                highly orchestrated, multi-level mathematical handshake designed to establish absolute trust over an
+                untrusted medium (the Internet) where anyone could be wiretapping.</p>
+
+            <h3>The 5 Phases of the SSH Connection</h3>
+            <ol>
+                <li><strong>The TCP Handshake:</strong> Standard Layer 4 SYN, SYN-ACK, ACK.</li>
+                <li><strong>Version Exchange:</strong> Both sides send plaintext strings (e.g.,
+                    <code>SSH-2.0-OpenSSH_8.9p1</code>) to negotiate protocol compatibility.
+                </li>
+                <li><strong>Key Exchange (KEX):</strong> The most CPU-intensive phase. The client and server agree on a
+                    temporary, session-specific encryption key using Diffie-Hellman math. <em>No authentication has
+                        happened yet.</em></li>
+                <li><strong>Host Authentication:</strong> The server proves its identity to the client to prevent
+                    Man-in-the-Middle (MITM) attacks.</li>
+                <li><strong>User Authentication:</strong> Finally, the client proves their identity to the server (via
+                    Passwords or Public Keys).</li>
+            </ol>
+
+            <div class="callout key">
+                <div class="callout-title">The Diffie-Hellman Miracle (KEX Math)</div>
+                How do a client and server agree on a secret key over a public network where an attacker is listening to
+                every packet? They use <strong>Diffie-Hellman (DH) Key Exchange</strong>.<br><br>
+                <strong>The Paint Analogy:</strong> Client and Server agree publicly on a common color (Yellow). The
+                Client picks a secret color (Red), mixes it with Yellow to make Orange, and sends Orange over the
+                network. The Server picks a secret color (Blue), mixes it to make Green, and sends Green. <br>
+                The Client takes the Server's Green, adds its secret Red, resulting in Brown. The Server takes the
+                Client's Orange, adds its secret Blue, resulting in Brown. <em>They now both possess the exact same
+                    Brown key, but Brown was never transmitted over the network.</em><br><br>
+                <strong>The Math:</strong> Instead of paint, DH uses modular arithmetic with massive prime numbers:
+                <code>(g^a mod p)</code>. Even if a hacker intercepts the public "mixed colors", figuring out the
+                original secret keys requires calculating discrete logarithms—a problem modern computers cannot solve in
+                a billion years.
+            </div>
+
+            <h3>The Transition: Asymmetric to Symmetric Cryptography</h3>
+            <p>Asymmetric math (using Public/Private key pairs) is brilliant, but it is astronomically slow. You cannot
+                use RSA to encrypt a 1GB database dump over SSH; it would take hours. Therefore, SSH only uses
+                Asymmetric Cryptography to <em>authenticate</em> and perform the DH Key Exchange. Once the shared
+                "Brown" key is generated, SSH instantly abandons asymmetric math and switches to <strong>Symmetric
+                    Cryptography</strong> (like AES-256-GCM or ChaCha20). Symmetric encryption uses the exact same key
+                to lock and unlock the data, allowing modern CPUs to process it via hardware acceleration at gigabits
+                per second.</p>
+
+            <h3>The Demise of RSA & The Rise of Ed25519</h3>
+            <p>For two decades, engineers generated keys using <code>ssh-keygen -t rsa -b 4096</code>. RSA relies on
+                Prime Factorization (multiplying two massive prime numbers together is easy; figuring out which primes
+                were used to make the result is practically impossible). However, RSA keys are massive, slow, and
+                theoretically vulnerable to future Quantum Computers (via Shor's Algorithm).</p>
+
+            <p>Modern environments mandate <strong>Ed25519</strong> (Elliptic Curve Cryptography). Instead of prime
+                numbers, ECC uses the algebraic structure of elliptic curves over finite fields (e.g.,
+                <code>y^2 = x^3 + ax + b</code>).
+            </p>
+            <ul>
+                <li><strong>Mathematical Superiority:</strong> A tiny 256-bit Ed25519 key provides the exact same
+                    cryptographic strength as a massive 3072-bit RSA key.</li>
+                <li><strong>Performance:</strong> Because the key is so small, signature generation and verification are
+                    exponentially faster, drastically reducing SSH connection latency.</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- ==========================================================================
+     SECTION 7.1: KEY MANAGEMENT & THE FORWARDING TRAP
+     ========================================================================== -->
+    <div class="page-container content-flow">
+        <div>
+            <h2>7.1 Key Management, ssh-agent, and the Forwarding Trap</h2>
+
+            <h3>The <code>ssh-agent</code> Daemon</h3>
+            <p>Private keys should always be encrypted on your SSD with a strong passphrase. However, typing this
+                passphrase 50 times a day is unacceptable. The <code>ssh-agent</code> is a background daemon. When you
+                run <code>ssh-add</code>, you type your passphrase once. The agent decrypts the key and holds the raw
+                bytes securely in your computer's RAM. It then creates a local UNIX socket (e.g.,
+                <code>/tmp/ssh-XXXXX/agent.sock</code>) and sets an environment variable (<code>SSH_AUTH_SOCK</code>) so
+                the SSH client knows where to find it.
+            </p>
+
+            <div class="callout warn">
+                <div class="callout-title">IRL Exploit: The ForwardAgent Vulnerability</div>
+                To access a private production server (DB1), you must first SSH into a public Bastion host. Junior
+                engineers often enable <code>ForwardAgent yes</code> in their config. This tells SSH to secretly map
+                your laptop's local <code>ssh-agent</code> socket across the network onto the Bastion host's `/tmp/`
+                directory.<br><br>
+                <strong>The Catastrophe:</strong> A hacker has compromised the Bastion host and gained <code>root</code>
+                access. They wait for you to log in. <br>
+                1. They run <code>lsof -U | grep agent</code> to find your forwarded socket file.<br>
+                2. They run <code>export SSH_AUTH_SOCK=/tmp/ssh-1234/agent.sock</code> on their own terminal.<br>
+                3. They run <code>ssh root@production_db</code>.<br><br>
+                Because they hijacked the socket, the Bastion host asks <em>your laptop's RAM</em> to sign the
+                cryptographic challenge. Your laptop silently complies. The hacker is instantly logged into the
+                production database as you, bypassing all security, without ever stealing your actual private key file.
+                <strong>Never use ForwardAgent.</strong>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================================================
+     SECTION 7.2: ADVANCED CONFIG ENGINEERING
+     ========================================================================== -->
+    <div class="page-container content-flow">
+        <div>
+            <h2>7.2 Advanced <code>~/.ssh/config</code> Engineering</h2>
+            <p>The <code>~/.ssh/config</code> file is a deterministic rules engine. When you execute
+                <code>ssh web-prod</code>, the SSH client parses the file top-to-bottom. <em>The first matching rule
+                    wins</em>. This allows you to set host-specific overrides followed by global defaults (using
+                <code>Host *</code> at the absolute bottom).
+            </p>
+
+            <h3>Connection Multiplexing (ControlMaster)</h3>
+            <p>We established that the 5-phase SSH handshake is mathematically heavy, often taking 500ms-800ms. If you
+                are running an Ansible playbook that connects to a server 100 times, you waste a full minute just doing
+                Diffie-Hellman math.</p>
+            <p><strong>ControlMaster</strong> solves this. When you SSH to a server for the first time, it executes the
+                full cryptographic handshake and creates a background "Master" connection tied to a local socket file.
+                If you open a second terminal and SSH to the same server, SSH detects the socket, bypasses the network
+                handshake entirely, and simply asks the Master connection to spawn a new session. Connection time drops
+                from 800ms to 5ms.</p>
+            <pre><code>Host *
+    ControlMaster auto
+    ControlPath ~/.ssh/sockets/%r@%h:%p
+    ControlPersist 10m
+</code></pre>
+
+            <h3>NAT Firewalls & TCP KeepAlives</h3>
+            <p>If you leave your SSH terminal idle, a corporate NAT firewall will eventually purge the inactive
+                connection from its routing tables to save memory. When you return, your terminal is frozen. Setting
+                <code>ServerAliveInterval 60</code> tells your local SSH client to send a tiny, encrypted
+                application-layer ping every 60 seconds, tricking the NAT firewall into keeping the stateful connection
+                open indefinitely.
+            </p>
+
+            <h3>The Modern Jump Host (<code>ProxyJump</code>)</h3>
+            <p>To safely traverse a Bastion host without the lethal <code>ForwardAgent</code> vulnerability, modern
+                OpenSSH uses <code>ProxyJump</code>. </p>
+            <pre><code>Host bastion
+    Hostname 1.2.3.4
+    User admin
+
+Host internal-db
+    Hostname 10.0.5.99
+    ProxyJump bastion
+</code></pre>
+            <p><strong>Mechanical Reality:</strong> When you type <code>ssh internal-db</code>, SSH connects to the
+                bastion, but it <em>does not</em> start a shell there. It asks the Bastion to blindly forward raw TCP
+                bytes to <code>10.0.5.99</code>. Your laptop then performs the Diffie-Hellman cryptographic handshake
+                directly with the <code>internal-db</code>. The Bastion host only sees encrypted ciphertext passing
+                through it. Even if root on the Bastion is compromised, they cannot read your traffic or hijack your
+                keys.</p>
+        </div>
+    </div>
+
+    <!-- ==========================================================================
+     SECTION 7.3: SSH DAEMON (SSHD) & OS HARDENING
+     ========================================================================== -->
+    <div class="page-container content-flow">
+        <div>
+            <h2>7.3 SSH Daemon (<code>sshd</code>) OS Mechanics & Hardening</h2>
+
+            <h3>The Operating System Reality of <code>sshd</code></h3>
+            <p>How does a server actually receive an SSH connection? The master <code>sshd</code> process runs as
+                <code>root</code>, permanently bound to TCP Port 22, listening for incoming SYN packets.
+            </p>
+            <p>When a connection arrives, the master daemon immediately calls the <code>fork()</code> system call. The
+                child process handles the connection. Crucially, OpenSSH uses <strong>Privilege Separation</strong>. The
+                child process immediately drops its <code>root</code> privileges, switching to an unprivileged,
+                restricted dummy user (like <code>sshd</code>) to process the highly complex, untrusted incoming network
+                data (the Diffie-Hellman key exchange).</p>
+
+            <div class="callout tip">
+                <div class="callout-title">The Benefit of Privilege Separation</div>
+                If a hacker discovers a Zero-Day Buffer Overflow exploit in the SSH protocol's cryptographic parsing
+                engine, they can crash the child process and execute arbitrary code. However, because the child process
+                dropped its privileges <em>before</em> parsing the math, the hacker is trapped as the unprivileged
+                <code>sshd</code> user in an isolated sandbox, rather than instantly gaining full <code>root</code>
+                control of the server.
+            </div>
+
+            <h3>Hardening <code>/etc/ssh/sshd_config</code></h3>
+            <p>A production server exposed to the public internet will endure thousands of brute-force dictionary
+                attacks every hour. Hardening is not optional.</p>
+            <ul>
+                <li><code>PasswordAuthentication no</code>: The most critical setting. Passwords can be brute-forced; a
+                    256-bit Ed25519 key cannot.</li>
+                <li><code>PermitRootLogin prohibit-password</code>: Strictly prevents logging in directly as root via a
+                    password, forcing users to log in as a standard user and escalate via <code>sudo</code> (which
+                    leaves a detailed audit trail).</li>
+                <li><code>AllowUsers alice bob</code>: Creates an absolute whitelist. Even if "charlie" has a valid user
+                    account and a valid SSH key on the server, the daemon will instantly drop his connection at the TCP
+                    level.</li>
+            </ul>
+
+            <h3>The Ultimate Lockdown: <code>authorized_keys</code> Restrictions</h3>
+            <p>When you place a public key in <code>~/.ssh/authorized_keys</code>, that key grants full shell access.
+                But what if you are writing an automated CI/CD script that only needs to deploy code, or a cronjob that
+                only needs to trigger a backup? Giving a script full interactive shell access is a massive security
+                risk.</p>
+
+            <div class="callout interview">
+                <div class="callout-title">IRL Implementation: Restricting Keys</div>
+                You can prepend strict execution rules to a public key in the <code>authorized_keys</code> file. This
+                applies the Principle of Least Privilege mathematically.<br><br>
+                <code>command="/opt/scripts/deploy.sh",no-pty,no-port-forwarding,no-X11-forwarding ssh-ed25519 AAAAC3...</code><br><br>
+                <strong>The Mechanic:</strong> When the client authenticates using the matching private key, the
+                <code>sshd</code> daemon intercepts the connection. It <em>refuses</em> to spawn a bash shell (enforced
+                by <code>no-pty</code>). It ignores whatever command the client asked to run, and forcefully executes
+                <code>/opt/scripts/deploy.sh</code> instead. If a hacker steals the private key from your Jenkins
+                server, the key is useless to them—they can only trigger your deployment script; they cannot explore the
+                server.
+            </div>
+        </div>
+    </div>
+    <!-- ==========================================================================
+     SECTION 7.4: TMUX (THE TERMINAL MULTIPLEXER ARCHITECTURE)
+     ========================================================================== -->
+    <div class="page-container content-flow">
+        <div>
+            <h2>7.4 Tmux: The Terminal Multiplexer Architecture</h2>
+            <p>Junior engineers view Tmux merely as a window manager to split their terminal screen. Staff engineers
+                understand that Tmux is fundamentally a <strong>background daemon and a pseudo-terminal (PTY)
+                    proxy</strong> designed to decouple process execution from network stability.</p>
+
+            <h3>The Client/Server OS Mechanics</h3>
+            <p>When you connect to a server via SSH and execute a long-running database migration script, your SSH
+                daemon (<code>sshd</code>) spawns a bash shell attached to your active TCP connection. If your laptop's
+                Wi-Fi drops, the TCP connection times out. The Linux Kernel instantly sends a <code>SIGHUP</code>
+                (Signal Hang Up) to your bash shell, which cascades and ruthlessly kills your migration script. The
+                database is left in a corrupted state.</p>
+
+            <div class="callout key">
+                <div class="callout-title">The Daemon Decoupling (Why Tmux Survives)</div>
+                When you type <code>tmux</code>, it does not just draw a green bar on your screen. It executes a
+                <code>fork()</code> system call, creating a hidden <strong>Tmux Server Daemon</strong> running in the
+                background, bound to a UNIX socket (e.g., <code>/tmp/tmux-1000/default</code>).<br><br>
+                Your visible terminal becomes a lightweight <strong>Tmux Client</strong> that connects to this socket.
+                The background daemon requests virtual Pseudo-Terminals (PTYs) from the Kernel and runs your bash shells
+                inside them.<br><br>
+                If your Wi-Fi drops, the Kernel kills your SSH connection and the Tmux <em>Client</em>. But the Tmux
+                <em>Server</em> is a daemon; it has no parent TTY. It ignores the <code>SIGHUP</code>. Your migration
+                script continues executing perfectly in the background. When your Wi-Fi returns, you reconnect via SSH,
+                type <code>tmux attach</code>, and the client simply re-binds to the background socket, instantly
+                redrawing your screen exactly as you left it.
+            </div>
+
+            <h3>The Hierarchical Data Structure</h3>
+            <p>Tmux organizes data in a strict hierarchy, heavily utilized when scripting automated workspaces:</p>
+            <ul>
+                <li><strong>Server:</strong> The background daemon managing the UNIX socket.</li>
+                <li><strong>Session:</strong> A collection of windows. You can detach from a session and leave it
+                    running.</li>
+                <li><strong>Window:</strong> Equivalent to a graphical tab. Occupies the entire screen.</li>
+                <li><strong>Pane:</strong> A subdivided rectangle within a window, running its own distinct PTY and bash
+                    instance.</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- ==========================================================================
+     SECTION 7.5: ADVANCED TMUX SCRIPTING & WORKFLOWS
+     ========================================================================== -->
+    <div class="page-container content-flow">
+        <div>
+            <h2>7.5 Advanced Tmux Scripting & Workflows</h2>
+            <p>Because Tmux is driven entirely by a command-line interface, every action you take interactively
+                (splitting panes, typing commands) can be scripted mathematically.</p>
+
+            <h3>Pane Synchronization (The Broadcast Architecture)</h3>
+            <p>During a high-severity incident, a microservice deployed across 4 different physical servers begins
+                throwing HTTP 500 errors. You need to inspect the NGINX error logs on all 4 machines simultaneously.</p>
+
+            <div class="callout interview">
+                <div class="callout-title">IRL Diagnostic: Synchronized Keystroke Broadcasting</div>
+                Instead of opening 4 terminal tabs and typing the SSH and <code>grep</code> commands 4 separate times,
+                you utilize Tmux Pane Synchronization.<br><br>
+                1. You split your screen into 4 panes.<br>
+                2. You execute the Tmux command: <code>:set-window-option synchronize-panes on</code><br>
+                3. <strong>The Mechanic:</strong> Tmux intercepts your physical keyboard input from the client and
+                multiplexes the byte stream, copying it directly into the standard input (<code>stdin</code>) file
+                descriptors of all 4 PTYs simultaneously.<br>
+                4. You type <code>ssh web-node-X</code> and execute
+                <code>tail -f /var/log/nginx/error.log | grep CRITICAL</code>. The command runs across the cluster in
+                perfect unison.
+            </div>
+
+            <h3>Programmatic Workspace Construction</h3>
+            <p>You can use the <code>tmux send-keys</code> command to inject strings and the Enter key (<code>C-m</code>
+                for Carriage Return) into background, detached sessions. This allows you to write bash scripts that
+                construct complex diagnostic dashboards before you even attach to them.</p>
+        </div>
+    </div>
+
+    <!-- ==========================================================================
+     SECTION 7.6: PRODUCTION IMPLEMENTATIONS
+     ========================================================================== -->
+    <div class="page-container content-flow">
+        <div>
+            <h2>7.6 Production Implementation: Automating Access</h2>
+
+            <h3>Implementation 1: The Staff-Level <code>~/.ssh/config</code></h3>
+            <p>This configuration demonstrates how to drastically reduce latency via multiplexing, bypass firewalls
+                automatically with ProxyJump, and keep idle sessions alive natively without altering server-side daemon
+                settings.</p>
+
+            <pre><code class="language-bash"># 1. GLOBAL DEFAULTS (Applied to all connections)
+Host *
+    # Keep idle connections alive by sending a tiny encrypted ping every 60 seconds.
+    ServerAliveInterval 60
+    # If the ping fails 3 times, gracefully terminate the connection.
+    ServerAliveCountMax 3
+    # Enforce modern Elliptic Curve keys, disabling legacy RSA.
+    PubkeyAcceptedAlgorithms +ssh-ed25519
+    # Enable Socket Multiplexing to reduce KEX handshake latency.
+    ControlMaster auto
+    ControlPath ~/.ssh/sockets/%r@%h:%p
+    # Keep the invisible master connection alive for 15 minutes after you exit.
+    ControlPersist 15m
+
+# 2. THE BASTION HOST (The Entry Point)
+Host prod-bastion
+    HostName bastion.production.internal.com
+    User security-admin
+    IdentityFile ~/.ssh/id_ed25519_bastion
+
+# 3. INTERNAL CLUSTER (Seamless hopping)
+# By typing 'ssh db-primary', SSH will automatically connect to prod-bastion first,
+# establish a secure TCP tunnel, and execute the final handshake with db-primary.
+# ForwardAgent is explicitly NOT used to preserve key security.
+Host db-primary
+    HostName 10.0.99.50
+    User postgres-admin
+    IdentityFile ~/.ssh/id_ed25519_db
+    ProxyJump prod-bastion
+</code></pre>
+
+            <h3>Implementation 2: The Automated Incident Response Dashboard</h3>
+            <p>A Bash script that utilizes the Tmux CLI to silently construct a 4-pane diagnostic workspace in the
+                background. It connects to 4 web servers, executes a live log tail, synchronizes the panes for further
+                manual commands, and finally attaches the user to the finished GUI.</p>
+
+            <pre><code class="language-bash">#!/bin/bash
+set -euo pipefail
+
+SESSION_NAME="incident_dashboard"
+
+# Check if the session already exists. If so, attach and exit.
+if tmux has-session -t "$SESSION_NAME" 2&gt;/dev/null; then
+    echo "[+] Session exists. Attaching..."
+    tmux attach-session -t "$SESSION_NAME"
+    exit 0
+fi
+
+echo "[+] Constructing automated diagnostic workspace..."
+
+# 1. Create a new detached (-d) session named "incident_dashboard"
+tmux new-session -d -s "$SESSION_NAME" -n "WebCluster"
+
+# 2. Split the window into 4 equal panes (2x2 grid)
+# -h splits left/right, -v splits top/bottom
+tmux split-window -h -t "$SESSION_NAME:0.0"
+tmux split-window -v -t "$SESSION_NAME:0.0"
+tmux split-window -v -t "$SESSION_NAME:0.2"
+
+# 3. Inject commands into each specific pane using 'send-keys'
+# C-m mimics pressing the 'Enter' key.
+# We are routing traffic through the Bastion configured in our SSH config.
+tmux send-keys -t "$SESSION_NAME:0.0" "ssh web-node-1" C-m
+tmux send-keys -t "$SESSION_NAME:0.0" "tail -f /var/log/syslog" C-m
+
+tmux send-keys -t "$SESSION_NAME:0.1" "ssh web-node-2" C-m
+tmux send-keys -t "$SESSION_NAME:0.1" "tail -f /var/log/syslog" C-m
+
+tmux send-keys -t "$SESSION_NAME:0.2" "ssh web-node-3" C-m
+tmux send-keys -t "$SESSION_NAME:0.2" "tail -f /var/log/syslog" C-m
+
+tmux send-keys -t "$SESSION_NAME:0.3" "ssh web-node-4" C-m
+tmux send-keys -t "$SESSION_NAME:0.3" "tail -f /var/log/syslog" C-m
+
+# 4. Synchronize the panes so any subsequent typing is broadcasted to all 4 servers
+tmux set-window-option -t "$SESSION_NAME:0" synchronize-panes on
+
+echo "[+] Workspace ready. Attaching terminal..."
+# 5. Hand control over to the user
+tmux attach-session -t "$SESSION_NAME"
+</code></pre>
+        </div>
+    </div>
+
+    <!-- ==========================================================================
+     SECTION 7.7: VERIFICATION, CHECKLIST & MASTER QUIZ
+     ========================================================================== -->
+    <div class="page-container content-flow">
+        <div>
+            <h2>7.7 Chapter Verification, Checklist & Master Quiz</h2>
+
+            <div class="checklist">
+                <h3>Staff-Level Verification Validators</h3>
+                <div class="check-item">
+                    <div class="checkbox"></div>
+                    <div>I can explain why Diffie-Hellman Key Exchange prevents Man-in-the-Middle attackers from
+                        deriving the symmetric encryption key.</div>
+                </div>
+                <div class="check-item">
+                    <div class="checkbox"></div>
+                    <div>I understand why Ed25519 (Elliptic Curve) keys provide mathematically superior security and
+                        lower latency compared to legacy 4096-bit RSA keys.</div>
+                </div>
+                <div class="check-item">
+                    <div class="checkbox"></div>
+                    <div>I can architect an SSH connection via a Bastion host using <code>ProxyJump</code>, strictly
+                        avoiding the catastrophic risks of <code>ForwardAgent</code>.</div>
+                </div>
+                <div class="check-item">
+                    <div class="checkbox"></div>
+                    <div>I know how to restrict an automated public key in <code>authorized_keys</code> to execute only
+                        a specific script, preventing interactive shell access.</div>
+                </div>
+                <div class="check-item">
+                    <div class="checkbox"></div>
+                    <div>I can explain the OS-level mechanics of why a Tmux daemon survives a <code>SIGHUP</code> signal
+                        when a TCP connection terminates.</div>
+                </div>
+                <div class="check-item">
+                    <div class="checkbox"></div>
+                    <div>I can programmatically construct a multi-pane Tmux workspace using <code>split-window</code>
+                        and <code>send-keys</code> within a bash script.</div>
+                </div>
+            </div>
+
+            <h3>Comprehensive Examination</h3>
+            <div class="quiz-section">
+                <div class="quiz-question">
+                    <p>1. Mechanically, how does a hacker hijack your <code>ssh-agent</code> if they gain root access on
+                        a shared Bastion host where you utilized <code>ForwardAgent yes</code>?</p>
+                    <div class="quiz-option">A) They copy your physical private key file from your laptop's SSD.</div>
+                    <div class="quiz-option">B) They intercept the Diffie-Hellman math and derive your private key.
+                    </div>
+                    <div class="quiz-option">C) They find your forwarded UNIX socket in <code>/tmp/</code>, set their
+                        <code>SSH_AUTH_SOCK</code> environment variable to point to it, and force your laptop's RAM to
+                        sign cryptographic challenges on their behalf.
+                    </div>
+                </div>
+
+                <div class="quiz-question">
+                    <p>2. Why does the SSH protocol transition from Asymmetric Cryptography to Symmetric Cryptography
+                        immediately after the handshake?</p>
+                    <div class="quiz-option">A) Asymmetric keys expire after 30 seconds.</div>
+                    <div class="quiz-option">B) Asymmetric math (like Elliptic Curves) is computationally expensive and
+                        too slow for high-speed bulk data transfer. Symmetric math (like AES) is hardware-accelerated
+                        and capable of gigabit throughput.</div>
+                    <div class="quiz-option">C) Symmetric cryptography is mathematically harder to crack than
+                        Asymmetric.</div>
+                </div>
+
+                <div class="quiz-question">
+                    <p>3. How does the <code>ControlMaster</code> directive reduce SSH connection latency from ~800ms
+                        down to ~5ms?</p>
+                    <div class="quiz-option">A) It bypasses the firewall entirely using UDP.</div>
+                    <div class="quiz-option">B) It caches the DNS resolution in your local <code>/etc/hosts</code> file.
+                    </div>
+                    <div class="quiz-option">C) It executes the heavy Diffie-Hellman cryptographic handshake once,
+                        binding it to a local UNIX socket. Subsequent connections reuse this established, encrypted TCP
+                        tunnel without renegotiating the math.</div>
+                </div>
+
+                <div class="quiz-question">
+                    <p>4. What exactly happens on the Linux filesystem when a Tmux client detaches from a session?</p>
+                    <div class="quiz-option">A) The processes inside the session are paused (SIGSTOP) and written to the
+                        swap partition.</div>
+                    <div class="quiz-option">B) The visible client process exits, but the background Tmux Server Daemon
+                        (which owns the Pseudo-Terminals and ignores SIGHUP) continues running flawlessly in memory,
+                        bound to its UNIX socket.</div>
+                    <div class="quiz-option">C) Tmux executes an <code>nohup</code> command on all active PIDs.</div>
+                </div>
+
+                <div class="quiz-question">
+                    <p>5. In <code>sshd_config</code>, what is the architectural benefit of OpenSSH Privilege
+                        Separation?</p>
+                    <div class="quiz-option">A) It forces users to log in with SSH keys instead of passwords.</div>
+                    <div class="quiz-option">B) When a connection arrives, the root daemon forks a child process that
+                        immediately drops root privileges. If a hacker exploits a bug in the protocol parsing math, they
+                        are trapped as an unprivileged user rather than gaining instant system control.</div>
+                    <div class="quiz-option">C) It prevents multiple users from logging into the same server
+                        simultaneously.</div>
+                </div>
+
+                <h3 style="margin-top: 24px;">Systems Writing Prompts</h3>
+
+                <p style="font-weight: 700; margin-bottom: 4px; font-size: 9.5pt;">Prompt 1: Defending the Bastion</p>
+                <p style="font-size: 9pt;">A junior engineer on your team suggests using <code>ForwardAgent yes</code>
+                    to easily traverse the company's new Bastion host into the secure database subnet. Draft a technical
+                    memo explaining the catastrophic security flaws of Agent Forwarding, and provide the exact
+                    <code>~/.ssh/config</code> implementation using <code>ProxyJump</code> as the secure alternative.
+                </p>
+
+                <p style="font-weight: 700; margin-top: 18px; margin-bottom: 4px; font-size: 9.5pt;">Prompt 2: The
+                    Resilient Pipeline</p>
+                <p style="font-size: 9pt;">You have a Python script that takes 6 hours to analyze a massive 500GB log
+                    file on a remote server. Explain the exact OS-level signaling mechanics of why running this script
+                    directly in a standard SSH session is dangerous, and detail how executing it inside Tmux protects
+                    the process from TCP timeouts.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================================================
+     ANSWER KEY
+     ========================================================================== -->
+    <div class="page-container">
+        <div class="litmus-box"
+            style="margin-top: 0; margin-bottom: 12px; padding: 12px 14px; font-size: 7.5pt; line-height: 1.45;">
+            <div
+                style="font-weight: 800; color: #4338CA; text-transform: uppercase; margin-bottom: 6px; font-size: 8pt;">
+                Chapter 7 Technical Answer Key</div>
+            <div style="margin-bottom: 4px;"><b>1. (C)</b> A forwarded agent creates a local socket on the remote
+                machine. Any user with <code>root</code> access to that remote machine can hijack the socket and
+                impersonate your cryptographic identity seamlessly.</div>
+            <div style="margin-bottom: 4px;"><b>2. (B)</b> Asymmetric math requires complex curve derivations or prime
+                factorization, which is CPU-bound. Symmetric math uses simple, reversible byte-shifting (AES), allowing
+                hardware acceleration.</div>
+            <div style="margin-bottom: 4px;"><b>3. (C)</b> <code>ControlMaster</code> multiplexes multiple SSH sessions
+                over a single, pre-authenticated TCP connection, skipping the 5-phase handshake for all subsequent
+                connections.</div>
+            <div style="margin-bottom: 4px;"><b>4. (B)</b> Tmux's architecture decouples the visible frontend (Client)
+                from the executing backend (Server daemon). Detaching simply severs the local socket connection; the
+                daemon ignores the disconnect.</div>
+            <div style="margin-bottom: 8px;"><b>5. (B)</b> Privilege Separation isolates the complex, bug-prone network
+                parsing logic into an unprivileged sandbox. Only after authentication succeeds does the daemon pass the
+                file descriptors to a privileged process to spawn the user's shell.</div>
+
+            <div style="margin-bottom: 4px;"><b>Prompt 1 (ProxyJump vs ForwardAgent):</b> Agent Forwarding exposes the
+                decrypted private key signing mechanism to the Bastion's root user via a <code>/tmp/</code> socket.
+                <code>ProxyJump</code> instructs the Bastion to blindly route encrypted TCP packets to the destination,
+                meaning the Bastion never sees plaintext data and cannot hijack the authentication challenge.
+            </div>
+            <div><b>Prompt 2 (SIGHUP Mechanics):</b> If the TCP connection drops, the kernel sends a <code>SIGHUP</code>
+                to the bash session, terminating all child processes (including the 6-hour script). Tmux runs as a
+                background daemon without a controlling TTY parent, rendering it immune to <code>SIGHUP</code>. The
+                script continues safely in the background until the user reconnects and reattaches.</div>
+        </div>
+    </div>
+</body>
+
+</html>
