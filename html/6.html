@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="../common.css">
+    <title>Chapter 6: Advanced Git Workflows, Monorepos & Scaling</title>
+</head>
+
+<body>
+
+    <!-- ==========================================================================
+     SECTION 6.0: REMOTES & THE FORKING MODEL
+     ========================================================================== -->
+    <div class="page-container content-flow">
+        <div>
+            <div class="phase-label">Module 6 &middot; Collaborative Network Mechanics & CI/CD</div>
+            <h1 class="chapter-title">Advanced Git Workflows, Monorepos & Submodules</h1>
+
+            <p>A local Git repository is an isolated island. In enterprise environments, Staff engineers must architect
+                how dozens or thousands of isolated Directed Acyclic Graphs (DAGs) mathematically synchronize over a
+                network without destroying each other's history. We begin by deconstructing the Remote architecture and
+                the mechanics of the Pull Request.</p>
+
+            <h2>6.0 The Collaborative DAG: Remotes & The Forking Model</h2>
+
+            <h3>Deconstructing <code>.git/config</code> (The Remote Map)</h3>
+            <p>When you run <code>git clone https://github.com/torvalds/linux.git</code>, Git does not magically bind
+                your computer to GitHub. It simply adds a text entry to your local <code>.git/config</code> file. A
+                "Remote" is nothing but a named URL and a fetching rule.</p>
+
+            <pre><code>[remote "origin"]
+    url = https://github.com/torvalds/linux.git
+    fetch = +refs/heads/*:refs/remotes/origin/*
+</code></pre>
+
+            <p><strong>The Refspec (<code>fetch = ...</code>):</strong> This is the mechanical heart of network
+                synchronization. It tells Git: <em>"When I run <code>git fetch origin</code>, take all the branches
+                    (<code>refs/heads/*</code>) from the remote URL, and map them into my local hidden tracking
+                    directories (<code>refs/remotes/origin/*</code>)."</em> The <code>+</code> sign means "force
+                update," allowing Git to overwrite your local tracking branches if the remote history was rewritten.</p>
+
+            <h3>The GitHub Fork & Upstream Architecture</h3>
+            <p>A "Fork" does not exist in the native Git protocol. It is a proprietary GitHub/GitLab concept. When you
+                click "Fork" on GitHub, their servers simply execute a bare clone of the repository into your personal
+                namespace. To work with a Fork locally, you must configure a dual-remote topology:</p>
+            <ol>
+                <li><code>git clone https://github.com/YOUR_NAME/repo.git</code> (This automatically becomes
+                    <code>origin</code>).
+                </li>
+                <li><code>git remote add upstream https://github.com/ORIGINAL_AUTHOR/repo.git</code>.</li>
+            </ol>
+
+            <div class="callout interview">
+                <div class="callout-title">IRL Diagnostic: Deep Fetching & Syncing the Fork</div>
+                <strong>The Problem:</strong> The <code>upstream</code> repository has moved forward by 50 commits. Your
+                Fork's <code>main</code> branch is hopelessly out of date. Junior engineers often try to use the GitHub
+                UI to sync, which can create ugly merge commits.<br><br>
+                <strong>The Staff Solution (Command Line):</strong><br>
+                1. <code>git fetch upstream</code><br>
+                <em>Mechanics:</em> Git connects to the upstream server, negotiates a Packfile, downloads the 50 new
+                Commits/Trees/Blobs, and updates your <code>refs/remotes/upstream/main</code> pointer. <strong>Your
+                    working files have not changed yet.</strong><br>
+                2. <code>git checkout main</code><br>
+                3. <code>git rebase upstream/main</code><br>
+                <em>Mechanics:</em> You mathematically slide your local <code>main</code> branch forward to match the
+                upstream pointer exactly. No merge commits are created.<br>
+                4. <code>git push origin main --force-with-lease</code><br>
+                <em>Mechanics:</em> You push the updated timeline to your personal Fork on GitHub.
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================================================
+     SECTION 6.1: ADVANCED DAG MANIPULATION (MERGE VS REBASE)
+     ========================================================================== -->
+    <div class="page-container content-flow">
+        <div>
+            <h2>6.1 Advanced DAG Manipulation: Merge vs. Rebase</h2>
+            <p>When two developers branch off <code>main</code>, write code, and commit, the DAG splits into two
+                divergent timelines. Git provides two mathematically distinct ways to resolve this divergence: Merging
+                and Rebasing.</p>
+
+            <h3>The 3-Way Merge (<code>git merge</code>)</h3>
+            <p>If you are on <code>main</code> and execute <code>git merge feature-x</code>, Git performs a
+                <strong>3-Way Merge</strong>. It looks at three specific Commit Objects:
+            </p>
+            <ol>
+                <li>The current tip of <code>main</code>.</li>
+                <li>The current tip of <code>feature-x</code>.</li>
+                <li>The <strong>Merge Base</strong> (the exact commit where the two branches originally split).</li>
+            </ol>
+            <p>Git calculates the diffs from the Merge Base to both tips. It then generates a brand new <strong>Merge
+                    Commit</strong>. A Merge Commit is unique because it has <em>two parent commits</em>. This preserves
+                the exact chronological history of what happened, but in a busy team, it creates a visual "railway yard"
+                graph filled with hundreds of crossing lines and trivial merge commits.</p>
+
+            <h3>The Rebase (<code>git rebase</code>) & The Mathematical Hash Rewrite</h3>
+            <p>Rebasing is the act of <strong>rewriting history</strong> to create a perfectly linear, straight-line
+                graph. If you are on <code>feature-x</code> and execute <code>git rebase main</code>, Git performs a
+                surgical operation:</p>
+            <ol>
+                <li>Git finds the Merge Base.</li>
+                <li>Git takes every commit you made on <code>feature-x</code> and saves their diffs to a temporary
+                    location in RAM.</li>
+                <li>Git forcibly moves your <code>feature-x</code> pointer to the current tip of <code>main</code>
+                    (Fast-Forwarding).</li>
+                <li>Git systematically <strong>replays</strong> your saved diffs on top of this new base, one by one.
+                </li>
+            </ol>
+
+            <div class="callout warn">
+                <div class="callout-title">The Danger of Rebase: SHA-1 Mutation</div>
+                Why do people fear rebasing? Because it destroys the original commits. Remember from Chapter 5: a
+                Commit's SHA-1 hash is generated by hashing its Author, its Tree, and <strong>its Parent's
+                    Hash</strong>. <br><br>
+                When you rebase, you are placing your commits onto a new parent. Because the Parent Hash changed, the
+                new Commit Hash mathematically <em>must</em> change. Git deletes your old commits (leaving them to the
+                Garbage Collector) and generates brand new commits with brand new SHA-1 hashes. <strong>The Golden Rule:
+                    Never rebase a branch that you have already pushed to a public server and shared with
+                    others.</strong> If you rewrite public history, your coworkers' local repositories will
+                catastrophically conflict with the server.
+            </div>
+
+            <h3>The Force Push (<code>--force</code> vs <code>--force-with-lease</code>)</h3>
+            <p>Because rebasing changes your commit hashes, if you try to <code>git push</code> the rebased branch back
+                to GitHub, the server will reject it. The server says, <em>"Your branch is missing the old commits I
+                    have. Pull first."</em> You must forcefully overwrite the server's history.</p>
+
+            <div class="callout interview">
+                <div class="callout-title">IRL Outage: The Fireable "git push -f"</div>
+                <strong>The Scenario:</strong> Alice and Bob share a branch. Alice rebases the branch locally to clean
+                it up. Meanwhile, Bob finishes a critical bug fix and pushes it to GitHub. Alice then runs
+                <code>git push --force</code>. <br><br>
+                <strong>The Result:</strong> Alice's computer violently overwrites the GitHub branch with her local
+                state. Bob's critical bug fix is instantly vaporized from the server. It is gone.<br><br>
+                <strong>The Staff Solution:</strong> You must <em>never</em> use <code>-f</code>. You must use
+                <strong><code>git push --force-with-lease</code></strong>. This command instructs Git to check the
+                server before pushing. It says: <em>"Force push my code, BUT ONLY IF the server's branch is exactly
+                    where I left it when I last fetched."</em> Because Bob pushed new code, the server's pointer moved.
+                The lease check fails, the push is safely aborted, and Bob's code survives.
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================================================
+     SECTION 6.2: SURGICAL ALTERATIONS (INTERACTIVE REBASE & RESETS)
+     ========================================================================== -->
+    <div class="page-container content-flow">
+        <div>
+            <h2>6.2 Surgical Alterations: Interactive Rebase & Resets</h2>
+
+            <h3>Interactive Rebase (<code>git rebase -i</code>)</h3>
+            <p>Staff engineers do not open Pull Requests containing commits like <em>"wip,"</em> <em>"fixed typo,"</em>
+                and <em>"forgot a file."</em> They curate their history before pushing. By executing
+                <code>git rebase -i HEAD~5</code>, Git opens a text editor showing the last 5 commits.
+            </p>
+            <p>You can change the commands next to each commit:</p>
+            <ul>
+                <li><code>pick</code>: Keep the commit as is.</li>
+                <li><code>reword</code>: Pause to let you rewrite the commit message.</li>
+                <li><code>squash</code>: Melt this commit's code into the commit directly above it, combining their
+                    messages.</li>
+                <li><code>drop</code>: Completely delete the commit from the DAG.</li>
+            </ul>
+
+            <h3>The Reset Triad (Manipulating the Index)</h3>
+            <p>To understand <code>git reset</code>, you must understand Git's three physical layers: The
+                <strong>HEAD</strong> (where the DAG points), the <strong>Index/Staging Area</strong> (what is ready to
+                be committed), and the <strong>Working Directory</strong> (the actual files on your SSD).
+            </p>
+
+            <p>Moving backward in time (e.g., <code>git reset HEAD~1</code> to undo the last commit) behaves differently
+                based on the flag:</p>
+            <ul>
+                <li><strong><code>--soft</code>:</strong> Moves HEAD backward, but leaves the Index and Working
+                    Directory untouched. <em>IRL Use: You made a commit, but want to add one more file to it. You soft
+                        reset, stage the new file, and commit again.</em></li>
+                <li><strong><code>--mixed</code> (The Default):</strong> Moves HEAD backward, and empties the Index.
+                    Your files on the SSD remain untouched. <em>IRL Use: You committed 10 files, but realize they should
+                        be split into two separate commits. You mixed reset, and stage them individually.</em></li>
+                <li><strong><code>--hard</code>:</strong> The nuclear option. Moves HEAD backward, empties the Index,
+                    and ruthlessly deletes all changes in your Working Directory to perfectly match the old commit.
+                    <em>IRL Use: You went down a terrible coding rabbit hole and want to destroy all your local work and
+                        start over.</em>
+                </li>
+            </ul>
+
+            <h3>Forward-Rolling (<code>git revert</code>)</h3>
+            <p>If a bad commit causes a production outage, and that commit is on the public <code>main</code> branch,
+                you <em>cannot</em> use <code>git reset</code> or <code>git rebase</code> (because rewriting public
+                history is forbidden). You must <strong>Forward-Roll</strong> using
+                <code>git revert &lt;commit_hash&gt;</code>.
+            </p>
+            <p>This command finds the exact inverse diff of the bad commit (e.g., if the bad commit added a line, the
+                inverse deletes it) and generates a brand new, mathematically opposite commit appended to the end of the
+                timeline. The bad code is neutralized, but the chronological history is perfectly preserved.</p>
+        </div>
+    </div>
+
+    <!-- ==========================================================================
+     SECTION 6.3: SCALING GIT (MONOREPOS VS POLYREPOS)
+     ========================================================================== -->
+    <div class="page-container content-flow">
+        <div>
+            <h2>6.3 Scaling Git: Monorepos vs. Polyrepos</h2>
+
+            <h3>The Monorepo Philosophy</h3>
+            <p>A <strong>Polyrepo</strong> architecture gives every microservice its own repository. This makes cloning
+                fast, but creates dependency hell (e.g., trying to coordinate an API change across an iOS repo, an
+                Android repo, and a Backend repo simultaneously).</p>
+            <p>A <strong>Monorepo</strong> (used by Google, Meta, Microsoft) places the entire company's codebase into a
+                single, massive repository. An API change and the corresponding frontend updates are merged in a single,
+                atomic commit. However, this brutally exposes Git's architectural limits.</p>
+
+            <h3>Overcoming Git's Limits: Shallow Clones & Sparse Checkouts</h3>
+            <p>By default, <code>git clone</code> downloads every single object (Blob, Tree, Commit) created since the
+                beginning of time. If a Monorepo is 500GB, developers and CI/CD pipelines cannot download it.</p>
+
+            <div class="callout tip">
+                <div class="callout-title">IRL Implementation: Optimizing CI/CD with Shallow Clones</div>
+                When a Jenkins pipeline triggers a build, it does not need the 10-year history of the repository. It
+                only needs the current state of the code.<br><br>
+                <strong>The Command:</strong> <code>git clone --depth 1 https://github.com/org/monorepo.git</code><br>
+                <strong>Mechanics:</strong> Git truncates the DAG. It tells the server to only pack and send the Blobs
+                and Trees associated with the absolute most recent commit on the default branch. A 50GB repository clone
+                drops to 50MB, saving massive pipeline execution time and bandwidth.
+            </div>
+
+            <div class="callout key">
+                <div class="callout-title">Sparse Checkouts (Cone Mode)</div>
+                What if a backend engineer clones the Monorepo, but they only want to work on the
+                <code>/backend/auth-service</code> directory? They don't want 200,000 iOS files polluting their IDE
+                indexing.<br><br>
+                They use <strong>Sparse Checkouts</strong>:<br>
+                1. <code>git clone --no-checkout https://github.com/org/monorepo.git</code> (Downloads the DB, but
+                populates zero files on the SSD).<br>
+                2. <code>git sparse-checkout set backend/auth-service</code> (Configures a Cone pattern).<br>
+                3. <code>git checkout main</code><br>
+                <strong>Result:</strong> The <code>.git/objects</code> database contains the full history, but the
+                Working Directory is strictly limited to the authentication service files, dramatically improving IDE
+                performance and `git status` speeds.
+            </div>
+        </div>
+    </div>
+    <!-- ==========================================================================
+     SECTION 6.4: GIT SUBMODULES & SUBTREES
+     ========================================================================== -->
+    <div class="page-container content-flow">
+        <div>
+            <h2>6.4 Git Submodules & Subtrees</h2>
+            <p>In a Polyrepo architecture, you often need to share code (like a UI component library or a gRPC protobuf
+                definition) across multiple distinct projects. You cannot simply copy-paste the code. You must nest one
+                Git repository inside another.</p>
+
+            <h3>The Submodule Mechanic (The Detached HEAD Trap)</h3>
+            <p>A Git Submodule is a pointer to another repository. When you run
+                <code>git submodule add https://github.com/org/shared-lib.git</code>, Git creates a
+                <code>.gitmodules</code> file mapping the URL to a local directory.
+            </p>
+
+            <div class="callout warn">
+                <div class="callout-title">The Architectural Reality of Submodules</div>
+                <strong>A submodule does not track a branch.</strong> It physically tracks a <em>single, specific Commit
+                    SHA-1 hash</em> of the child repository.<br><br>
+                When a junior developer clones the parent repository, the submodule directory is completely empty. They
+                must run the infamous command: <code>git submodule update --init --recursive</code>. This tells Git to
+                read the `.gitmodules` file, clone the child repo, and instantly check out the exact Commit SHA-1
+                recorded by the parent.<br><br>
+                Because it checks out a raw hash, the developer is immediately thrown into a <strong>Detached
+                    HEAD</strong> state inside the submodule. If they make changes and commit without manually checking
+                out a branch first, those commits will be orphaned and lost.
+            </div>
+
+            <h3>Git Subtrees (The Modern Alternative)</h3>
+            <p>To avoid the catastrophic Detached HEAD issues of submodules, Staff engineers often advocate for
+                <strong>Git Subtrees</strong>. Instead of just storing a pointer to a commit hash, a Subtree physically
+                copies the entire Tree and Blob structure of the child repository directly into the parent repository's
+                DAG.
+            </p>
+            <p>The code is physically present when you clone the parent repo (no <code>--init</code> required).
+                Developers treat it like a normal folder, but you retain the ability to mathematically extract those
+                commits later and push them back to the child repository using <code>git subtree push</code>.</p>
+        </div>
+    </div>
+
+    <!-- ==========================================================================
+     SECTION 6.5: CI/CD & GITHUB WEBHOOKS
+     ========================================================================== -->
+    <div class="page-container content-flow">
+        <div>
+            <h2>6.5 CI/CD & GitHub Webhooks</h2>
+            <p>Continuous Integration (CI) and Continuous Deployment (CD) pipelines (like Jenkins, AWS CodePipeline, or
+                GitHub Actions) are fundamentally event-driven. They do not constantly poll your repository asking if
+                code has changed. GitHub aggressively pushes a notification to your server the millisecond a Git event
+                occurs.</p>
+
+            <h3>Webhook Payload Anatomy</h3>
+            <p>A Webhook is simply an HTTP <code>POST</code> request containing a massive JSON payload. When a developer
+                executes <code>git push</code>, GitHub constructs this payload and fires it at your server's endpoint.
+            </p>
+            <ul>
+                <li><strong>Headers:</strong> GitHub includes <code>X-GitHub-Event: push</code> (telling you what
+                    happened) and <code>X-GitHub-Delivery</code> (a unique UUID for tracing).</li>
+                <li><strong>Body <code>ref</code>:</strong> Indicates exactly what branch was pushed to (e.g.,
+                    <code>"refs/heads/main"</code>).
+                </li>
+                <li><strong>Body <code>commits</code>:</strong> An array containing the exact SHA-1 hashes, author
+                    names, and commit messages of the newly pushed code.</li>
+            </ul>
+
+            <div class="callout key">
+                <div class="callout-title">HMAC-SHA256 Cryptographic Security</div>
+                If your deployment server listens on a public IP, a hacker can easily craft a fake JSON payload, set the
+                <code>X-GitHub-Event: push</code> header, and force your server to deploy malicious code. <strong>You
+                    must mathematically prove the payload came from GitHub.</strong><br><br>
+                When configuring the webhook in GitHub, you provide a <strong>Secret Token</strong>. When a push occurs,
+                GitHub takes the raw bytes of the JSON payload and your Secret Token, runs them through an HMAC-SHA256
+                cryptographic algorithm, and places the resulting hash in the <code>X-Hub-Signature-256</code> HTTP
+                header.<br><br>
+                Your receiving server takes the incoming payload, hashes it locally using the exact same Secret Token,
+                and compares its result to the <code>X-Hub-Signature-256</code> header. If a hacker alters even a single
+                byte of the payload, or doesn't know the Secret Token, the hashes will catastrophically mismatch, and
+                your server instantly drops the connection with a 401 Unauthorized.
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================================================
+     SECTION 6.6: PRODUCTION IMPLEMENTATIONS (AUTOMATING THE FLOW)
+     ========================================================================== -->
+    <div class="page-container content-flow">
+        <div>
+            <h2>6.6 Production Implementation: Automating the Flow</h2>
+
+            <h3>Implementation 1: The Bulletproof Sync Script</h3>
+            <p>This Staff-level Bash script safely synchronizes a local Fork with an Upstream repository. It attempts a
+                fast-forward rebase and automatically aborts if conflicts are detected, preventing the developer from
+                accidentally destroying code.</p>
+
+            <pre><code class="language-bash">
+
+#!/bin/bash
+set -euo pipefail
+
+
+BRANCH="main"
+echo "[+] Fetching latest DAG from upstream..."
+git fetch upstream
+
+
+echo "[+] Transitioning to $BRANCH..."
+git checkout $BRANCH
+
+
+echo "[+] Attempting mathematical fast-forward rebase..."
+# The 'if' statement captures the exit code of the rebase command.
+# If Git hits a merge conflict, it exits with a non-zero code, 
+# triggering the 'else' block.
+if git rebase upstream/$BRANCH; then
+    echo "[+] Rebase successful. Force-pushing to personal Origin with lease..."
+    git push origin $BRANCH --force-with-lease
+    echo "[+] Synchronization Complete."
+else
+    echo "[!] CRITICAL: Merge conflict detected during rebase."
+    echo "[!] Aborting rebase to restore repository to a clean state."
+    git rebase --abort
+    echo "[!] Please resolve conflicts manually."
+    exit 1
+fi
+</code></pre>
+
+            <h3>Implementation 2: The Secure CI/CD Webhook Listener (Node.js)</h3>
+            <p>This raw Node.js server receives a GitHub webhook, cryptographically verifies the HMAC-SHA256 signature,
+                ensures the push was to the <code>main</code> branch, and triggers a local deployment script.</p>
+
+            <pre><code class="language-javascript">     
+const express = require('express');
+const crypto = require('crypto');
+const { exec } = require('child_process');
+
+const app = express();
+const WEBHOOK_SECRET = process.env.GITHUB_WEBHOOK_SECRET;
+
+// We must parse the body as raw bytes to ensure the 
+// cryptographic hash matches exactly.
+
+app.use(express.raw({ type: 'application/json' }));
+
+app.post('/deploy', (req, res) => {
+    const signature = req.headers['x-hub-signature-256'];
+    if (!signature) return res.status(401).send('Missing signature header.');
+
+    // 1. HMAC-SHA256 Cryptographic Verification
+    const hmac = crypto.createHmac('sha256', WEBHOOK_SECRET);
+    const digest = 'sha256=' + hmac.update(req.body).digest('hex');
+
+    // Use timingSafeEqual to prevent hackers from analyzing millisecond response 
+    // times to brute-force the hash.
+    if (!crypto.timingSafeEqual(Buffer.from(digest), Buffer.from(signature))) {
+        return res.status(401).send('Cryptographic Signature Mismatch.');
+    }
+
+    // 2. Parse the verified payload
+    const payload = JSON.parse(req.body.toString());
+
+    // 3. Ensure we only deploy when the 'main' branch is pushed
+    if (req.headers['x-github-event'] === 'push' && 
+        payload.ref === 'refs/heads/main') {
+        console.log(`[+] push to main by ${payload.pusher.name}...`);
+        
+        exec('/opt/scripts/deploy.sh', (error, stdout, stderr) => {
+            if (error) console.error(`Deployment Failed: ${error}`);
+            else console.log(`Deployment Output: ${stdout}`);
+        });
+    }
+
+    res.status(200).send('Webhook Received and Verified.');
+});
+
+app.listen(3000, () => console.log('Secure Webhook Listener on port 3000'));
+
+</code></pre>
+        </div>
+    </div>
+
+    <!-- ==========================================================================
+     SECTION 6.7: VERIFICATION, CHECKLIST & MASTER QUIZ
+     ========================================================================== -->
+    <div class="page-container content-flow">
+        <div>
+            <h2>6.7 Chapter Verification, Checklist & Master Quiz</h2>
+
+            <div class="checklist">
+                <h3>Staff-Level Verification Validators</h3>
+                <div class="check-item">
+                    <div class="checkbox"></div>
+                    <div>I can explain why a GitHub Fork requires a dual-remote topology (<code>origin</code> and
+                        <code>upstream</code>) to synchronize accurately.
+                    </div>
+                </div>
+                <div class="check-item">
+                    <div class="checkbox"></div>
+                    <div>I understand that <code>git rebase</code> deletes old commits and mathematically generates new
+                        Commit SHA-1 hashes by attaching them to a new parent.</div>
+                </div>
+                <div class="check-item">
+                    <div class="checkbox"></div>
+                    <div>I know why <code>git push --force</code> is a catastrophic liability in shared branches, and
+                        why <code>--force-with-lease</code> prevents the deletion of coworkers' code.</div>
+                </div>
+                <div class="check-item">
+                    <div class="checkbox"></div>
+                    <div>I understand how <code>git clone --depth 1</code> (Shallow Clones) truncates the DAG to save
+                        bandwidth in CI/CD pipelines.</div>
+                </div>
+                <div class="check-item">
+                    <div class="checkbox"></div>
+                    <div>I know why executing <code>git submodule update</code> immediately places a repository into a
+                        Detached HEAD state.</div>
+                </div>
+                <div class="check-item">
+                    <div class="checkbox"></div>
+                    <div>I can explain how to secure an HTTP deployment endpoint using an
+                        <code>X-Hub-Signature-256</code> HMAC validation.
+                    </div>
+                </div>
+            </div>
+
+            <h3>Comprehensive Examination</h3>
+            <div class="quiz-section">
+                <div class="quiz-question">
+                    <p>1. Mechanically, what is the difference between <code>git push -f</code> and
+                        <code>git push --force-with-lease</code>?
+                    </p>
+                    <div class="quiz-option">A) <code>--force-with-lease</code> only forces the push if you are the
+                        repository owner.</div>
+                    <div class="quiz-option">B) <code>-f</code> blindly overwrites the remote branch.
+                        <code>--force-with-lease</code> checks the remote server first; if a coworker has pushed new
+                        commits since your last fetch, the push aborts.
+                    </div>
+                    <div class="quiz-option">C) <code>-f</code> deletes the remote branch and recreates it.</div>
+                    <div class="quiz-option">D) <code>--force-with-lease</code> requires an SSH key rather than an HTTPS
+                        token.</div>
+                </div>
+
+                <div class="quiz-question">
+                    <p>2. What is the fundamental structural difference in the DAG between a <code>merge</code> and a
+                        <code>rebase</code>?
+                    </p>
+                    <div class="quiz-option">A) A merge creates a new Commit Object with two parent hashes. A rebase
+                        creates perfectly linear history by generating brand new Commits with a single parent hash,
+                        overwriting the old timeline.</div>
+                    <div class="quiz-option">B) A merge rewrites the SHA-1 hashes of your commits; a rebase preserves
+                        them.</div>
+                    <div class="quiz-option">C) A rebase can only be executed on the <code>main</code> branch.</div>
+                </div>
+
+                <div class="quiz-question">
+                    <p>3. You want to undo the last commit you made locally, but you want to keep the code changes
+                        staged so you can split them into two separate commits. Which command do you use?</p>
+                    <div class="quiz-option">A) <code>git reset --hard HEAD~1</code></div>
+                    <div class="quiz-option">B) <code>git reset --mixed HEAD~1</code></div>
+                    <div class="quiz-option">C) <code>git reset --soft HEAD~1</code></div>
+                    <div class="quiz-option">D) <code>git revert HEAD</code></div>
+                </div>
+
+                <div class="quiz-question">
+                    <p>4. Why does checking out a Git Submodule put you in a Detached HEAD state?</p>
+                    <div class="quiz-option">A) Because the submodule has no branches configured.</div>
+                    <div class="quiz-option">B) Because the parent repository strictly records the raw SHA-1 hash of a
+                        single Commit in the child repository, not a branch pointer.</div>
+                    <div class="quiz-option">C) Because submodules use the <code>--depth 1</code> shallow clone feature.
+                    </div>
+                </div>
+
+                <div class="quiz-question">
+                    <p>5. If you implement a Monorepo containing 500 Gigabytes of historical codebase, how do you
+                        prevent developers' IDEs from crashing when they only need to work on a single microservice?</p>
+                    <div class="quiz-option">A) Utilize <code>git submodule</code> to isolate the microservice.</div>
+                    <div class="quiz-option">B) Utilize a Sparse Checkout (Cone Mode) to restrict the populated Working
+                        Directory to a specific folder path, while maintaining the full DAG in the hidden
+                        <code>.git</code> folder.
+                    </div>
+                    <div class="quiz-option">C) Use <code>.gitignore</code> to hide the files they don't need.</div>
+                </div>
+
+                <div class="quiz-question">
+                    <p>6. How do you cryptographically verify that a JSON payload sent to your deployment server
+                        actually originated from GitHub?</p>
+                    <div class="quiz-option">A) By verifying the incoming IP address against GitHub's known IP ranges.
+                    </div>
+                    <div class="quiz-option">B) By hashing the raw JSON payload with your private Secret Token using
+                        HMAC-SHA256, and comparing your result against the <code>X-Hub-Signature-256</code> header.
+                    </div>
+                    <div class="quiz-option">C) By ensuring the payload contains the correct
+                        <code>repository.name</code> property.
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 24px;">Systems Writing Prompts</h3>
+
+                <p style="font-weight: 700; margin-bottom: 4px; font-size: 9.5pt;">Prompt 1: The Monorepo Scaling
+                    Strategy</p>
+                <p style="font-size: 9pt;">You are migrating a 50-person engineering team to a Monorepo structure.
+                    Detail the specific Git configurations (Shallow Clones, Sparse Checkouts, Rebase-only merge
+                    policies) you will enforce in the CI/CD pipeline and the developer environment to prevent network
+                    bandwidth exhaustion and "merge commit" graph spaghetti.</p>
+
+                <p style="font-weight: 700; margin-top: 18px; margin-bottom: 4px; font-size: 9.5pt;">Prompt 2: Anatomy
+                    of a Webhook Attack</p>
+                <p style="font-size: 9pt;">Explain how a hacker could exploit a webhook deployment server that checks
+                    for <code>X-GitHub-Event: push</code> but fails to validate the HMAC signature. Walk through the
+                    exact node.js <code>crypto</code> functions required to mitigate this, and explain why
+                    <code>timingSafeEqual</code> is mandatory over a standard <code>===</code> string comparison.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================================================
+     ANSWER KEY
+     ========================================================================== -->
+    <div class="page-container">
+        <div class="litmus-box"
+            style="margin-top: 0; margin-bottom: 12px; padding: 12px 14px; font-size: 7.5pt; line-height: 1.45;">
+            <div
+                style="font-weight: 800; color: #4338CA; text-transform: uppercase; margin-bottom: 6px; font-size: 8pt;">
+                Chapter 6 Technical Answer Key</div>
+            <div style="margin-bottom: 4px;"><b>1. (B)</b> <code>--force-with-lease</code> is a conditional overwrite.
+                It checks the remote's current pointer against your local tracking branch pointer to ensure no one has
+                pushed un-fetched code.</div>
+            <div style="margin-bottom: 4px;"><b>2. (A)</b> A merge unites two timelines into a single Commit with two
+                parents. A rebase lifts the commits, changes their parent, and generates brand new SHA-1 hashes to
+                create a straight line.</div>
+            <div style="margin-bottom: 4px;"><b>3. (C)</b> <code>--soft</code> moves HEAD backward but leaves your Index
+                (staging area) perfectly intact, allowing you to easily restructure the commit.</div>
+            <div style="margin-bottom: 4px;"><b>4. (B)</b> Submodules track exact state, not moving targets. Because the
+                parent maps a specific SHA-1 hash, checking it out detaches you from any local branches.</div>
+            <div style="margin-bottom: 4px;"><b>5. (B)</b> Sparse Checkout manipulates the physical files exposed on the
+                SSD. The database remains complete, but the IDE only indexes the requested Cone directory.</div>
+            <div style="margin-bottom: 8px;"><b>6. (B)</b> IPs can be spoofed, and repository names are public
+                knowledge. Only a cryptographic HMAC signature, salted with a shared secret, provides mathematical proof
+                of origin.</div>
+
+            <div style="margin-bottom: 4px;"><b>Prompt 1 (Monorepo Scaling):</b> CI pipelines must use
+                <code>--depth 1</code> to avoid downloading a decade of history. Developers use
+                <code>git sparse-checkout</code> to limit SSD I/O. To prevent graph spaghetti, the team must mandate a
+                "Rebase and Fast-Forward Only" policy on Pull Requests, explicitly banning 3-way Merge Commits to
+                maintain a perfectly linear DAG.
+            </div>
+            <div><b>Prompt 2 (Webhook Attack):</b> A hacker can simply `curl` a crafted JSON payload containing a
+                malicious branch trigger. To mitigate, the server must compute
+                <code>crypto.createHmac('sha256', secret).update(body).digest('hex')</code> and compare it to the
+                incoming header. <code>timingSafeEqual</code> is mandatory because standard string comparison exits the
+                millisecond a character mismatches; a hacker can measure these microsecond response times to brute-force
+                the hash one character at a time.
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
