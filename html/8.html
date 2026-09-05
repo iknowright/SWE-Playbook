@@ -225,9 +225,9 @@
                 completely fake digital motherboard, loads a heavy Guest OS Kernel into RAM, and runs applications on
                 top. It provides 100% hardware isolation but wastes gigabytes of RAM doing so.</p>
 
-            <p>A Container is completely different. <strong>A container has no OS Kernel.</strong> A container is
+            <p><strong>A container has no OS Kernel.</strong> A container is
                 literally just a standard Linux process (like a Python script or an NGINX daemon) running directly on
-                the Host's Kernel. However, the Host Kernel is instructed to mercilessly lie to this process.</p>
+                the Host's Kernel.</p>
 
             <div class="callout key">
                 <div class="callout-title">The OS Mechanics: Namespaces and cgroups</div>
@@ -242,8 +242,7 @@
                 <strong>2. cgroups (Control Groups - The Resource Limit):</strong><br>
                 While namespaces control what the process can <em>see</em>, cgroups control what the process can
                 <em>use</em>. You can configure a cgroup to limit the container to exactly 2048MB of RAM. If the
-                container uses 2049MB, the Host Kernel's OOM (Out of Memory) Killer ruthlessly murders the process,
-                protecting the rest of your laptop.
+                container uses 2049MB, the Host Kernel's OOM (Out of Memory)
             </div>
 
             <h3>The Bind Mount Mechanic</h3>
@@ -501,7 +500,8 @@ if [ ! -d "$DOTFILES_DIR" ]; then
     echo "[-] Dotfiles directory missing. Cloning repository..."
     git clone https://github.com/your-org/dotfiles.git "$DOTFILES_DIR"
 fi
-
+</code></pre>
+            <pre><code class="language-bash">
 # 4. SYMLINK FARM EXECUTION
 # We navigate to the directory and use Stow to mathematically map the modular packages.
 # The '-R' (Restow) flag makes the command idempotent. If a symlink exists, it safely 
@@ -600,7 +600,8 @@ echo "[+] Bootstrap complete. Laptop state is converged."
                 <div class="check-item">
                     <div class="checkbox"></div>
                     <div>I can map the temporal difference between the <code>onCreateCommand</code> and
-                        <code>postCreateCommand</code> execution phases.</div>
+                        <code>postCreateCommand</code> execution phases.
+                    </div>
                 </div>
                 <div class="check-item">
                     <div class="checkbox"></div>
@@ -640,13 +641,16 @@ echo "[+] Bootstrap complete. Laptop state is converged."
 
                 <div class="quiz-question">
                     <p>4. Inside a Devcontainer setup, why must <code>npm install</code> be placed in the
-                        <code>postCreateCommand</code> rather than the <code>onCreateCommand</code>?</p>
+                        <code>postCreateCommand</code> rather than the <code>onCreateCommand</code>?
+                    </p>
                     <div class="quiz-option">A) Because Node.js is not installed yet during
-                        <code>onCreateCommand</code>.</div>
+                        <code>onCreateCommand</code>.
+                    </div>
                     <div class="quiz-option">B) <code>onCreateCommand</code> executes in the background <em>before</em>
                         the physical Host SSD is bind-mounted into the container's workspace. If you run
                         <code>npm install</code> there, the <code>node_modules</code> directory will be wiped out the
-                        millisecond the bind mount occurs.</div>
+                        millisecond the bind mount occurs.
+                    </div>
                     <div class="quiz-option">C) Because <code>postCreateCommand</code> runs as the root user.</div>
                 </div>
 
@@ -667,7 +671,8 @@ echo "[+] Bootstrap complete. Laptop state is converged."
                     <code>git clone https://github.com/tools/library.git</code>. Every time they run the script to
                     update their laptop, it crashes because the directory already exists. Rewrite this specific command
                     using Bash idempotency checks so that it clones the repo if missing, but runs <code>git pull</code>
-                    if it already exists.</p>
+                    if it already exists.
+                </p>
 
                 <p style="font-weight: 700; margin-top: 18px; margin-bottom: 4px; font-size: 9.5pt;">Prompt 2:
                     Dissecting the RPC Tunnel</p>
@@ -698,7 +703,8 @@ echo "[+] Bootstrap complete. Laptop state is converged."
             <div style="margin-bottom: 4px;"><b>4. (B)</b> <code>onCreateCommand</code> is for OS-level bootstrapping
                 (like <code>apt-get</code>) that lives inside the container's writable layer. Any files written to the
                 <code>/workspace</code> folder during this phase will be obliterated when the Host's Bind Mount
-                physically overlays that directory.</div>
+                physically overlays that directory.
+            </div>
             <div style="margin-bottom: 8px;"><b>5. (B)</b> By matching the mathematical UIDs via <code>usermod</code>,
                 the Kernel's access control matrices are satisfied. The container writes a file as UID 1001, and the
                 physical Mac/Windows machine recognizes it as belonging to its own UID 1001 user.</div>
@@ -711,7 +717,8 @@ echo "[+] Bootstrap complete. Laptop state is converged."
                 <code>docker exec</code> stream. When the user types, the local UI sends a JSON-RPC payload through the
                 Docker socket. The backend Server queries the local container file system, computes the Python
                 autocomplete vectors, and streams the JSON response back to the UI in milliseconds, completely
-                eliminating the need to install Python on the host machine.</div>
+                eliminating the need to install Python on the host machine.
+            </div>
         </div>
     </div>
 </body>
