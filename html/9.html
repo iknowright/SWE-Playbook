@@ -25,7 +25,8 @@
             <h2>9.0 The Death of SysVinit and the Concurrency Problem</h2>
             <p>Historically, SysVinit booted the operating system by executing a series of sequential bash scripts
                 located in <code>/etc/init.d/</code>. These scripts were prefixed with numbers: <code>S01network</code>,
-                <code>S02syslog</code>, <code>S99nginx</code>.</p>
+                <code>S02syslog</code>, <code>S99nginx</code>.
+            </p>
 
             <p><strong>The Sequential Bottleneck:</strong> The OS had to read the <code>S01network</code> script,
                 execute it, and <em>wait</em>. If the network took 5 seconds to acquire a DHCP lease, the entire server
@@ -56,13 +57,15 @@
             <h2>9.1 Targets vs. Runlevels (The Execution Graph)</h2>
             <p>SysVinit used "Runlevels" (0 through 6). Systemd uses <strong>Targets</strong>. A target is simply a
                 synchronization point in the boot graph. It is physically represented by a file ending in
-                <code>.target</code>.</p>
+                <code>.target</code>.
+            </p>
 
             <h3>The Bare-Metal Boot Path</h3>
             <p>When systemd takes over from the Kernel, it looks for the default target, usually symlinked at
                 <code>/etc/systemd/system/default.target</code>. On a server, this points to
                 <code>multi-user.target</code>. Systemd must now satisfy a massive Directed Acyclic Graph (DAG) of
-                dependencies to reach that target.</p>
+                dependencies to reach that target.
+            </p>
 
             <ol>
                 <li><strong><code>sysinit.target</code>:</strong> The lowest level. Systemd mounts the Virtual File
@@ -74,7 +77,8 @@
                 <li><strong><code>multi-user.target</code>:</strong> The finish line for a headless server. This target
                     contains a hidden directory called <code>multi-user.target.wants/</code>. Systemd looks inside this
                     directory, finds the symlinks for <code>nginx.service</code>, <code>ssh.service</code>, and
-                    <code>cron.service</code>, and executes them concurrently.</li>
+                    <code>cron.service</code>, and executes them concurrently.
+                </li>
             </ol>
 
             <div class="callout tip">
@@ -99,7 +103,8 @@
             <h2>9.2 The Unit File Anatomy</h2>
             <p>To register an application with PID 1, you write an INI-style configuration text file called a
                 <strong>Unit File</strong> (located in <code>/etc/systemd/system/</code>). The most common is the
-                <code>.service</code> unit.</p>
+                <code>.service</code> unit.
+            </p>
 
             <h3>The 3 Critical Sections</h3>
             <pre><code class="language-ini">[Unit]
@@ -132,13 +137,15 @@ WantedBy=multi-user.target
                         <li><code>Type=notify</code>: The modern standard. Systemd executes the binary and halts the
                             boot graph. The binary must send a D-Bus message (<code>READY=1</code>) to systemd via the
                             <code>sd_notify()</code> C-library function to prove it successfully bound to its ports and
-                            loaded its cache.</li>
+                            loaded its cache.
+                        </li>
                     </ul>
                 </li>
                 <li><strong><code>[Install]</code>:</strong> Defines what happens when you type
                     <code>systemctl enable</code>. The <code>WantedBy=multi-user.target</code> directive tells systemd
                     to create a physical symlink of this file inside the
-                    <code>/etc/systemd/system/multi-user.target.wants/</code> directory.</li>
+                    <code>/etc/systemd/system/multi-user.target.wants/</code> directory.
+                </li>
             </ul>
         </div>
     </div>
@@ -157,12 +164,14 @@ WantedBy=multi-user.target
             <p>Systemd solves this by physically wiring itself into the Linux Kernel's <strong>Control Group
                     (cgroups)</strong> architecture. When systemd starts a service, it dynamically creates a dedicated
                 cgroup directory inside the Kernel's Virtual File System at
-                <code>/sys/fs/cgroup/system.slice/your-app.service/</code>.</p>
+                <code>/sys/fs/cgroup/system.slice/your-app.service/</code>.
+            </p>
 
             <p>Every single child, thread, and fork spawned by your application is mathematically trapped inside this
                 cgroup. If you run <code>systemctl stop your-app</code>, systemd doesn't just send a
                 <code>SIGTERM</code> to the main PID. It looks at the cgroup, finds every single process trapped inside
-                it, and annihilates them all simultaneously. Zombies are architecturally impossible.</p>
+                it, and annihilates them all simultaneously. Zombies are architecturally impossible.
+            </p>
 
             <div class="callout warn">
                 <div class="callout-title">IRL Implementation: Bare-Metal Resource Limits</div>
@@ -193,7 +202,8 @@ WantedBy=multi-user.target
                 interface. <code>systemctl</code> is merely a command-line client. When you execute
                 <code>systemctl start nginx</code>, the <code>systemctl</code> binary connects to a UNIX socket (usually
                 <code>/run/dbus/system_bus_socket</code>) and sends an IPC (Inter-Process Communication) message using
-                the D-Bus protocol to PID 1.</p>
+                the D-Bus protocol to PID 1.
+            </p>
 
             <h3>The <code>daemon-reload</code> Mechanic</h3>
             <p>If you open <code>vim /etc/systemd/system/api.service</code> and change the <code>ExecStart</code> path,
@@ -207,7 +217,8 @@ WantedBy=multi-user.target
             <p>When you edit a text file, the RAM graph is totally unaware. You <strong>must</strong> execute
                 <code>systemctl daemon-reload</code>. This specific command sends a D-Bus signal forcing PID 1 to pause,
                 traverse the physical SSD, re-parse all the INI text files, mathematically recalculate the dependency
-                graph, and overwrite its RAM cache.</p>
+                graph, and overwrite its RAM cache.
+            </p>
         </div>
     </div>
     <!-- ==========================================================================
@@ -219,7 +230,8 @@ WantedBy=multi-user.target
             <p>A junior engineer writes a Unit File, sets <code>Restart=always</code>, and assumes their job is done. A
                 Staff engineer knows that if an application has a fatal bug (e.g., a missing database password),
                 <code>Restart=always</code> will cause the daemon to crash and restart 500 times a second, pinning the
-                CPU to 100% and starving the rest of the server.</p>
+                CPU to 100% and starving the rest of the server.
+            </p>
 
             <h3>The Token Bucket Algorithm (Crash Loop Prevention)</h3>
             <p>Systemd employs a mathematical "token bucket" rate-limiter to prevent crash loops. You must explicitly
@@ -239,7 +251,8 @@ WantedBy=multi-user.target
                         within a rolling 30-second window. If it crashes a 4th time within that window, systemd
                         permanently trips the circuit breaker. The service is placed in a <code>failed</code> state and
                         will absolutely not attempt to start again until a human manually intervenes via
-                        <code>systemctl reset-failed</code>.</p>
+                        <code>systemctl reset-failed</code>.
+                    </p>
                 </li>
             </ul>
         </div>
@@ -263,7 +276,8 @@ WantedBy=multi-user.target
                 <li><code>ProtectSystem=strict</code>: The Kernel mounts the entire physical OS (<code>/usr</code>,
                     <code>/boot</code>, <code>/etc</code>) as mathematically <strong>Read-Only</strong> for this
                     specific process. Even if the process runs as <code>root</code>, any attempt to modify a system file
-                    is rejected by the Kernel.</li>
+                    is rejected by the Kernel.
+                </li>
                 <li><code>PrivateTmp=yes</code>: The Kernel spins up an isolated, invisible Virtual File System (VFS)
                     and mounts it over <code>/tmp</code> and <code>/var/tmp</code>. The daemon cannot see temporary
                     files created by other users or processes, preventing data scraping.</li>
@@ -298,12 +312,14 @@ WantedBy=multi-user.target
 
             <h3>The File Descriptor Handoff</h3>
             <p>To implement this, you do not write one unit file; you write two: <code>admin.socket</code> and
-                <code>admin.service</code>.</p>
+                <code>admin.service</code>.
+            </p>
 
             <ol>
                 <li>During boot, systemd reads <code>admin.socket</code> and executes the C-level <code>listen()</code>
                     syscall on Port 8080. <strong>Systemd itself holds the port.</strong> The actual Node.js
-                    <code>admin.service</code> remains completely inactive (0 bytes of RAM).</li>
+                    <code>admin.service</code> remains completely inactive (0 bytes of RAM).
+                </li>
                 <li>Three days later, an HTTP request arrives on Port 8080. Systemd calls <code>accept()</code>.</li>
                 <li>Systemd instantly forks, spins up the <code>admin.service</code> binary, and injects the physical
                     network File Descriptor directly into the Node.js process using environment variables
@@ -360,7 +376,8 @@ WantedBy=multi-user.target
             <p>This command traverses the Directed Acyclic Graph (DAG) backwards from <code>multi-user.target</code>,
                 exposing the absolute longest mathematical path through the boot sequence. It prints a tree showing
                 exactly which service was forcefully waiting for another service to finish (denoted by the
-                <code>@</code> activation time and the <code>+</code> execution duration).</p>
+                <code>@</code> activation time and the <code>+</code> execution duration).
+            </p>
 
             <div class="callout warn">
                 <div class="callout-title">The Networking Deadlock</div>
@@ -383,11 +400,13 @@ WantedBy=multi-user.target
             <p>Junior engineers think <code>apt</code> and <code>dpkg</code> are the same thing. They are not.
                 <code>dpkg</code> is the absolute lowest-level C binary responsible for physically unpacking files onto
                 your SSD. It has no concept of the internet, URLs, or repositories. It only understands local
-                <code>.deb</code> files.</p>
+                <code>.deb</code> files.
+            </p>
 
             <h3>The State Registry (<code>/var/lib/dpkg/status</code>)</h3>
             <p>How does the OS know what software is installed? It maintains a massive, flat text file registry at
-                <code>/var/lib/dpkg/status</code>. This file tracks the exact state of every package on the machine.</p>
+                <code>/var/lib/dpkg/status</code>. This file tracks the exact state of every package on the machine.
+            </p>
 
             <p>When you run <code>dpkg -i package.deb</code>, the binary performs the following atomic operations:</p>
             <ol>
@@ -426,12 +445,14 @@ WantedBy=multi-user.target
                 Acyclic Graph (DAG) in memory.</p>
             <p>The metadata for NGINX might say: <code>Depends: libc6 (&gt;= 2.14), libssl1.1, libpcre3</code>. But
                 <code>libssl1.1</code> might depend on a specific version of <code>zlib1g</code>. APT must recursively
-                traverse this tree, resolving version conflicts across thousands of packages simultaneously.</p>
+                traverse this tree, resolving version conflicts across thousands of packages simultaneously.
+            </p>
 
             <p>This is a classic NP-Complete mathematical problem (Boolean Satisfiability). APT uses a highly optimized
                 graph-traversal algorithm. If it finds a solution, it calculates the exact sequential order required by
                 <code>dpkg</code> (e.g., install <code>zlib1g</code> first, then <code>libssl1.1</code>, then
-                <code>nginx</code>) and initiates the downloads.</p>
+                <code>nginx</code>) and initiates the downloads.
+            </p>
         </div>
     </div>
 
@@ -501,11 +522,13 @@ Pin-Priority: -10
             <h2>9.14 The Pre-Inst and Post-Inst Hooks (The Hidden Danger)</h2>
             <p>When you run <code>apt install htop</code>, you expect it to simply copy the <code>htop</code> binary to
                 your SSD. However, <code>.deb</code> files are incredibly dangerous because they execute arbitrary
-                <code>root</code> bash scripts during the installation process.</p>
+                <code>root</code> bash scripts during the installation process.
+            </p>
 
             <h3>The 4 Hidden Control Scripts</h3>
             <p>A <code>.deb</code> package can contain four specific scripts in its control metadata:
-                <code>preinst</code>, <code>postinst</code>, <code>prerm</code>, and <code>postrm</code>.</p>
+                <code>preinst</code>, <code>postinst</code>, <code>prerm</code>, and <code>postrm</code>.
+            </p>
             <ul>
                 <li><strong><code>preinst</code> (Pre-Installation):</strong> Executes as root <em>before</em> any files
                     are unpacked. Often used to stop currently running services or verify OS compatibility.</li>
@@ -536,7 +559,8 @@ Pin-Priority: -10
             <h2>9.15 The Anatomy of a <code>.deb</code> File</h2>
             <p>A junior engineer views a <code>.deb</code> file as a magical installer. A Staff engineer knows that a
                 <code>.deb</code> file is nothing more than a legacy <strong><code>ar</code> (archive)</strong> file
-                containing two compressed tarballs. There is no proprietary magic; it is just a structured zip file.</p>
+                containing two compressed tarballs. There is no proprietary magic; it is just a structured zip file.
+            </p>
 
             <h3>Ripping Open the Archive</h3>
             <p>If you download <code>nginx.deb</code> and run <code>ar x nginx.deb</code>, you will extract exactly
@@ -548,10 +572,12 @@ Pin-Priority: -10
                     (<code>tar -xf data.tar.xz</code>), you will see a perfect miniature representation of the Linux
                     root filesystem (e.g., <code>./usr/bin/nginx</code>, <code>./etc/nginx/nginx.conf</code>). When
                     <code>dpkg</code> installs the package, it literally just overlays this directory tree onto your
-                    physical SSD.</li>
+                    physical SSD.
+                </li>
                 <li><strong><code>control.tar.xz</code>:</strong> The metadata and execution logic. This contains the
                     <code>control</code> file (dependencies, version, architecture) and the dangerous
-                    <code>preinst</code> / <code>postinst</code> bash scripts.</li>
+                    <code>preinst</code> / <code>postinst</code> bash scripts.
+                </li>
             </ol>
         </div>
     </div>
@@ -614,7 +640,8 @@ SignWith: 7A1C2B3D...
                 distinct architectural actions:</p>
             <ol>
                 <li>It copies the <code>.deb</code> file into a structured pool directory (e.g.,
-                    <code>pool/main/i/internal-api/</code>).</li>
+                    <code>pool/main/i/internal-api/</code>).
+                </li>
                 <li>It dynamically parses the <code>control.tar.xz</code> metadata out of the <code>.deb</code> file.
                 </li>
                 <li>It updates the master <strong><code>Packages.gz</code></strong> index file, appending the package's
@@ -639,9 +666,11 @@ SignWith: 7A1C2B3D...
                 <li>The <code>.deb</code> file's SHA-256 hash is recorded inside the <code>Packages.gz</code> index.
                 </li>
                 <li>The <code>Packages.gz</code> file's SHA-256 hash is recorded inside a root file called
-                    <strong><code>Release</code></strong>.</li>
+                    <strong><code>Release</code></strong>.
+                </li>
                 <li>The <code>Release</code> file is physically encrypted using your private GPG key, generating a
-                    <strong><code>Release.gpg</code></strong> (and <code>InRelease</code>) signature file.</li>
+                    <strong><code>Release.gpg</code></strong> (and <code>InRelease</code>) signature file.
+                </li>
             </ol>
 
             <div class="callout key">
@@ -682,10 +711,12 @@ SignWith: 7A1C2B3D...
                     verified before any executing processes are touched.</li>
                 <li><strong>Atomic Swap:</strong> The <code>preinst</code> hook gracefully drains traffic.
                     <code>dpkg</code> overlays the new binary on the SSD in milliseconds. The <code>postinst</code> hook
-                    executes <code>systemctl restart internal-api</code>.</li>
+                    executes <code>systemctl restart internal-api</code>.
+                </li>
                 <li><strong>Instant Rollback:</strong> If v1.4.2 contains a fatal bug, you simply execute
                     <code>apt-get install internal-api=1.4.1</code>. The OS instantly downgrades the binary and restarts
-                    the service. The state machine remains perfect.</li>
+                    the service. The state machine remains perfect.
+                </li>
             </ul>
         </div>
     </div>
@@ -702,7 +733,8 @@ SignWith: 7A1C2B3D...
             <p>Systemd treats <code>/etc/fstab</code> as a hard dependency generator. If a disk defined in
                 <code>fstab</code> fails to mount, systemd halts the execution graph and refuses to transition to
                 <code>multi-user.target</code> to protect the system from data corruption. You must physically bypass
-                the standard boot graph.</p>
+                the standard boot graph.
+            </p>
 
             <ol>
                 <li>Reboot the server and rapidly press <code>Esc</code> or <code>Shift</code> to halt the GRUB boot
@@ -799,7 +831,7 @@ MemoryMax=1G
 CPUQuota=50%
 
 </code></pre>
-<pre><code class="language-ini"></code>
+            <pre><code class="language-ini"></code>
 
 # ==========================================
 # ZERO-TRUST SANDBOXING (Kernel Namespaces)
@@ -882,12 +914,14 @@ echo "[-] Ensure NGINX is configured to serve ${REPO_DIR} over HTTP."
                 <div class="check-item">
                     <div class="checkbox"></div>
                     <div>I can mathematically prevent a daemon from entering an infinite crash loop using the
-                        <code>StartLimitBurst</code> token bucket algorithm.</div>
+                        <code>StartLimitBurst</code> token bucket algorithm.
+                    </div>
                 </div>
                 <div class="check-item">
                     <div class="checkbox"></div>
                     <div>I know how to physically sandbox a process from the host OS using
-                        <code>ProtectSystem=strict</code> and <code>NoNewPrivileges=yes</code>.</div>
+                        <code>ProtectSystem=strict</code> and <code>NoNewPrivileges=yes</code>.
+                    </div>
                 </div>
                 <div class="check-item">
                     <div class="checkbox"></div>
@@ -902,7 +936,8 @@ echo "[-] Ensure NGINX is configured to serve ${REPO_DIR} over HTTP."
                 <div class="check-item">
                     <div class="checkbox"></div>
                     <div>I can rip open a <code>.deb</code> archive using <code>ar</code> and audit the dangerous
-                        <code>postinst</code> bash script.</div>
+                        <code>postinst</code> bash script.
+                    </div>
                 </div>
             </div>
 
@@ -912,7 +947,8 @@ echo "[-] Ensure NGINX is configured to serve ${REPO_DIR} over HTTP."
                     <p>1. Why is <code>systemctl daemon-reload</code> required after editing a unit file?</p>
                     <div class="quiz-option">A) Because systemd caches all unit files into a highly optimized binary
                         graph in RAM during boot. It does not perform disk I/O when starting services.
-                        <code>daemon-reload</code> forces systemd to traverse the SSD and rebuild the RAM graph.</div>
+                        <code>daemon-reload</code> forces systemd to traverse the SSD and rebuild the RAM graph.
+                    </div>
                     <div class="quiz-option">B) Because editing a unit file changes the file's SELinux security context,
                         which must be reloaded.</div>
                     <div class="quiz-option">C) Because systemd runs in a chroot jail and needs to sync the filesystem.
@@ -939,7 +975,8 @@ echo "[-] Ensure NGINX is configured to serve ${REPO_DIR} over HTTP."
                         (<code>StartLimitBurst=3</code> and <code>StartLimitIntervalSec=30</code>) to mathematically
                         trip a circuit breaker and halt the loop.</div>
                     <div class="quiz-option">C) The CPU spikes to 100%, and you must fix it by adding
-                        <code>MemoryMax=1G</code>.</div>
+                        <code>MemoryMax=1G</code>.
+                    </div>
                 </div>
 
                 <div class="quiz-question">
@@ -951,7 +988,8 @@ echo "[-] Ensure NGINX is configured to serve ${REPO_DIR} over HTTP."
                     <div class="quiz-option">C) It sets the <code>PR_SET_NO_NEW_PRIVS</code> bit in the
                         <code>prctl()</code> syscall, which instructs the Kernel to ruthlessly ignore the SUID
                         (Set-User-ID) bit for this process and all future children, making privilege escalation to root
-                        impossible.</div>
+                        impossible.
+                    </div>
                 </div>
 
                 <div class="quiz-question">
@@ -985,7 +1023,8 @@ echo "[-] Ensure NGINX is configured to serve ${REPO_DIR} over HTTP."
                     after a reboot. Junior engineers are blaming the PostgreSQL service because
                     <code>systemd-analyze blame</code> shows it takes 15 seconds to start. Explain the fundamental flaw
                     in using <code>blame</code> in a concurrent execution graph, and detail exactly how you would use
-                    <code>systemd-analyze critical-chain</code> to mathematically isolate the true bottleneck.</p>
+                    <code>systemd-analyze critical-chain</code> to mathematically isolate the true bottleneck.
+                </p>
 
                 <p style="font-weight: 700; margin-top: 18px; margin-bottom: 4px; font-size: 9.5pt;">Prompt 2: The
                     Malicious Package Audit</p>
@@ -993,7 +1032,8 @@ echo "[-] Ensure NGINX is configured to serve ${REPO_DIR} over HTTP."
                     <code>internal-tools.deb</code>. Before executing <code>dpkg -i</code> as root, you must verify it
                     does not contain a malicious backdoor. Detail the precise <code>ar</code> and <code>tar</code>
                     commands required to physically deconstruct the archive, isolate the control metadata, and audit the
-                    exact bash hooks (like <code>postinst</code>) that would run as root upon installation.</p>
+                    exact bash hooks (like <code>postinst</code>) that would run as root upon installation.
+                </p>
             </div>
         </div>
     </div>
@@ -1006,7 +1046,8 @@ echo "[-] Ensure NGINX is configured to serve ${REPO_DIR} over HTTP."
                 Chapter 9 Technical Answer Key</div>
             <div style="margin-bottom: 4px;"><b>1. (A)</b> Systemd operates entirely from RAM.
                 <code>daemon-reload</code> triggers the D-Bus signal forcing PID 1 to resync its RAM graph with the
-                SSD's physical state.</div>
+                SSD's physical state.
+            </div>
             <div style="margin-bottom: 4px;"><b>2. (B)</b> cgroups eliminate the "zombie child" problem. Systemd looks
                 at the Kernel's cgroup tree and obliterates every PID inside the service's slice, ignoring bash
                 parent/child relationships.</div>
@@ -1034,7 +1075,8 @@ echo "[-] Ensure NGINX is configured to serve ${REPO_DIR} over HTTP."
                 <code>tar -xf control.tar.xz</code>. This reveals the <code>control</code> metadata file and the hidden
                 bash scripts (<code>preinst</code>, <code>postinst</code>, <code>prerm</code>, <code>postrm</code>). You
                 must physically read these scripts using <code>cat</code> or <code>vim</code> to ensure they do not
-                contain malicious code, because <code>dpkg</code> will execute them with full root privileges.</div>
+                contain malicious code, because <code>dpkg</code> will execute them with full root privileges.
+            </div>
         </div>
     </div>
 </body>
