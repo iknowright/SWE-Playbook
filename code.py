@@ -37,7 +37,8 @@ else:
 		if not html_file.read_text(encoding="utf-8").strip():
 			# print(f"Skipped (empty HTML): {html_file.name}")
 			continue
-		if pdf_file.exists():
+		if pdf_file.exists() and not args.html_file:
 			continue
 		HTML(filename=str(html_file), base_url=str(HTML_DIR)).write_pdf(str(pdf_file))
-		print(f"Created: {pdf_file.name}")
+		verb = "Replaced" if args.html_file else "Created"
+		print(f"{verb}: {pdf_file.name}")
