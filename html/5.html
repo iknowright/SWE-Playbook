@@ -187,10 +187,12 @@
                 <li><strong>Blob (Binary Large Object):</strong> Stores the raw, zlib-compressed data of a file.
                     <em>Crucially, a Blob does not store the filename.</em> If you have a file named <code>app.js</code>
                     and rename it to <code>server.js</code> without changing the code, Git does not create a new Blob.
-                    The hash of the content is identical.</li>
+                    The hash of the content is identical.
+                </li>
                 <li><strong>Tree:</strong> This is Git's version of a Directory. A Tree object is simply a text file
                     that maps human-readable filenames to Blob hashes, or subdirectories to other Tree hashes. (e.g.,
-                    <code>100644 blob 3f8a... app.js</code>).</li>
+                    <code>100644 blob 3f8a... app.js</code>).
+                </li>
                 <li><strong>Commit:</strong> The metadata snapshot. A Commit object is a tiny text file containing:
                     <ul>
                         <li>A pointer to a single root <strong>Tree</strong> hash (representing the entire project state
@@ -299,7 +301,8 @@
             <h3>The <code>HEAD</code> Pointer & "Detached" States</h3>
             <p>How does Git know which branch you are currently on? It uses a special file located at
                 <code>.git/HEAD</code>. Normally, this file contains a reference pointer, like:
-                <code>ref: refs/heads/main</code>.</p>
+                <code>ref: refs/heads/main</code>.
+            </p>
 
             <div class="callout key">
                 <div class="callout-title">Deep Dive: The Detached HEAD State</div>
@@ -417,12 +420,14 @@ echo "[+] Success! Run 'git log' to see the manually forged commit."
                 <div class="check-item">
                     <div class="checkbox"></div>
                     <div>I know how to utilize <code>git reflog</code> to rescue orphaned Commits after a destructive
-                        <code>reset</code> or <code>rebase</code>.</div>
+                        <code>reset</code> or <code>rebase</code>.
+                    </div>
                 </div>
                 <div class="check-item">
                     <div class="checkbox"></div>
                     <div>I understand how the Smart HTTP/SSH protocol negotiates a minimal Packfile during a
-                        <code>git push</code>.</div>
+                        <code>git push</code>.
+                    </div>
                 </div>
             </div>
 
@@ -463,11 +468,13 @@ echo "[+] Success! Run 'git log' to see the manually forged commit."
 
                 <div class="quiz-question">
                     <p>4. In the Git Object Database, where is the actual human-readable filename (e.g.,
-                        <code>database.yml</code>) stored?</p>
+                        <code>database.yml</code>) stored?
+                    </p>
                     <div class="quiz-option">A) Inside the Blob object alongside the file content.</div>
                     <div class="quiz-option">B) Inside the Commit object metadata.</div>
                     <div class="quiz-option">C) Inside the Tree object, which maps the text string
-                        <code>database.yml</code> to the 40-character SHA-1 hash of the corresponding Blob.</div>
+                        <code>database.yml</code> to the 40-character SHA-1 hash of the corresponding Blob.
+                    </div>
                 </div>
 
                 <div class="quiz-question">
@@ -476,7 +483,8 @@ echo "[+] Success! Run 'git log' to see the manually forged commit."
                         folder.</div>
                     <div class="quiz-option">B) Git generates a new Packfile containing the branch delta.</div>
                     <div class="quiz-option">C) Git creates a 40-byte text file at
-                        <code>.git/refs/heads/feature-x</code> containing the SHA-1 hash of the current commit.</div>
+                        <code>.git/refs/heads/feature-x</code> containing the SHA-1 hash of the current commit.
+                    </div>
                 </div>
 
                 <div class="quiz-question">
@@ -506,7 +514,8 @@ echo "[+] Success! Run 'git log' to see the manually forged commit."
                     <div class="quiz-option">A) <code>fetch</code> downloads packfiles into the
                         <code>.git/objects</code> database and updates remote tracking pointers, but does not mutate the
                         working directory. <code>pull</code> executes a fetch, and instantly merges those changes into
-                        the working files.</div>
+                        the working files.
+                    </div>
                     <div class="quiz-option">B) <code>fetch</code> only gets metadata; <code>pull</code> downloads the
                         actual Blobs.</div>
                     <div class="quiz-option">C) <code>fetch</code> is used for SSH; <code>pull</code> is used for HTTPS.
@@ -561,12 +570,14 @@ echo "[+] Success! Run 'git log' to see the manually forged commit."
                 branch.</div>
             <div style="margin-bottom: 8px;"><b>8. (A)</b> <code>fetch</code> is a safe network synchronization command.
                 <code>pull</code> is a compound command that mutates your local working directory via a merge or rebase,
-                which can cause conflicts.</div>
+                which can cause conflicts.
+            </div>
 
             <div style="margin-bottom: 4px;"><b>Prompt 1 (Observability):</b> <code>strace</code> induces lethal
                 <code>ptrace</code> overhead, rendering it unusable under load. <code>perf</code> uses hardware
                 interrupts at a fixed frequency (99Hz) to sample the CPU with ~1% overhead. The resulting Flame Graph
-                will reveal the exact function causing the spike as a wide plateau at the top edge of the graph.</div>
+                will reveal the exact function causing the spike as a wide plateau at the top edge of the graph.
+            </div>
             <div><b>Prompt 2 (DAG Reconstruction):</b> Modifying the file creates a new Blob for the new content. A new
                 Tree is created pointing to the new Blob (while reusing the hashes of unmodified Blobs/Trees). A new
                 Commit is created pointing to the new root Tree and the previous Commit. Storage is minimized because
