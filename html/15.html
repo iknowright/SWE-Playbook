@@ -8,5 +8,1060 @@
 </head>
 
 <body>
+    <!-- ==========================================================================
+     SECTION 15.0: THE CSSOM EXECUTION GRAPH & RENDER BLOCKING
+     ========================================================================== -->
+    <div class="page-container content-flow">
+        <div>
+            <div class="phase-label">Module 15 &middot; The CSS Object Model & Specificity Math</div>
+            <h1 class="chapter-title">Modern CSS Layouts & Responsive Systems</h1>
+
+            <p>A junior engineer treats CSS like a paint brush, randomly applying properties until the screen looks
+                correct. A Staff engineer treats CSS as a strictly typed, declarative mathematical matrix that instructs
+                the browser's C++ rendering engine on how to allocate pixels, manage memory, and calculate geometric
+                reflows.</p>
+
+            <h2>15.0 The CSSOM Execution Graph</h2>
+            <p>When the browser downloads your HTML, it begins parsing the Document Object Model (DOM). However,
+                <strong>the browser will mathematically refuse to paint a single pixel to the screen until the CSS
+                    Object Model (CSSOM) is completely constructed.</strong> CSS is a Render-Blocking Resource.
+            </p>
+
+            <h3>The Flash of Unstyled Content (FOUC) vs. The White Screen</h3>
+            <p>If the browser painted the HTML before the CSS arrived, the user would see giant Times New Roman text
+                (FOUC), followed by a violent geometric shift once the CSS loaded. To prevent this, the engine halts the
+                Render Tree execution until every <code>&lt;link rel="stylesheet"&gt;</code> is downloaded and parsed.
+            </p>
+
+            <pre><code class="language-html">&lt;!-- ❌ JUNIOR: The Execution Graph Deadlock --&gt;
+&lt;head&gt;
+    &lt;!-- The browser pauses HTML parsing to download and execute this JS --&gt;
+    &lt;script src="heavy-analytics.js"&gt;&lt;/script&gt;
+    
+    &lt;!-- The CSS download is delayed by the JS, 
+    pushing First Contentful Paint (FCP) back by seconds --&gt;
+    &lt;link rel="stylesheet" href="styles.css"&gt;
+&lt;/head&gt;
+
+&lt;!-- ✅ STAFF: Optimized Parser Delivery --&gt;
+&lt;head&gt;
+    &lt;!-- CSS is dispatched to the network. The CSSOM begins construction. --&gt;
+    &lt;link rel="stylesheet" href="styles.css"&gt;
+    
+    &lt;!-- 'defer' instructs the C++ engine to download the JS in the background
+    on a parallel thread,  but mathematically guarantees it will not execute 
+    until the DOM and CSSOM are finished. --&gt;
+    &lt;script src="heavy-analytics.js" defer&gt;&lt;/script&gt;
+&lt;/head&gt;
+</code></pre>
+        </div>
+    </div>
+
+    <!-- ==========================================================================
+     SECTION 15.1: SPECIFICITY AS A 3D VECTOR
+     ========================================================================== -->
+    <div class="page-container content-flow">
+        <div>
+            <h2>15.1 Specificity as a 3D Vector</h2>
+            <p>When two CSS rules target the exact same HTML element with conflicting properties, the browser must
+                decide which rule wins. Junior engineers think specificity operates in base-10 mathematics (e.g., 10
+                classes = 1 ID). This is a myth. <strong>Specificity is a 3-Dimensional Vector Array:
+                    <code>[ID, Class, Element]</code>.</strong></p>
+
+            <p>The browser's C++ engine compares these vectors lexicographically (left-to-right). A vector of
+                <code>[1, 0, 0]</code> will mathematically obliterate a vector of <code>[0, 99, 0]</code>. An infinite
+                number of classes can never override a single ID.
+            </p>
+
+            <h3>The Vector Clash</h3>
+            <pre><code class="language-html">&lt;div id="nav" class="menu primary"&gt;
+    &lt;a href="#" class="link active"&gt;Dashboard&lt;/a&gt;
+&lt;/div&gt;
+</code></pre>
+
+            <pre><code class="language-css">/* ❌ JUNIOR: Deeply nested, high-specificity rules (Fragile Architecture) */
+#nav .menu .link.active {
+    color: red;
+}
+/* Vector Math: [1 ID, 3 Classes, 0 Elements] -> [1, 3, 0] */
+
+
+/* ✅ STAFF: Flat, strictly encapsulated class architecture (BEM paradigm) */
+.nav-link--active {
+    color: blue;
+}
+/* Vector Math: [0 IDs, 1 Class, 0 Elements] -> [0, 1, 0] */
+</code></pre>
+
+            <div class="callout warn">
+                <div class="callout-title">The `!important` Global State Violation</div>
+                Using <code>!important</code> is the CSS equivalent of a C# <code>goto</code> statement. It completely
+                subverts the vector mathematics of the CSSOM, forcefully injecting the rule into a hidden, overarching
+                execution plane. If a bug requires you to use <code>!important</code> to fix a color, your architectural
+                specificities are fundamentally broken. Staff engineers write flat CSS (<code>[0, 1, 0]</code>
+                everywhere) so that the cascade order (the physical line number in the file) cleanly resolves overrides.
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================================================
+     SECTION 15.2: THE LAYOUT ALGORITHM (NORMAL FLOW)
+     ========================================================================== -->
+    <div class="page-container content-flow">
+        <div>
+            <h2>15.2 The Layout Algorithm (Normal Flow)</h2>
+            <p>Before entering Flexbox or Grid, you must understand how the browser engine allocates pixels by default,
+                known as <strong>Normal Flow</strong>. The engine relies on two opposing mathematical models: Extrinsic
+                Sizing and Intrinsic Sizing.</p>
+
+            <h3>Extrinsic vs. Intrinsic Sizing</h3>
+            <ul>
+                <li><strong>Extrinsic (Block-level):</strong> The element calculates its geometry based on its
+                    <em>Parent</em>. A <code>&lt;div&gt;</code> natively claims 100% of the available width of its
+                    container, regardless of how much text is inside it.
+                </li>
+                <li><strong>Intrinsic (Inline-level):</strong> The element calculates its geometry based on its
+                    <em>Content</em>. A <code>&lt;span&gt;</code> calculates its width by mathematically summing the
+                    pixel width of the characters inside it. It rejects height and margin-top requests.
+                </li>
+            </ul>
+
+            <h3>Block Formatting Contexts (BFC)</h3>
+            <p>A BFC is a mini-layout sandbox inside the CSSOM. Elements inside a BFC cannot affect the layout geometry
+                of elements outside of it. Junior engineers struggle with collapsing margins or elements "floating" out
+                of their containers because they do not understand how to intentionally trigger a new BFC.</p>
+
+            <pre><code class="language-html">&lt;!-- The Floating Container Trap --&gt;
+&lt;div class="card"&gt;
+    &lt;img src="avatar.jpg" class="avatar" /&gt;
+    &lt;p&gt;Employee Data&lt;/p&gt;
+&lt;/div&gt;
+</code></pre>
+
+            <pre><code class="language-css">/* ❌ JUNIOR: The "Clearfix" Hack */
+.avatar {
+    float: left; /* Pulls the image OUT of normal flow */
+}
+.card::after {
+    /* The junior injects an invisible element 
+    to force the parent to wrap the floated child */
+    content: "";
+    display: table;
+    clear: both; 
+}
+
+/* ✅ STAFF: Instantiating a Mathematical BFC */
+.card {
+    /* display: flow-root explicitly tells the C++ engine to create a new 
+       Block Formatting Context. The parent now mathematically acknowledges the 
+       geometry of its floated children without requiring pseudo-element hacks. */
+    display: flow-root; 
+}
+.avatar {
+    float: left;
+}
+</code></pre>
+
+            <div class="callout tip">
+                <div class="callout-title">The Margin Collapse Mechanic</div>
+                If you place two <code>&lt;div&gt;</code> elements stacked vertically, and give the top one
+                <code>margin-bottom: 20px</code> and the bottom one <code>margin-top: 30px</code>, the gap between them
+                is <strong>NOT 50px</strong>. It is 30px. In Normal Flow, the C++ engine mathematically collapses
+                adjoining vertical margins into a single margin equal to the largest of the two values. Creating a new
+                BFC on the parent container (via <code>display: flex</code>, <code>grid</code>, or
+                <code>flow-root</code>) safely disables this legacy collapsing behavior.
+            </div>
+        </div>
+    </div>
+    <!-- ==========================================================================
+     SECTION 15.3: MAIN AXIS VS. CROSS AXIS GEOMETRY
+     ========================================================================== -->
+    <div class="page-container content-flow">
+        <div>
+            <div class="phase-label">Module 15 &middot; One-Dimensional Execution (Flexbox Mechanics)</div>
+            <h2>15.3 Main Axis vs. Cross Axis Geometry</h2>
+            <p>A junior developer visualizes Flexbox as a way to "center things" or "push boxes to the right." A Staff
+                engineer understands that Flexbox is a strict, <strong>One-Dimensional Vector Engine</strong>. It
+                operates by drawing a primary geometric axis and aligning DOM nodes mathematically along that line.</p>
+
+            <h3>The Coordinate System Rotation</h3>
+            <p>In the Flexbox algorithm, there is no inherent "X" or "Y" axis. There is only the <strong>Main
+                    Axis</strong> and the <strong>Cross Axis</strong>.</p>
+            <ul>
+                <li><code>justify-content</code> <strong>always</strong> distributes space along the Main Axis.</li>
+                <li><code>align-items</code> <strong>always</strong> distributes space along the Cross Axis.</li>
+            </ul>
+
+            <p>When you declare <code>flex-direction: column</code>, the browser's C++ rendering engine physically
+                rotates the mathematical coordinate system by 90 degrees. The Main Axis is now vertical.
+                <code>justify-content</code> now controls vertical spacing, and <code>align-items</code> controls
+                horizontal alignment. Failing to grasp this dynamic coordinate rotation leads to trial-and-error CSS.
+            </p>
+
+            <pre><code class="language-css">/* ❌ JUNIOR: Trial and Error Alignment */
+.header-actions {
+    display: flex;
+    /* "Let me try margin-top, no, let me try vertical-align..." */
+    margin-top: 10px;
+    padding-left: 20px;
+}
+
+/* ✅ STAFF: Geometric Certainty */
+.header-actions {
+    display: flex;
+    flex-direction: row; /* Main Axis = Horizontal (Default) */
+    
+    /* Allocates remaining horizontal space perfectly between children */
+    justify-content: space-between; 
+    
+    /* Locks all children to the mathematical center of the vertical Cross Axis */
+    align-items: center; 
+}
+</code></pre>
+        </div>
+    </div>
+
+    <!-- ==========================================================================
+     SECTION 15.4: FRACTIONAL DISTRIBUTION (GROW, SHRINK, BASIS)
+     ========================================================================== -->
+    <div class="page-container content-flow">
+        <div>
+            <h2>15.4 Fractional Distribution (<code>grow</code>, <code>shrink</code>, <code>basis</code>)</h2>
+            <p>The most misunderstood property in modern web architecture is <code>flex</code>. It is a shorthand for
+                three distinct mathematical variables passed to the browser's layout engine: <code>flex-grow</code>,
+                <code>flex-shrink</code>, and <code>flex-basis</code>.
+            </p>
+
+            <h3>The <code>flex-basis</code> Algorithm</h3>
+            <p>Before the browser calculates how to distribute empty space, it must assign a hypothetical starting size
+                to every flex child. This is the <strong>Basis</strong>.</p>
+            <ul>
+                <li><code>flex-basis: auto</code> (The Default): The browser looks at the width of the content (the text
+                    or image) inside the child. A child with 50 words gets a larger starting size than a child with 5
+                    words.</li>
+                <li><code>flex-basis: 0</code>: The browser mathematically ignores the content entirely. It treats the
+                    starting size of every child as exactly zero pixels.</li>
+            </ul>
+
+            <h3>The Space Allocation Math</h3>
+            <p>Once the Basis is set, the browser calculates the remaining free space in the parent container. It then
+                uses the <code>flex-grow</code> ratios to distribute that specific pool of free space.</p>
+
+            <pre><code class="language-html">&lt;!-- The Fractional Space Matrix --&gt;
+&lt;div class="flex-container"&gt;
+    &lt;div class="box short-text"&gt;OK&lt;/div&gt;
+    &lt;div class="box long-text"&gt;This is a very long string of text.&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+
+            <pre><code class="language-css">/* ❌ JUNIOR: Uneven columns based on content */
+.box {
+    /* flex: 1 1 auto; */
+    flex: 1; 
+    /* The long-text box will physically be much wider than the short-text box 
+    because 'auto' basis factored in the width BEFORE distributing free space. */
+}
+
+/* ✅ STAFF: Mathematically perfect, equal columns regardless of content */
+.box {
+    /* flex: grow(1) shrink(1) basis(0); */
+    flex: 1 1 0; 
+    /* Because basis is 0, the browser ignores the text length. 
+    Both boxes start at 0px.  The engine splits 100% of the parent's 
+    width equally (1:1 ratio). Both boxes  are mathematically locked to 
+    exactly 50% width. */
+}
+</code></pre>
+
+            <div class="callout key">
+                <div class="callout-title">The `flex-shrink` Overflow Overflow</div>
+                What happens when the children are larger than the parent container? The engine calculates the
+                <strong>negative free space</strong> (the overflow) and uses the <code>flex-shrink</code> ratio to
+                determine how much geometry to subtract from each child. Setting <code>flex-shrink: 0</code> on an image
+                mathematically forbids the layout engine from compressing it, which is the Staff-level solution for
+                preventing distorted UI avatars inside responsive headers.
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================================================
+     SECTION 15.5: THE FLEXBOX TRAP (DOM BLOAT)
+     ========================================================================== -->
+    <div class="page-container content-flow">
+        <div>
+            <h2>15.5 The Flexbox Trap</h2>
+            <p>Because Flexbox is a one-dimensional engine, it only understands a single row (or a single column) at a
+                time. If you apply <code>flex-wrap: wrap</code>, the browser simply creates independent, disconnected
+                rows. <strong>The geometry of Row 1 has zero mathematical relationship to the geometry of Row
+                    2.</strong></p>
+
+            <h3>The Alignment Failure</h3>
+            <p>If you build a product gallery using Flexbox, and the product titles are different lengths, the layout
+                breaks. If Row 1 has a tall card, Row 1 becomes tall. Row 2 remains short. If you try to align the "Add
+                to Cart" buttons horizontally across both rows, the one-dimensional math fails because the rows cannot
+                communicate their cross-axis dimensions to each other.</p>
+
+            <h3>The DOM Wrapper Hack</h3>
+            <p>To force two-dimensional alignment using a one-dimensional tool, junior engineers resort to nesting
+                multiple flex containers (e.g., Bootstrap's grid system), generating massive DOM bloat that penalizes
+                the CPU.</p>
+
+            <pre><code class="language-html">&lt;!-- ❌ JUNIOR: The Flexbox 2D Trap (Massive DOM Bloat) --&gt;
+&lt;div class="container"&gt;
+    &lt;div class="row"&gt; &lt;!-- Flex wrapper 1 --&gt;
+        &lt;div class="col-4"&gt;
+            &lt;div class="card"&gt; &lt;!-- Flex wrapper 2 --&gt;
+                &lt;div class="card-body"&gt; &lt;!-- Flex wrapper 3 --&gt;
+                    Product 1
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+        &lt;!-- Repeat 500 times... The DOM tree is now 2,000 nodes deep --&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;!-- ✅ STAFF: Flat 2D Grid Migration --&gt;
+&lt;!-- The moment you need rows AND columns to align, you abandon Flexbox. --&gt;
+&lt;main class="product-grid"&gt;
+    &lt;article class="card"&gt;Product 1&lt;/article&gt;
+    &lt;article class="card"&gt;Product 2&lt;/article&gt;
+    &lt;article class="card"&gt;Product 3&lt;/article&gt;
+&lt;/main&gt;
+</code></pre>
+
+            <div class="callout tip">
+                <div class="callout-title">The Engineering Rule of Thumb</div>
+                <strong>Flexbox is for Micro-Layouts; Grid is for Macro-Layouts.</strong><br>
+                Use Flexbox to align a magnifying glass icon inside a search button, or to space out a row of navigation
+                links. The moment you are aligning components <em>against each other</em> across multiple rows and
+                columns, immediately switch to CSS Grid. Forcing Flexbox to behave like a Grid requires destructive
+                levels of DOM wrapper nodes.
+            </div>
+        </div>
+    </div>
+    <!-- ==========================================================================
+     SECTION 15.6: THE GRID MATRIX
+     ========================================================================== -->
+    <div class="page-container content-flow">
+        <div>
+            <div class="phase-label">Module 15 &middot; Two-Dimensional Execution (CSS Grid Architecture)</div>
+            <h2>15.6 The Grid Matrix</h2>
+            <p>While Flexbox is a one-dimensional alignment engine, <strong>CSS Grid is a native two-dimensional
+                    coordinate matrix.</strong> It is the most powerful layout algorithm ever introduced to the
+                browser's C++ rendering engine. It completely decouples the visual layout geometry from the physical
+                HTML document structure.</p>
+
+            <h3>Decoupling HTML from Coordinates</h3>
+            <p>In the past, if you wanted a sidebar to appear on the left on desktop but drop below the main content on
+                mobile, you had to physically order the HTML elements to support the CSS float or flex logic. With CSS
+                Grid, the HTML order is dictated purely by the Accessibility Object Model (AOM) for screen readers,
+                while the CSS engine paints them at absolute coordinates.</p>
+
+            <pre><code class="language-html">&lt;!-- AOM-Optimized HTML (Semantic structure, zero layout wrappers) --&gt;
+&lt;body class="app-layout"&gt;
+    &lt;header&gt;Global Nav&lt;/header&gt;
+    &lt;main&gt;Primary Data&lt;/main&gt;
+    &lt;aside&gt;Sidebar Filters&lt;/aside&gt;
+    &lt;footer&gt;Legal&lt;/footer&gt;
+&lt;/body&gt;
+</code></pre>
+
+            <pre><code class="language-css">/* ✅ STAFF: The Declarative CSS Grid Matrix */
+.app-layout {
+    display: grid;
+    /* Define the tracks: 1 column of 250px, 1 column of remaining space */
+    grid-template-columns: 250px 1fr;
+    /* Define the rows: header and footer adapt to content, main fills the rest */
+    grid-template-rows: auto 1fr auto;
+    
+    /* Paint the elements into the matrix like a 2D array */
+    grid-template-areas:
+        "header header"
+        "sidebar main"
+        "footer footer";
+}
+
+header { grid-area: header; }
+aside  { grid-area: sidebar; }
+main   { grid-area: main; }
+footer { grid-area: footer; }
+</code></pre>
+        </div>
+    </div>
+
+    <!-- ==========================================================================
+     SECTION 15.7: FRACTIONAL MATH (fr) AND MINMAX()
+     ========================================================================== -->
+    <div class="page-container content-flow">
+        <div>
+            <h2>15.7 Fractional Math (<code>fr</code>) and <code>minmax()</code></h2>
+            <p>A classic junior layout bug involves horizontal scrollbars appearing when combining percentages with
+                padding or gaps. Staff engineers abandon percentages for layout structures and utilize the Grid-native
+                Fractional unit (<code>fr</code>).</p>
+
+            <h3>The Percentage Overflow Trap</h3>
+            <p>If you create a 4-column layout using <code>width: 25%</code> and add a <code>gap: 20px</code> between
+                columns, the browser calculates: <code>(4 * 25%) + (3 * 20px) = 100% + 60px</code>. The layout
+                physically overflows the viewport, causing a destructive horizontal scrollbar.</p>
+
+            <h3>The <code>fr</code> Algorithm</h3>
+            <p>The <code>fr</code> unit represents a fraction of the <strong>available free space</strong>. The C++
+                layout engine subtracts all fixed constraints (pixels, gaps, and <code>auto</code> content) from the
+                viewport <em>first</em>, and then mathematically divides the remaining pixels by the total number of
+                fractions.</p>
+
+            <pre><code class="language-css">/* ❌ JUNIOR: The Overflow Trap */
+.container {
+    display: flex;
+    gap: 20px;
+}
+.child {
+    width: 25%; /* mathematically guarantees a 60px overflow */
+}
+
+/* ✅ STAFF: The Fractional Safe Zone */
+.grid-container {
+    display: grid;
+    gap: 20px;
+    /* The browser subtracts 60px of gaps first, then divides the remaining 
+       pixel geometry perfectly into 4 equal segments. Zero overflow. */
+    grid-template-columns: 1fr 1fr 1fr 1fr; 
+}
+</code></pre>
+
+            <h3>The <code>minmax()</code> Function</h3>
+            <p>To architect resilient grid tracks that never collapse below usability thresholds, Staff engineers use
+                <code>minmax()</code>. It allows you to declare a lower mathematical bound (e.g., "never compress this
+                column smaller than 250px") and an upper fluid bound (e.g., "but allow it to expand to claim 1 fraction
+                of free space").
+            </p>
+
+            <pre><code class="language-css">.dashboard-grid {
+    /* The sidebar will stretch up to 350px, but will physically refuse to 
+       compress below 200px. The main content claims all remaining space. */
+    grid-template-columns: minmax(200px, 350px) 1fr;
+}
+</code></pre>
+        </div>
+    </div>
+
+    <!-- ==========================================================================
+     SECTION 15.8: ALGORITHMIC WRAPPING (AUTO-FIT VS AUTO-FILL)
+     ========================================================================== -->
+    <div class="page-container content-flow">
+        <div>
+            <h2>15.8 Algorithmic Wrapping (<code>auto-fit</code> vs <code>auto-fill</code>)</h2>
+            <p>Junior engineers rely on imperative <code>@media</code> queries to make a grid responsive (e.g., "if
+                screen is &lt; 768px, use 1 column; if &lt; 1024px, use 2 columns"). This "media query soup" creates a
+                fragile state machine that breaks on unexpected hardware resolutions like folding phones or ultra-wide
+                monitors.</p>
+
+            <p>Staff engineers utilize <strong>Zero-Breakpoint Design</strong>. They offload the wrap-calculation
+                mathematics directly to the C++ layout engine using the <code>repeat()</code> and <code>auto-fit</code>
+                directives.</p>
+
+            <h3>The Zero-Breakpoint Algorithm</h3>
+            <p>By declaring <code>grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));</code>, you instruct the
+                browser engine to execute a dynamic algorithm on every monitor refresh:</p>
+            <ol>
+                <li>Check the total width of the parent container.</li>
+                <li>Divide that width by the minimum track size (300px) plus the gap.</li>
+                <li>Floor the result to a whole integer. This is the maximum number of columns that can physically fit.
+                </li>
+                <li>Distribute the remaining fractional space (<code>1fr</code>) equally among those columns.</li>
+                <li>If the container shrinks below 600px, automatically wrap the grid into 1 column. If it expands to
+                    3,000px, generate 9 columns.</li>
+            </ol>
+
+            <pre><code class="language-css">/* ❌ JUNIOR: Fragile Media Query Soup */
+.product-grid { display: grid; grid-template-columns: 1fr; }
+
+@media (min-width: 768px) {
+    .product-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (min-width: 1024px) {
+    .product-grid { grid-template-columns: 1fr 1fr 1fr; }
+}
+
+/* ✅ STAFF: The Mathematical Algorithmic Grid */
+.product-grid {
+    display: grid;
+    gap: 1.5rem;
+    
+    /* One line of code replaces all media queries. The grid calculates its own 
+       geometry dynamically at the silicon level, scaling infinitely on any device. */
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+</code></pre>
+
+            <div class="callout tip">
+                <div class="callout-title">`auto-fit` vs. `auto-fill`</div>
+                If you have a massive monitor and only 2 product cards, what happens? <br><br>
+                <strong><code>auto-fill</code></strong>: The browser fills the row with invisible "ghost" columns of
+                300px, keeping your 2 product cards squeezed to exactly 300px on the left side of the screen.<br>
+                <strong><code>auto-fit</code></strong>: The browser calculates how many columns <em>could</em> fit, but
+                then collapses the empty ghost columns to 0px. The remaining fractional space (<code>1fr</code>) is
+                given to the 2 product cards, causing them to fluidly stretch and fill the entire ultra-wide monitor.
+                (Staff engineers default to <code>auto-fit</code> for UI components).
+            </div>
+        </div>
+    </div>
+    <!-- ==========================================================================
+     SECTION 15.9: THE DEATH OF MEDIA QUERY SOUP & CASCADE LAYERS
+     ========================================================================== -->
+    <div class="page-container content-flow">
+        <div>
+            <div class="phase-label">Module 15 &middot; Fluid Responsive Systems & Component Encapsulation</div>
+            <h2>15.9 The Death of Media Query Soup</h2>
+            <p>Junior engineers build responsive websites by creating "Media Query Soup"—a fragile web of hardcoded
+                <code>@media (max-width: 768px)</code> breakpoints. This assumes the user is viewing the site on an
+                iPhone, an iPad, or a 1080p Desktop. In reality, the modern web is viewed on folding screens,
+                split-screen desktop windows, and 4K ultra-wide monitors. Hardcoded breakpoints create structural dead
+                zones.
+            </p>
+
+            <h3>Native C++ Mathematical Functions</h3>
+            <p>Staff engineers transition away from discrete breakpoints by utilizing native CSS mathematical functions:
+                <code>calc()</code>, <code>min()</code>, and <code>max()</code>. These are not preprocessor hacks (like
+                Sass); they are evaluated dynamically by the browser's C++ rendering engine on every single frame
+                refresh.
+            </p>
+
+            <pre><code class="language-css">/* ❌ JUNIOR: Fragile Media Query States */
+.hero-image { width: 100%; }
+
+@media (min-width: 1200px) {
+    .hero-image { width: 1000px; } /* Hard jump in geometry */
+}
+
+/* ✅ STAFF: Mathematical Constraint (Zero Media Queries) */
+.hero-image {
+    /* The engine calculates both values and mathematically enforces the smaller one.
+    On a phone, it takes 100%. On a 4K monitor, it mathematically locks at 1000px. */
+    width: min(100%, 1000px); 
+}
+</code></pre>
+
+            <div class="callout key">
+                <div class="callout-title">The Missing Architecture: CSS Cascade Layers (@layer)</div>
+                *Added Architectural Principle:* In Module 1, we discussed Specificity Vectors. To completely eliminate
+                specificity wars across a massive enterprise application, Staff engineers now utilize CSS Cascade Layers
+                (<code>@layer</code>). <br><br>
+                By declaring <code>@layer reset, framework, components, utilities;</code> at the top of your CSS, you
+                mathematically dictate the override hierarchy. A style defined in the <code>utilities</code> layer will
+                permanently override a style in the <code>framework</code> layer, <strong>even if the framework style
+                    has a vastly higher Specificity Vector (like an ID)</strong>. This guarantees that your utility
+                classes never lose to third-party library bloat.
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================================================
+     SECTION 15.10: FLUID TYPOGRAPHY & VIEWPORT UNITS (CLAMP)
+     ========================================================================== -->
+    <div class="page-container content-flow">
+        <div>
+            <h2>15.10 Fluid Typography & Viewport Units</h2>
+            <p>Typographic scale is a critical component of cognitive architecture. If an <code>&lt;h1&gt;</code> is
+                <code>64px</code> on a desktop, it will physically push critical content off the screen on a mobile
+                device. Creating 5 different media queries to step the font down (64px, 48px, 32px, 24px) creates
+                jittery UI transitions.
+            </p>
+
+            <h3>The <code>clamp()</code> Algorithm</h3>
+            <p>Staff engineers utilize Fluid Typography. Text should scale linearly as the viewport stretches, just like
+                liquid filling a container, but it must be mathematically constrained by absolute minimums and maximums
+                to prevent unreadable extremes.</p>
+
+            <p>The <code>clamp(MIN, IDEAL, MAX)</code> function is the architectural standard. It requires three
+                parameters:</p>
+            <ol>
+                <li><strong>MIN:</strong> The absolute floor (usually in <code>rem</code> for accessibility).</li>
+                <li><strong>IDEAL:</strong> The fluid scale (usually in <code>vw</code> - viewport width).</li>
+                <li><strong>MAX:</strong> The absolute ceiling (usually in <code>rem</code>).</li>
+            </ol>
+
+            <pre><code class="language-css">/* ❌ JUNIOR: Fixed pixels and jittery breakpoints */
+h1 { font-size: 24px; }
+@media (min-width: 768px) { h1 { font-size: 48px; } }
+@media (min-width: 1200px) { h1 { font-size: 64px; } }
+
+/* ✅ STAFF: Fluid Mathematical Scaling */
+h1 {
+    /* 
+       1. Never shrink below 1.5rem (24px default).
+       2. Attempt to scale at 5% of the total screen width (5vw).
+       3. Never exceed 4rem (64px default).
+       
+    The C++ engine recalculates this smoothly 60 times a second during window resize. 
+    */
+    font-size: clamp(1.5rem, 5vw, 4rem); 
+}
+</code></pre>
+
+            <div class="callout warn">
+                <div class="callout-title">The REM Accessibility Mandate</div>
+                Never use <code>px</code> for <code>font-size</code>. If a visually impaired user alters their OS-level
+                or Browser-level default font size from 16px to 24px, a hardcoded <code>font-size: 16px;</code>
+                mathematically overrides their accessibility settings. The <code>rem</code> unit (Root EM) acts as a
+                multiplier of the user's base preference. <code>2rem</code> means "two times whatever size the user
+                needs."
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================================================
+     SECTION 15.11: CONTAINER QUERIES (THE PARADIGM SHIFT)
+     ========================================================================== -->
+    <div class="page-container content-flow">
+        <div>
+            <h2>15.11 Container Queries (<code>@container</code>)</h2>
+            <p>The most profound architectural shift in modern UI engineering is the introduction of <strong>Container
+                    Queries</strong>. A media query looks at the total width of the global Viewport (the browser
+                window). This fundamentally breaks component encapsulation.</p>
+
+            <h3>The Encapsulation Failure of Media Queries</h3>
+            <p>Imagine a "User Profile Card" component. If you program it to switch to a vertical layout using
+                <code>@media (max-width: 600px)</code>, what happens if you place that card inside a narrow 300px
+                sidebar on a 4K Desktop monitor? The viewport is 3840px wide, so the media query does NOT trigger. The
+                card attempts to render its wide desktop layout inside a tiny sidebar, instantly overflowing and
+                destroying the UI.
+            </p>
+
+            <h3>True Component Isolation</h3>
+            <p>A Staff engineer requires components to be entirely agnostic of the global page layout. A component
+                should redesign itself based <em>only</em> on the physical geometry of the container it is placed
+                within.</p>
+
+            <pre><code class="language-html">&lt;!-- The HTML DOM Structure --&gt;
+&lt;div class="sidebar"&gt;
+    &lt;div class="profile-card"&gt;
+        &lt;img src="avatar.jpg" class="profile-img"&gt;
+        &lt;div class="profile-data"&gt;Data&lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+
+            <pre><code class="language-css">/* ✅ STAFF: Container Query Encapsulation */
+
+/* 1. Define the mathematical container boundary */
+.sidebar {
+    /* Instructs the C++ layout engine to monitor the inline 
+    dimensions (width) of this node */
+    container-type: inline-size;
+    container-name: sidebar-context;
+    width: 300px;
+}
+
+/* 2. The component defaults to a vertical, stacked layout (Mobile-first) */
+.profile-card {
+    display: flex;
+    flex-direction: column; 
+}
+
+/* 3. The component queries its PARENT's geometry, 
+completely ignoring the Window size */
+
+@container sidebar-context (min-width: 500px) {
+    /* If the sidebar ever expands past 500px, the card morphs into a horizontal row.
+       If placed in a 4K monitor's 300px sidebar, this mathematically will NOT trigger, 
+       keeping the UI perfectly safe. */
+    .profile-card {
+        flex-direction: row; 
+    }
+}
+</code></pre>
+
+            <div class="callout tip">
+                <div class="callout-title">Container Query Units (cqw)</div>
+                Just as <code>vw</code> maps to the Viewport Width, Container Queries introduce <code>cqw</code>
+                (Container Query Width). You can combine this with <code>clamp()</code> to create fluid typography that
+                scales relative to the parent <code>&lt;div&gt;</code>, rather than the entire screen. E.g.,
+                <code>font-size: clamp(1rem, 5cqw, 2rem);</code>. This allows a Blazor or React component to be
+                copy-pasted into any grid area and flawlessly re-scale itself.
+            </div>
+        </div>
+    </div>
+    <!-- ==========================================================================
+     SECTION 15.12: IMPLEMENTATION 1 (THE ZERO-BREAKPOINT FLUID GRID)
+     ========================================================================== -->
+    <div class="page-container content-flow">
+        <div>
+            <div class="phase-label">Module 15 &middot; Production Implementations & Verification</div>
+            <h2>15.12 Implementation 1: The Zero-Breakpoint Fluid Grid</h2>
+            <p>A Staff-level architecture demands that layouts scale infinitely across any hardware resolution without
+                maintaining a fragile registry of imperative <code>@media</code> breakpoints. This implementation
+                leverages the C++ layout engine's native <code>auto-fit</code> algorithm to dynamically calculate column
+                geometry based strictly on available fractional space.</p>
+
+            <pre><code class="language-html">&lt;!-- Zero-Breakpoint DOM Structure --&gt;
+&lt;main class="fluid-dashboard"&gt;
+    &lt;article class="metric-card"&gt;
+        &lt;h3&gt;L1 Cache Hits&lt;/h3&gt;
+        &lt;data value="94.2"&gt;94.2%&lt;/data&gt;
+    &lt;/article&gt;
+    &lt;article class="metric-card"&gt;
+        &lt;h3&gt;GC Pauses&lt;/h3&gt;
+        &lt;data value="12"&gt;12ms&lt;/data&gt;
+    &lt;/article&gt;
+    &lt;article class="metric-card"&gt;
+        &lt;h3&gt;Thread Starvation&lt;/h3&gt;
+        &lt;data value="0"&gt;0 Events&lt;/data&gt;
+    &lt;/article&gt;
+&lt;/main&gt;
+</code></pre>
+
+            <pre><code class="language-css">/* ✅ STAFF: The Algorithmic CSS Matrix */
+.fluid-dashboard {
+    display: grid;
+    /* The layout engine resolves the 24px gap BEFORE calculating fractional space */
+    gap: 1.5rem; 
+    
+    /* 
+       THE MATHEMATICAL CORE:
+       1. auto-fit: Calculate maximum possible columns, collapse empty ones to 0px.
+       2. minmax(280px, 1fr): Cards cannot compress below 280px. 
+       3. 1fr: If the viewport expands, distribute the remaining pixels equally.
+       
+       Result: 1 column on mobile, 2 on tablet, 4 on desktop, 12 on ultra-wide. 
+       Zero @media queries required. 
+    */
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    
+    /* Optimize painting performance by informing the browser of fixed constraints */
+    contain: layout inline-size;
+}
+
+.metric-card {
+    /* Create a local formatting context to prevent margin collapse */
+    display: flow-root;
+    padding: 1.5rem;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    
+    /* Isolate internal geometry from external layout thrashing */
+    contain: content; 
+}
+</code></pre>
+        </div>
+    </div>
+
+    <!-- ==========================================================================
+     SECTION 15.13: IMPLEMENTATION 2 (THE ENCAPSULATED UI COMPONENT)
+     ========================================================================== -->
+    <div class="page-container content-flow">
+        <div>
+            <h2>15.13 Implementation 2: The Encapsulated Blazor Component</h2>
+            <p>A true component must be mathematically agnostic to the global viewport. If a C# Blazor component
+                requires global <code>@media</code> queries to render correctly, it violates encapsulation. This
+                implementation uses <code>@container</code> queries and <code>clamp()</code> to create a completely
+                isolated, self-morphing component that can be injected anywhere in the DOM safely.</p>
+
+            <pre><code class="language-html">@* ProfileCard.razor *@
+&lt;div class="profile-container-boundary"&gt;
+    &lt;article class="profile-card"&gt;
+        &lt;img class="profile-avatar" src="@User.AvatarUrl" alt="Avatar" /&gt;
+        &lt;div class="profile-info"&gt;
+            &lt;h2 class="profile-name"&gt;@User.FullName&lt;/h2&gt;
+            &lt;p class="profile-role"&gt;@User.RoleTitle&lt;/p&gt;
+        &lt;/div&gt;
+    &lt;/article&gt;
+&lt;/div&gt;
+
+&lt;style&gt;
+    /* 1. Define the Architectural Container Boundary */
+    .profile-container-boundary {
+        container-type: inline-size;
+        container-name: profile;
+        width: 100%; /* Adapts to whatever parent grid it is placed inside */
+    }
+
+    /* 2. Mobile-First Default State (Stacked) */
+    .profile-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        text-align: center;
+    }
+
+    </code></pre>
+
+
+    <pre><code class="language-html">
+
+
+    /* 3. Fluid Typography bound to Container Width (cqw), not Viewport (vw) */
+    .profile-name {
+        /* Minimum 1.2rem, fluidly scales at 5% of container width, maxes at 2rem */
+        font-size: clamp(1.2rem, 5cqw, 2rem);
+        margin: 0;
+    }
+
+    /* 4. The Encapsulated Container Query */
+    @container profile (min-width: 450px) {
+        /* Once THIS SPECIFIC CONTAINER physically exceeds 450px, the internal 
+        layout  morphs to a horizontal row. The Window/Viewport width is 
+        completely ignored. */
+        .profile-card {
+            flex-direction: row;
+            text-align: left;
+        }
+        
+        .profile-avatar {
+            /* Prevent the flexbox algorithm from squishing the image geometry */
+            flex-shrink: 0; 
+            width: 80px;
+            height: 80px;
+        }
+    }
+&lt;/style&gt;
+
+@code {
+    [Parameter, EditorRequired]
+    public required UserDto User { get; set; }
+}
+</code></pre>
+        </div>
+    </div>
+
+    <!-- ==========================================================================
+     SECTION 15.14: VERIFICATION & MASTER QUIZ
+     ========================================================================== -->
+    <div class="page-container content-flow">
+        <div>
+            <h2>15.14 Chapter Verification, Checklist & Master Quiz</h2>
+
+            <div class="checklist">
+                <h3>Staff-Level Verification Validators</h3>
+                <div class="check-item">
+                    <div class="checkbox"></div>
+                    <div>I understand that CSS is a Render-Blocking Resource and that the CSSOM must be fully parsed
+                        before the C++ engine will paint the HTML.</div>
+                </div>
+                <div class="check-item">
+                    <div class="checkbox"></div>
+                    <div>I calculate Specificity as a 3D vector <code>[ID, Class, Element]</code> and recognize that
+                        <code>!important</code> is an architectural global state violation.
+                    </div>
+                </div>
+                <div class="check-item">
+                    <div class="checkbox"></div>
+                    <div>I understand that <code>display: flow-root</code> initiates a new Block Formatting Context
+                        (BFC), safely terminating margin collapse and resolving floated geometries.</div>
+                </div>
+                <div class="check-item">
+                    <div class="checkbox"></div>
+                    <div>I can articulate the mathematical difference between <code>flex-basis: auto</code>
+                        (content-aware size) and <code>flex-basis: 0</code> (ignoring content for strict fractional
+                        allocation).</div>
+                </div>
+                <div class="check-item">
+                    <div class="checkbox"></div>
+                    <div>I utilize CSS Grid and <code>repeat(auto-fit, minmax(...))</code> to construct zero-breakpoint
+                        responsive matrices, flattening the DOM execution graph.</div>
+                </div>
+                <div class="check-item">
+                    <div class="checkbox"></div>
+                    <div>I utilize <code>@container</code> queries to strictly encapsulate component layout logic,
+                        completely decoupling UI scaling from global <code>@media</code> breakpoints.</div>
+                </div>
+            </div>
+
+            <h3>Comprehensive Examination</h3>
+            <div class="quiz-section">
+                <div class="quiz-question">
+                    <p>1. A junior engineer places a heavy <code>&lt;script src="bundle.js"&gt;&lt;/script&gt;</code> in
+                        the <code>&lt;head&gt;</code> tag immediately before the
+                        <code>&lt;link rel="stylesheet"&gt;</code> tag. What is the mechanical result in the browser
+                        engine?
+                    </p>
+                    <div class="quiz-option">A) The JavaScript executes faster because it has higher priority in the
+                        AST.</div>
+                    <div class="quiz-option">B) The HTML parser physically halts. It waits for the JS to download and
+                        execute. Consequently, the CSS download is blocked, delaying the CSSOM construction and
+                        destroying the First Contentful Paint (FCP). The user sees a blank white screen for seconds.
+                    </div>
+                    <div class="quiz-option">C) The CSSOM is built first in the background using a Web Worker.</div>
+                </div>
+
+                <div class="quiz-question">
+                    <p>2. You have a CSS rule <code>#app .nav-list li.active { color: red; }</code>. What is its exact
+                        Specificity Vector?</p>
+                    <div class="quiz-option">A) It is calculated as 100 + 10 + 1 + 10 = 121 points.</div>
+                    <div class="quiz-option">B) [1 ID, 2 Classes, 1 Element] -> [1, 2, 1].</div>
+                    <div class="quiz-option">C) [1 ID, 1 Class, 2 Elements] -> [1, 1, 2].</div>
+                </div>
+
+                <div class="quiz-question">
+                    <p>3. Two vertically stacked <code>&lt;div&gt;</code> elements are assigned
+                        <code>margin-bottom: 40px;</code> (top div) and <code>margin-top: 60px;</code> (bottom div).
+                        Assuming Normal Flow, what is the exact pixel distance between them, and why?
+                    </p>
+                    <div class="quiz-option">A) 100px. Margins are additive.</div>
+                    <div class="quiz-option">B) 60px. In Normal Flow, adjoining vertical margins mathematically collapse
+                        into a single margin equal to the largest value. The C++ engine overrides the 40px boundary.
+                    </div>
+                    <div class="quiz-option">C) 50px. The engine calculates the average of the two margins.</div>
+                </div>
+
+                <div class="quiz-question">
+                    <p>4. Inside a Flexbox container, you declare <code>flex: 1 1 0;</code> on three child elements
+                        containing wildly varying amounts of text. What is the layout result?</p>
+                    <div class="quiz-option">A) The element with the most text will be the widest, because
+                        <code>flex-grow</code> is proportional to content.
+                    </div>
+                    <div class="quiz-option">B) Because <code>flex-basis</code> is 0, the engine mathematically ignores
+                        the text length. All three elements start with an intrinsic width of 0px, and the 100% free
+                        space is divided equally. They will be exactly the same width (33.33%).</div>
+                    <div class="quiz-option">C) The text overflows its container because basis is 0.</div>
+                </div>
+
+                <div class="quiz-question">
+                    <p>5. Why does <code>grid-template-columns: 1fr 1fr; gap: 20px;</code> prevent horizontal
+                        scrollbars, whereas <code>width: 50%; gap: 20px;</code> in Flexbox causes catastrophic layout
+                        overflow?</p>
+                    <div class="quiz-option">A) Grid elements automatically apply <code>box-sizing: border-box</code>.
+                    </div>
+                    <div class="quiz-option">B) Percentage widths calculate geometry strictly against the parent's total
+                        width (50% + 50% + 20px = overflow). The <code>fr</code> unit calculates geometry against
+                        <em>remaining free space</em>. The engine subtracts the 20px gap first, then halves the
+                        remaining pixels, guaranteeing zero overflow.
+                    </div>
+                    <div class="quiz-option">C) Flexbox does not support the <code>gap</code> property in modern
+                        browsers.</div>
+                </div>
+
+                <div class="quiz-question">
+                    <p>6. How does <code>auto-fit</code> mathematically differ from <code>auto-fill</code> when applied
+                        to a CSS Grid with empty horizontal space?</p>
+                    <div class="quiz-option">A) <code>auto-fit</code> forces all elements to the same height;
+                        <code>auto-fill</code> allows staggered heights.
+                    </div>
+                    <div class="quiz-option">B) <code>auto-fill</code> preserves empty grid tracks, pinning existing
+                        elements to their minimum width. <code>auto-fit</code> completely collapses empty tracks to 0px,
+                        allowing the remaining fractional units (<code>1fr</code>) to dynamically stretch the existing
+                        elements to fill the void.</div>
+                    <div class="quiz-option">C) There is no mathematical difference; they are aliases for the same
+                        underlying C++ algorithm.</div>
+                </div>
+
+                <div class="quiz-question">
+                    <p>7. A developer uses <code>@media (max-width: 600px)</code> to change a UI card's layout to
+                        vertical. The card is placed inside a 300px sidebar on a 1920px desktop monitor. What happens,
+                        and why is this an architectural failure?</p>
+                    <div class="quiz-option">A) The card successfully switches to vertical mode because the sidebar is
+                        less than 600px.</div>
+                    <div class="quiz-option">B) The card fails to switch to vertical mode. The <code>@media</code> query
+                        strictly evaluates the global Window Viewport (1920px), completely ignoring the 300px parent
+                        container. The card attempts to render its desktop layout inside a tiny sidebar, overflowing and
+                        breaking the UI. This violates component encapsulation.</div>
+                    <div class="quiz-option">C) The browser throws a rendering exception.</div>
+                </div>
+
+                <div class="quiz-question">
+                    <p>8. What is the mathematical execution sequence of <code>font-size: clamp(16px, 4vw, 32px)</code>?
+                    </p>
+                    <div class="quiz-option">A) The font is 16px on mobile, 32px on desktop, and 4vw on tablets.</div>
+                    <div class="quiz-option">B) The engine continuously calculates 4% of the viewport width. If that
+                        value drops below 16px, it locks at 16px. If it exceeds 32px, it locks at 32px. Within that
+                        boundary, it scales fluidly on every frame refresh.</div>
+                    <div class="quiz-option">C) It selects the largest of the three values at all times.</div>
+                </div>
+
+                <h3 style="margin-top: 24px;">Systems Writing Prompts</h3>
+
+                <p style="font-weight: 700; margin-bottom: 4px; font-size: 9.5pt;">Prompt 1: Specificity and the Cascade
+                    Layer Migration</p>
+                <p style="font-size: 9pt;">Your enterprise application relies heavily on Bootstrap, resulting in
+                    thousands of overridden rules using <code>!important</code> to force custom branding. Explain the
+                    exact mathematical mechanics of Specificity Vectors, why <code>!important</code> is destructive to
+                    the CSSOM graph, and architect a migration strategy utilizing modern <code>@layer</code>
+                    declarations to mathematically force your custom utility classes to override the framework without
+                    relying on ID selectors or specificity hacks.</p>
+
+                <p style="font-weight: 700; margin-top: 18px; margin-bottom: 4px; font-size: 9.5pt;">Prompt 2:
+                    Dissecting the Flexbox Allocation Algorithm</p>
+                <p style="font-size: 9pt;">A junior developer uses <code>flex: 1 1 auto;</code> on a navigation menu,
+                    but complains that the "Dashboard" link is physically much wider than the "Home" link. Detail the
+                    step-by-step layout calculation the C++ engine performs regarding <code>flex-basis</code> and
+                    content width before allocating the remaining free space via <code>flex-grow</code>. Provide the
+                    exact CSS correction required to force mathematically equal widths.</p>
+
+                <p style="font-weight: 700; margin-top: 18px; margin-bottom: 4px; font-size: 9.5pt;">Prompt 3: The
+                    Architecture of Container Queries</p>
+                <p style="font-size: 9pt;">You are architecting a shared UI component library in Blazor that will be
+                    consumed by five different enterprise products. The products have vastly different global layouts
+                    (sidebars, split screens, modals). Argue the epistemological necessity of abandoning
+                    <code>@media</code> queries in favor of <code>@container</code> queries for the component library,
+                    referencing structural encapsulation, the definition of <code>container-type</code>, and the
+                    prevention of global viewport layout poisoning.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================================================
+     ANSWER KEY
+     ========================================================================== -->
+    <div class="page-container">
+        <div class="litmus-box"
+            style="margin-top: 0; margin-bottom: 12px; padding: 12px 14px; font-size: 7.5pt; line-height: 1.45;">
+            <div
+                style="font-weight: 800; color: #4338CA; text-transform: uppercase; margin-bottom: 6px; font-size: 8pt;">
+                Chapter 15 Technical Answer Key</div>
+            <div style="margin-bottom: 4px;"><b>1. (B)</b> Script execution blocks HTML parsing. CSS blocks Rendering.
+                Putting a heavy JS script before CSS forces the browser to halt AST construction, delaying the CSS
+                network request and causing massive FCP latency. Use <code>defer</code>.</div>
+            <div style="margin-bottom: 4px;"><b>2. (B)</b> <code>#app</code> (1 ID), <code>.nav-list</code> and
+                <code>.active</code> (2 Classes), <code>li</code> (1 Element). The vector is <code>[1, 2, 1]</code>.
+                Specificity is not base-10; it is lexicographic vector comparison.
+            </div>
+            <div style="margin-bottom: 4px;"><b>3. (B)</b> 60px. Normal Flow collapses adjoining vertical margins to the
+                largest single margin to prevent redundant whitespace. To override this, the parent must instantiate a
+                new Block Formatting Context (BFC).</div>
+            <div style="margin-bottom: 4px;"><b>4. (B)</b> <code>flex-basis: 0</code> mathematically severs the geometry
+                from the content. The engine allocates space purely based on the <code>grow</code> ratio, resulting in
+                perfectly equal partitions.</div>
+            <div style="margin-bottom: 4px;"><b>5. (B)</b> Percentages calculate width before gaps, causing overflow.
+                The Fractional (<code>fr</code>) unit calculates width <em>after</em> gaps are subtracted from the
+                viewport, mathematically guaranteeing a safe fit.</div>
+            <div style="margin-bottom: 4px;"><b>6. (B)</b> <code>auto-fill</code> retains grid integrity regardless of
+                content. <code>auto-fit</code> optimizes for available space by collapsing empty tracks and stretching
+                the remaining elements to fill the container.</div>
+            <div style="margin-bottom: 4px;"><b>7. (B)</b> Media queries evaluate the global Window state, violating
+                component encapsulation. A card inside a 300px sidebar on a 4K screen evaluates against 4K, breaking the
+                UI. Container queries solve this.</div>
+            <div style="margin-bottom: 8px;"><b>8. (B)</b> The <code>clamp()</code> function dynamically calculates the
+                fluid <code>vw</code> size per frame, strictly enforcing the floor (16px) and ceiling (32px) to prevent
+                typographic extremes.</div>
+
+            <div style="margin-bottom: 4px;"><b>Prompt 1 (Specificity Layers):</b> Specificity vectors (ID, Class,
+                Element) create an arms race. <code>!important</code> violates the cascading graph. The solution is
+                <code>@layer bootstrap, utilities;</code>. The C++ engine evaluates Cascade Layers *before* specificity.
+                Because <code>utilities</code> is declared after <code>bootstrap</code>, a simple <code>.text-red</code>
+                class in the utilities layer will mathematically override a Bootstrap ID selector (<code>#header</code>)
+                without requiring an ID or <code>!important</code>.
+            </div>
+            <div style="margin-bottom: 4px;"><b>Prompt 2 (Flex Allocation):</b> The engine calculates
+                <code>flex-basis: auto</code> first, meaning the initial width of the element is dictated by its text
+                length ("Dashboard" > "Home"). The engine subtracts these initial widths from the parent, leaving a pool
+                of free space. <code>flex-grow: 1</code> distributes that free space equally. Because "Dashboard"
+                started significantly wider, it ends significantly wider. The fix is <code>flex: 1 1 0;</code> to ignore
+                text length entirely.
+            </div>
+            <div><b>Prompt 3 (Container Encapsulation):</b> A UI library component cannot predict the layout environment
+                of the consuming application. If a card uses <code>@media (max-width: 800px)</code>, it will overflow if
+                placed inside a 400px CSS Grid column on a 1080p monitor. True encapsulation requires the component to
+                declare <code>container-type: inline-size</code> on its root, and use
+                <code>@container (max-width: 400px)</code> for its internal reflows. The component's execution graph is
+                now mathematically isolated and inherently scalable.
+            </div>
+        </div>
+    </div>
+
 </body>
+
 </html>
