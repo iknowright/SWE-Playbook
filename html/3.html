@@ -378,7 +378,9 @@ echo "[SYSTEM] Deployment successful."
                 safety.
             </p>
 
-            <pre><code class="language-c">#include &lt;stdio.h&gt;
+            <pre><code class="language-c">
+                
+#include &lt;stdio.h&gt;
 #include &lt;stdlib.h&gt;
 #include &lt;unistd.h&gt;
 #include &lt;sys/mman.h&gt;
@@ -406,6 +408,8 @@ int main() {
     // 3. Clone the process
     pid_t pid = fork();
 
+    </code></pre>
+            <pre><code class="language-c">
     if (pid == 0) {
         // --- CHILD PROCESS ---
         for (int i = 0; i &lt; 100000; i++) {
@@ -422,14 +426,6 @@ int main() {
             shared-&gt;counter++;         // Mutate shared RAM safely
             sem_post(&amp;shared-&gt;lock);   // RELEASE LOCK
         }
-        
-
-
-
-
-
-        
-
         
         wait(NULL); // Wait for child to finish
 
