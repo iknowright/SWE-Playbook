@@ -374,7 +374,8 @@
                 <li><strong>PREROUTING:</strong> The absolute first hook. The packet has hit the Network Interface Card
                     (NIC) and entered RAM, but the OS has not yet looked at its destination IP. This is where
                     <strong>DNAT (Destination Network Address Translation)</strong> occurs (e.g., port forwarding public
-                    port 80 to an internal Docker container).</li>
+                    port 80 to an internal Docker container).
+                </li>
                 <li><strong>INPUT:</strong> The Kernel read the routing table and realized the packet is destined for a
                     local socket on this exact machine (e.g., your local NGINX process). This is where standard incoming
                     security drops occur.</li>
@@ -384,7 +385,8 @@
                     send out. The Kernel evaluates it here before routing.</li>
                 <li><strong>POSTROUTING:</strong> The final hook before the packet hits the copper wire. This is where
                     <strong>SNAT (Source NAT / Masquerading)</strong> occurs, rewriting the local sender IP to a public
-                    router IP.</li>
+                    router IP.
+                </li>
             </ol>
 
             <div class="callout key">
@@ -512,12 +514,14 @@ fi
                 <div class="check-item">
                     <div class="checkbox"></div>
                     <div>I can physically trace the DNS resolution order from <code>nsswitch.conf</code> through to
-                        <code>systemd-resolved</code>.</div>
+                        <code>systemd-resolved</code>.
+                    </div>
                 </div>
                 <div class="check-item">
                     <div class="checkbox"></div>
                     <div>I know how to identify Ephemeral Port exhaustion by detecting thousands of sockets in the
-                        <code>TIME_WAIT</code> state using <code>ss -s</code>.</div>
+                        <code>TIME_WAIT</code> state using <code>ss -s</code>.
+                    </div>
                 </div>
                 <div class="check-item">
                     <div class="checkbox"></div>
@@ -527,7 +531,8 @@ fi
                 <div class="check-item">
                     <div class="checkbox"></div>
                     <div>I can map the Netfilter traversal path, correctly placing DNAT operations in the
-                        <code>PREROUTING</code> hook and filtering in the <code>INPUT</code> hook.</div>
+                        <code>PREROUTING</code> hook and filtering in the <code>INPUT</code> hook.
+                    </div>
                 </div>
             </div>
 
@@ -551,7 +556,8 @@ fi
                         prevent massive privilege escalation security holes.</div>
                     <div class="quiz-option">C) The script is forced to run in the background as a daemon.</div>
                     <div class="quiz-option">D) The script executes but requires a password prompt via
-                        <code>sudo</code>.</div>
+                        <code>sudo</code>.
+                    </div>
                 </div>
 
                 <div class="quiz-question">
@@ -593,7 +599,8 @@ fi
                 <p style="font-size: 9pt;">An internal Node.js microservice crashes daily with a
                     <code>Cannot assign requested address</code> error. The server has 90% of its RAM available. Detail
                     exactly how you would use the <code>iproute2</code> suite to prove this is an Ephemeral Port /
-                    <code>TIME_WAIT</code> exhaustion issue, and explain the mechanical kernel triggers causing it.</p>
+                    <code>TIME_WAIT</code> exhaustion issue, and explain the mechanical kernel triggers causing it.
+                </p>
 
                 <p style="font-weight: 700; margin-top: 18px; margin-bottom: 4px; font-size: 9.5pt;">Prompt 2: ACLs vs.
                     Special Execution Bits</p>
@@ -642,7 +649,8 @@ fi
                 shared group compromises granularity. Solution: Set the SGID bit to enforce group ownership
                 (<code>chmod 2770 /opt/shared_code</code>). Then, apply ACLs:
                 <code>setfacl -m u:userA:rwx,u:userB:rwx,u:userC:r-x /opt/shared_code</code>, and use the
-                <code>-d</code> flag to apply these defaults to future files.</div>
+                <code>-d</code> flag to apply these defaults to future files.
+            </div>
         </div>
     </div>
 </body>
