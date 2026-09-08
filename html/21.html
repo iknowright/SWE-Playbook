@@ -87,7 +87,7 @@ type FiberNode = {
     // Pointer to the physical C++ DOM node (e.g., HTMLDivElement)
 </code></pre>
 
-<pre><code class="language-typescript">
+            <pre><code class="language-typescript">
     // 3. The Singly Linked List Pointers (The Traversal Graph)
     return: FiberNode | null;  // Pointer UP to the parent
     child: FiberNode | null;   // Pointer DOWN to the FIRST child
@@ -221,7 +221,7 @@ function App() {
             <p>React achieves an <strong>O(n) time complexity</strong> by cheating. It abandons strict mathematical
                 optimization and enforces two heuristic assumptions:</p>
 
-                <p>If your component behaves differently or crashes simply because it was executed twice in rapid
+            <p>If your component behaves differently or crashes simply because it was executed twice in rapid
                 succession, your architecture is fundamentally flawed and will catastrophically fail in a Concurrent
                 Rendering environment.</p>
             <pre><code class="language-javascript">// ✅ STAFF: Visualizing the Double Buffering Pointer Swap
