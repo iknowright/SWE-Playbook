@@ -1,1762 +1,689 @@
 <!doctype html>
 <html>
-  <head>
-    <meta charset="utf-8" />
-    <link rel="stylesheet" href="../common.css" />
-  </head>
 
-  <body>
-    <!-- ============ COVER PAGE ============ -->
-    <div class="cover">
-      <div class="top-block">
-        <div class="kicker">Self-Paced Systems Masterclass</div>
-        <h1>GIT GOOD</h1>
-        <div class="subtitle">The 365-Day SWE Playbook</div>
-        <div class="terminal-tag">
-          $ git commit -m "fix(career): might take 1 year to complete"
-          --no-verify
-        </div>
-      </div>
-      <div class="bottom-block">
-        <div class="byline">Written &amp; Verified by me</div>
-        <div class="year">2026 &middot; First Edition</div>
+<head>
+  <meta charset="utf-8" />
+  <link rel="stylesheet" href="../common.css" />
+</head>
+
+<body>
+  <!-- ============ COVER PAGE ============ -->
+  <div class="cover">
+    <div class="top-block">
+      <div class="kicker">Self-Paced SWE Masterclass</div>
+      <h1>GIT GOOD</h1>
+      <div class="subtitle">The 365 Lessons Playbook</div>
+      <div class="terminal-tag">
+        $ git commit -m "fix(career): might take 1 year to complete"
+        --no-verify
       </div>
     </div>
+    <div class="bottom-block">
+      <div class="byline">Written by me</div>
+      <div class="year">2026 &middot; First &amp; Last Edition</div>
+    </div>
+  </div>
 
-    <!-- ============ ABOUT THE AUTHOR & MANIFESTO ============ -->
-    <h2 class="fm-title">About the Author and This Book</h2>
+  <!-- ============ ABOUT THE AUTHOR & MANIFESTO ============ -->
+  <h2 class="fm-title">About the Author and This Book</h2>
 
-    <h3 class="fm-sub">About the Author</h3>
-    <p class="fm-body">
-      I'm Srajan Rai, a software engineer writing backend systems in C#/.NET who
-      got deeply tired of current job market and levels of interviews that
-      demand everything from theory to actual hands-on experience.
-    </p>
+  <h3 class="fm-sub">About the Author</h3>
+  <p class="fm-body">
+    I'm ikr, a software engineer writing backend systems in C#/.NET who
+    got deeply tired of current job market and levels of interviews that
+    demand everything from theory to actual hands-on experience.
+  </p>
 
-    <p class="fm-body">
-      I got laid off and took some time off to react to this job famine, So
-      after getting back from my vacation and preparing for 1 month 16 hrs a
-      day, I got the job and wanted to create a self pace play book to help
-      myself. I created this book to help myself and others like me. I wanted to
-      understand the absolute everything: how CPU pipelines execute
-      instructions, why cache line false sharing degrades performance, how
-      lock-free primitives eliminate contention, and how state machines prevent
-      split-brain anomalies under network partitions.
-    </p>
+  <p class="fm-body">
+    I got laid off and took some time off to react to this job famine, So
+    after getting back from my vacation and preparing for 1 month 16-17 hours a
+    day, I finally got the job and wanted to create a self-pace playbook to help myself. I created this book to help
+    myself and others like me. I wanted to understand the absolute everything: how CPU pipelines execute
+    instructions, why cache line false sharing degrades performance, how
+    lock-free primitives eliminate contention, and how state machines prevent
+    split-brain anomalies under network partitions.
+  </p>
 
-    <p class="fm-body">
-      The standard was simple: if I couldn't explain the physical hardware
-      mechanics, sketch the memory layout, trace the failure recovery path, and
-      defend the trade-offs on a whiteboard under pressure, I didn't actually
-      own the concept. This playbook is that roadmap.
-    </p>
+  <p class="fm-body">
+    The standard was simple: if I couldn't explain the physical hardware
+    mechanics, sketch the memory layout, trace the failure recovery path, and
+    defend the trade-offs on a whiteboard under pressure, I didn't actually
+    own the concept. This playbook is that roadmap.
+  </p>
 
-    <h3 class="fm-sub">About This Book</h3>
-    <p class="fm-body">
-      This is not a high-level cheat sheet, and it is not an academic textbook
-      created by a human. It is an unapologetic, exhaustive
-      <strong>365-day, 19-volume systems curriculum</strong> engineered to take
-      me from any level to Staff-level systems design and architecture.
-    </p>
+  <h3 class="fm-sub">About This Book</h3>
+  <p class="fm-body">
+    This is not a high-level cheat sheet, and it is not an academic textbook
+    created by a human. It is an unapologetic, exhaustive
+    <strong>365, 19-volume systems curriculum</strong> engineered to take
+    me from any level to Staff-level systems design and architecture.
+  </p>
 
-    <p class="fm-body">
-      Every single module follows an unyielding
-      <strong>5-Layer Pedagogical Framework</strong>
-    </p>
-    <ul>
-      <li>
-        <strong>1. Physical Memory &amp; Hardware Reality:</strong> What
-        physical RAM, CPU registers, and 64-byte cache lines are doing under the
-        hood during execution.
-      </li>
-      <li>
-        <strong>2. Abstract Theory &amp; Mathematical Invariants:</strong>
-        Formal complexity bounds ($O, \Omega, \Theta$), proof-of-correctness
-        invariants, and state transition models.
-      </li>
-      <li>
-        <strong>3. Production-Grade Implementation:</strong> Complete,
-        unabridged source code with zero-allocation optimizations, error
-        handling, and memory safety.
-      </li>
-      <li>
-        <strong>4. Elite Algorithmic &amp; Real-World Scenarios:</strong> Core
-        interview archetypes, non-trivial edge cases, and high-frequency failure
-        scenarios.
-      </li>
-      <li>
-        <strong>5. Verification, Synthesis &amp; Examination:</strong>
-        Self-assessment checklists and multi-question quizzes with full
-        technical rationale to audit knowledge gaps.
-      </li>
+  <p class="fm-body">
+    Every single module follows an unyielding
+    <strong>5-Layer Pedagogical Framework</strong>
+  </p>
+  <ul>
+    <li>
+      <strong>1. Physical Memory &amp; Hardware Reality:</strong> What
+      physical RAM, CPU registers, and 64-byte cache lines are doing under the
+      hood during execution.
+    </li>
+    <li>
+      <strong>2. Abstract Theory &amp; Mathematical Invariants:</strong>
+      Formal complexity bounds ($O, \Omega, \Theta$), proof-of-correctness
+      invariants, and state transition models.
+    </li>
+    <li>
+      <strong>3. Production-level Implementation:</strong> Complete,
+      unabridged source code with zero-allocation optimizations, error
+      handling, and memory safety.
+    </li>
+    <li>
+      <strong>4. Elite Algorithmic &amp; Real-World Scenarios:</strong> Core
+      interview archetypes, non-trivial edge cases, and high-frequency failure
+      scenarios.
+    </li>
+    <li>
+      <strong>5. Verification, Synthesis &amp; Examination:</strong>
+      Self-assessment checklists and multi-question quizzes with full
+      technical rationale to audit knowledge gaps.
+    </li>
+  </ul>
+
+  <!-- ============ TABLE OF CONTENTS  ============ -->
+  <h2 class="fm-title toc-title">Table of Contents</h2>
+  <div class="toc-block">
+    <div class="toc-phase">
+      Module 1: Foundations, Tooling &amp; Terminal Mastery
+    </div>
+    <ul class="toc-list">
+      <li><strong> 1:</strong> Computer Systems Foundations, Memory Hierarchy &amp; POSIX Concepts</li>
+      <li><strong> 2:</strong> VS Code Mastery, Workspaces, Tasks &amp; Launch Configurations</li>
+      <li><strong> 3:</strong> Shell Fundamentals, IPC, Filesystems &amp; Process Lifecycles</li>
+      <li><strong> 4:</strong> Git Version Control, Monorepos, Submodules &amp; Branching Strategies</li>
+      <li><strong> 5:</strong> Linux Observability, Syscall Tracing &amp; Log Diagnostics</li>
+      <li><strong> 6:</strong> GitHub Collaboration, PRs, Webhooks &amp; Delivery Workflows</li>
+      <li><strong> 7:</strong> Secure Remote Development, SSH Forwarding &amp; Tmux Multiplexing</li>
+      <li><strong> 8:</strong> Reproducible Devcontainers, Dockerfiles &amp; Volume Mounts</li>
+      <li><strong> 9:</strong> Package Managers, Semantic Versioning &amp; Systemd Services</li>
+      <li><strong> 10:</strong> Static Website Integration, Testing &amp; Publishing Workflows</li>
+      <li><strong> 11:</strong> Code Quality Automation, Linting &amp; Clean Code Principles</li>
+      <li><strong> 12:</strong> Engineering Documentation, ADRs &amp; Maintenance Workflows</li>
+      <li><strong> 13:</strong> Configuration Data Formats, Schemas &amp; Secure Secrets Handling</li>
+      <li><strong> 14:</strong> Browser Developer Tools, Network Debugging &amp; Performance Profiling</li>
+      <li><strong> 15:</strong> HTML5 Semantic Structure, Metadata &amp; DOM Layouts</li>
+      <li><strong> 16:</strong> Modern CSS, Responsive Design, Flexbox &amp; Grid Architectures</li>
     </ul>
 
-    <!-- ============ TABLE OF CONTENTS  ============ -->
-    <h2 class="fm-title toc-title">Table of Contents</h2>
-    <div class="toc-block">
-      <!-- MODULE 1 -->
-      <div class="toc-phase">
-        Module 1: Foundations, Tooling & Terminal Mastery
-      </div>
-      <ul class="toc-list">
-        <li>
-          <strong>Day 1:</strong> Hardware Architecture, Universal Turing
-          Machines & Instruction Set Execution
-        </li>
-        <li>
-          <strong>Day 2:</strong> POSIX Standards, C/C++ Evolution, Memory
-          Layouts & Process Lifecycles
-        </li>
-        <li>
-          <strong>Day 3:</strong> Advanced Linux CLI Scripting, Signals,
-          Daemons, and IPC Mechanisms
-        </li>
-        <li>
-          <strong>Day 4:</strong> File Systems, ACLs, Permissions, and Network
-          Diagnostics (ip, ss, iptables)
-        </li>
-        <li>
-          <strong>Day 5:</strong> Performance Tracing, Syscall Profiling & Git
-          Object Database Internals
-        </li>
-        <li>
-          <strong>Day 6:</strong> Advanced Git Workflows, Monorepos, Submodules
-          & CI/CD Webhook Integration
-        </li>
-        <li>
-          <strong>Day 7:</strong> SSH Configuration, Key Management & Tmux
-          Session Multiplexing
-        </li>
-        <li>
-          <strong>Day 8:</strong> Dotfiles Management & Containerizing
-          Environments with Devcontainers
-        </li>
-        <li>
-          <strong>Day 9:</strong> Package Management, Repositories & Systemd
-          Service Creation/Management
-        </li>
-        <li>
-          <strong>Day 10:</strong> Log Rotation, Journald & Advanced Text
-          Processing (awk, sed, grep)
-        </li>
-        <li>
-          <strong>Day 11:</strong> Clean Code Principles: Meaningful Names,
-          Functions, and Comments
-        </li>
-        <li>
-          <strong>Day 12:</strong> Documentation as Code: Markdown, DocFX, and
-          Architecture Decision Records
-        </li>
-        <li>
-          <strong>Day 13:</strong> Automated Code Formatting, Linting
-          Enforcement & EditorConfig Standards
-        </li>
-        <li>
-          <strong>Day 14:</strong> Terminal Sandbox Mastery & HTML5 Semantic
-          Architecture/DOM Layouts
-        </li>
-        <li>
-          <strong>Day 15:</strong> Modern CSS Layouts (Grid/Flexbox) &
-          Responsive Design Systems
-        </li>
-      </ul>
-
-      <!-- MODULE 2 -->
-      <div class="toc-phase">
-        Module 2: Client-Side Scripting, UI & Extension Development
-      </div>
-      <ul class="toc-list">
-        <li>
-          <strong>Day 16:</strong> Tailwind CSS Utility-First Design & Advanced
-          Preprocessor Patterns
-        </li>
-        <li>
-          <strong>Day 17:</strong> Vanilla JavaScript Fundamentals, Scope
-          Chains, Closures & Prototype Inheritance
-        </li>
-        <li>
-          <strong>Day 18:</strong> Asynchronous JavaScript Mechanics: Event
-          Loop, Microtasks, Macros & Promises
-        </li>
-        <li>
-          <strong>Day 19:</strong> DOM Manipulation, Shadow DOM Encapsulation &
-          Performance Optimization
-        </li>
-        <li>
-          <strong>Day 20:</strong> Modern Web Tooling: Vite Architecture,
-          Bundlers, Tree-Shaking & Minification
-        </li>
-        <li>
-          <strong>Day 21:</strong> React Architectural Deep Dive & Custom
-          Concurrent Renderer
-        </li>
-        <li><strong>Day 22:</strong> Custom Chrome Extension Engine</li>
-        <li>
-          <strong>Day 23:</strong> Real-Time Todo App: Optimistic UI Updates,
-          LWW Conflict & IndexedDB
-        </li>
-      </ul>
-
-      <!-- MODULE 3 -->
-      <div class="toc-phase">
-        Module 3: Scripting Languages & Enterprise Automation (Python & C# Core)
-      </div>
-      <ul class="toc-list">
-        <li>
-          <strong>Day 24:</strong> Python Advanced Syntax: Dunder Methods,
-          Iterators, and Generators
-        </li>
-        <li>
-          <strong>Day 25:</strong> Concurrency: Asyncio Event Loops, Coroutines
-          & Threading vs. Multiprocessing
-        </li>
-        <li>
-          <strong>Day 26:</strong> Reference Counting, Garbage Collection &
-          Cython/Numba Acceleration
-        </li>
-        <li>
-          <strong>Day 27:</strong> Python Typing, Packaging (pyproject.toml,
-          Poetry) & Pytest Fixture Architectures
-        </li>
-        <li>
-          <strong>Day 28:</strong> C# Environment Setup, .NET CLI, and the
-          Roslyn Compiler Pipeline
-        </li>
-        <li>
-          <strong>Day 29:</strong> C# Type System: Value Types, Reference Types,
-          and Stack vs. Heap Memory Layouts
-        </li>
-        <li>
-          <strong>Day 30:</strong> Nullable Reference Types, Safe Null Handling
-          & Immutable Data Records
-        </li>
-        <li>
-          <strong>Day 31:</strong> Object-Oriented Principles in C#: Classes,
-          Structs, Polymorphism & Interface Design
-        </li>
-        <li>
-          <strong>Day 32:</strong> Generics, Type Constraints, and
-          Covariance/Contravariance Mechanics
-        </li>
-        <li>
-          <strong>Day 33:</strong> Delegates, Events, Lambda Expressions &
-          Expression Trees
-        </li>
-        <li>
-          <strong>Day 34:</strong> LINQ Architecture: Deferred Execution,
-          Expression Trees, and Custom Providers
-        </li>
-        <li>
-          <strong>Day 35:</strong> Exception Handling Strategies, Custom
-          Exception Hierarchies & Result Monads
-        </li>
-        <li>
-          <strong>Day 36:</strong> Asynchronous Programming: Task, ValueTask,
-          and Async Streams
-        </li>
-        <li>
-          <strong>Day 37:</strong> Multithreading in C#: ThreadPool Tuning,
-          Mutexes, Semaphores, and Monitors
-        </li>
-        <li>
-          <strong>Day 38:</strong> .NET Memory Management: Garbage Collector
-          Generations, Ephemeral/LOH heaps
-        </li>
-        <li>
-          <strong>Day 39:</strong> Unsafe Code, Pointers, Memory Marshaling &
-          Interop with Native Libraries (P/Invoke)
-        </li>
-        <li>
-          <strong>Day 40:</strong> Zero-Allocation Programming: Span,
-          ReadOnlySpan, and Memory&lt;T&gt; Manipulations
-        </li>
-        <li>
-          <strong>Day 41:</strong> Reflection, Dynamic Code Execution,
-          Attributes, and Source Generators
-        </li>
-        <li>
-          <strong>Day 42:</strong> Argon2id Key Derivation, AES-256-GCM, and
-          Secure Memory Zeroing
-        </li>
-        <li>
-          <strong>Day 43:</strong> File I/O Streams, Binary Serialization, and
-          High-Performance JSON Processing
-        </li>
-        <li>
-          <strong>Day 44:</strong> Performance Profiling: xUnit, Moq, Fluent
-          Assertions, and BenchmarkDotNet
-        </li>
-        <li>
-          <strong>Day 45:</strong> DI Container Lifetimes, Service Registration,
-          and Composition Roots
-        </li>
-        <li>
-          <strong>Day 46:</strong> Pattern Matching, Advanced Switch
-          Expressions, and Top-Level Statements
-        </li>
-        <li>
-          <strong>Day 47:</strong> Concurrent Collections, Channels, and
-          Asynchronous Pipeline Architectures
-        </li>
-      </ul>
-
-      <!-- MODULE 4 -->
-      <div class="toc-phase">
-        Module 4: Code Quality, Static Analysis & Architectural Patterns
-      </div>
-      <ul class="toc-list">
-        <li>
-          <strong>Day 48:</strong> SOLID Principles Deep Dive with Enterprise C#
-          Implementation Examples
-        </li>
-        <li>
-          <strong>Day 49:</strong> Cyclomatic Complexity, Cognitive Complexity,
-          and Metrics Tracking
-        </li>
-        <li>
-          <strong>Day 50:</strong> Code Smells, Refactoring Techniques & Legacy
-          Code Salvaging
-        </li>
-        <li>
-          <strong>Day 51:</strong> AST-Level Static Code Analysis & Custom
-          Roslyn Analyzer Development
-        </li>
-        <li>
-          <strong>Day 52:</strong> SonarQube Architecture: Server, Scanner,
-          Quality Gates & CI/CD Pipeline Integration
-        </li>
-        <li>
-          <strong>Day 53:</strong> Code Coverage Metrics: Line, Branch, Mutation
-          Testing & Technical Debt Management
-        </li>
-        <li>
-          <strong>Day 54:</strong> Design Patterns (Creational & Structural):
-          Singleton, Factory, Adapter, Decorator
-        </li>
-        <li>
-          <strong>Day 55:</strong> Design Patterns (Behavioral): Strategy,
-          Observer, Command & State Patterns
-        </li>
-        <li>
-          <strong>Day 56:</strong> Clean Architecture & Domain-Driven Design
-          (DDD) Strategic/Tactical Patterns
-        </li>
-        <li>
-          <strong>Day 57:</strong> Domain Modeling: Entities, Value Objects,
-          Aggregates, and Domain Events
-        </li>
-        <li>
-          <strong>Day 58:</strong> CQRS and Event Sourcing: Immutable Event
-          Logs, Snapshots & Event Stores
-        </li>
-        <li>
-          <strong>Day 59:</strong> Resilient Application Architecture: Circuit
-          Breakers, Retries, and Rate Limiting (Polly)
-        </li>
-        <li>
-          <strong>Day 60:</strong> Refactoring a 10-Year-Old Legacy Monolith: A
-          Strangler Fig Case Study
-        </li>
-      </ul>
-
-      <!-- MODULE 5 -->
-      <div class="toc-phase">
-        Module 5: Relational Databases & Storage Engines
-      </div>
-      <ul class="toc-list">
-        <li>
-          <strong>Day 61:</strong> ACID Guarantees, Relational Algebra &
-          Normalization
-        </li>
-        <li>
-          <strong>Day 62:</strong> B-Tree and B+ Tree Physical Page Layouts &
-          Disk Seeking Optimization
-        </li>
-        <li>
-          <strong>Day 63:</strong> Execution Plans, Index Tuning, Join
-          Algorithms, and Filter Optimization Forensics
-        </li>
-        <li>
-          <strong>Day 64:</strong> Stored Procedures, Triggers, User-Defined
-          Functions & Concurrency Control
-        </li>
-        <li>
-          <strong>Day 65:</strong> Azure SQL Database Architecture, Service
-          Tiers, Elastic Pools & Managed Instances
-        </li>
-        <li>
-          <strong>Day 66:</strong> Entity Framework Core Internals: Change
-          Tracking, SQL Translation & Interceptors
-        </li>
-        <li>
-          <strong>Day 67:</strong> Database Migrations, Table Partitioning,
-          Sharding & Multi-Tenant Scaling
-        </li>
-        <li>
-          <strong>Day 68:</strong> Database Security: TDE & RLS & Auditing
-        </li>
-        <li>
-          <strong>Day 69:</strong> Performance Tuning: Query Store, Extended
-          Events, DMVs & Parameter Sniffing
-        </li>
-        <li>
-          <strong>Day 70:</strong> Redis In-Memory Caching and NoSQL Document
-          Stores
-        </li>
-        <li>
-          <strong>Day 71:</strong> Time-Series Databases for Telemetry & Graph
-          Databases (Neo4j / Cypher Traversal)
-        </li>
-        <li>
-          <strong>Day 72:</strong> Database Clustering, High Availability,
-          Failover Groups & Disaster Recovery
-        </li>
-        <li>
-          <strong>Day 73:</strong> Data Warehousing Concepts: Star Schema,
-          Snowflake Schema, and Columnar Storage
-        </li>
-        <li>
-          <strong>Day 74:</strong> ETL vs. ELT Pipelines, Change Data Capture
-          (CDC) & Data Ingestion Strategies
-        </li>
-        <li>
-          <strong>Day 75:</strong> Transactions: Two-Phase Commit (2PC) and the
-          Saga Pattern
-        </li>
-      </ul>
-
-      <!-- MODULE 6 -->
-      <div class="toc-phase">
-        Module 6: Web APIs, Protocols & Enterprise Integration
-      </div>
-      <ul class="toc-list">
-        <li>
-          <strong>Day 76:</strong> Web API Architectural Styles & ASP.NET Core
-          Fundamentals
-        </li>
-        <li>
-          <strong>Day 77:</strong> Minimal APIs, Content Negotiation,
-          Serialization, and RFC 7807 Problem Details
-        </li>
-        <li>
-          <strong>Day 78:</strong> API Versioning Strategies, Lifecycle
-          Management, and Backward Compatibility
-        </li>
-        <li>
-          <strong>Day 79:</strong> Model Validation, FluentValidation, and
-          Exception Handling Middleware
-        </li>
-        <li>
-          <strong>Day 80:</strong> OData Protocol: Query Options ($filter,
-          $expand, $select) and Custom Providers
-        </li>
-        <li>
-          <strong>Day 81:</strong> OpenAPI, Swagger, and Enterprise API
-          Documentation Standards
-        </li>
-        <li>
-          <strong>Day 82:</strong> Microsoft Kiota: Generating Type-Safe API
-          Clients from OpenAPI Specifications
-        </li>
-        <li>
-          <strong>Day 83:</strong> Resilient HTTP Integration:
-          IHttpClientFactory, Typed Clients, and Polly Pipelines
-        </li>
-        <li>
-          <strong>Day 84:</strong> gRPC Services: Protobuf Schema Design,
-          Multiplexing, and Bidirectional Streaming
-        </li>
-        <li>
-          <strong>Day 85:</strong> GraphQL APIs: Schema Stitching, Queries,
-          Mutations, and HotChocolate Execution
-        </li>
-        <li>
-          <strong>Day 86:</strong> API Gateway Pattern and Reverse Proxies with
-          YARP (Yet Another Reverse Proxy)
-        </li>
-        <li>
-          <strong>Day 87:</strong> API Security: Rate Limiting Policies, CORS,
-          IP Filtering, and Headers Protection
-        </li>
-        <li>
-          <strong>Day 88:</strong> WebSockets, SignalR Hubs, and Scale-Out
-          Backplanes
-        </li>
-        <li>
-          <strong>Day 89:</strong> Enterprise Integration Testing with
-          TestContainers and Automated Test Harnesses
-        </li>
-        <li>
-          <strong>Day 90:</strong> API Monitoring, Health Checks, and Telemetry
-          Instrumentation
-        </li>
-        <li>
-          <strong>Day 91:</strong> Hypermedia (HATEOAS) and RESTful Maturity
-          Models
-        </li>
-        <li>
-          <strong>Day 92:</strong> Webhooks, Delivery Guarantees, Idempotency
-          Keys, and Cryptography
-        </li>
-        <li>
-          <strong>Day 93:</strong> Microsoft Graph API Authentication, Scopes,
-          and OAuth 2.0 Token Flows
-        </li>
-        <li>
-          <strong>Day 94:</strong> Querying Users, Groups, and Organizational
-          Data via Microsoft Graph
-        </li>
-        <li>
-          <strong>Day 95:</strong> Managing SharePoint, OneDrive Files, and
-          Outlook Calendars via Graph SDKs
-        </li>
-        <li>
-          <strong>Day 96:</strong> High-Performance Batching, Delta Queries, and
-          Graph Change Notifications
-        </li>
-        <li>
-          <strong>Day 97:</strong> Enterprise Integration Patterns (EIP):
-          Message Channels, Routers, and Transformers
-        </li>
-        <li>
-          <strong>Day 98:</strong> Python/C# Interop Pipelines: Running
-          Cross-Language Automation Frameworks
-        </li>
-        <li>
-          <strong>Day 99:</strong> Model Context Protocol (MCP): Standardizing
-          Data Sources and Tool Integrations for AI
-        </li>
-      </ul>
-
-      <!-- MODULE 7 -->
-      <div class="toc-phase">
-        Module 7: Microsoft Fabric & Big Data Engineering
-      </div>
-      <ul class="toc-list">
-        <li>
-          <strong>Day 100:</strong> MS Fabric Architecture: OneLake, Lakehouses,
-          Warehouses, and Spark Compute
-        </li>
-        <li>
-          <strong>Day 101:</strong> Data Engineering in Fabric: Notebooks,
-          PySpark, and JVM Interop
-        </li>
-        <li>
-          <strong>Day 102:</strong> ACID Transactions, Transaction Logs, and
-          Time Travel Mechanics
-        </li>
-        <li>
-          <strong>Day 103:</strong> Data Factory Pipelines, Activities,
-          Transformations, and Copy Data Engine
-        </li>
-        <li>
-          <strong>Day 104:</strong> Real-Time Intelligence in Fabric: Kusto
-          Query Language (KQL) and Eventstreams
-        </li>
-        <li>
-          <strong>Day 105:</strong> Power BI Semantic Models, DirectLake Mode,
-          and Optimized DAX Queries
-        </li>
-        <li>
-          <strong>Day 106:</strong> Data Governance with Microsoft Purview:
-          Lineage, Classification, and Scans
-        </li>
-        <li>
-          <strong>Day 107:</strong> Securing Fabric Workspaces, Object-Level
-          Security, and Row-Level Security
-        </li>
-        <li>
-          <strong>Day 108:</strong> Streaming Data Ingestion: Azure Event Hubs
-          to Fabric Real-Time Analytics
-        </li>
-        <li>
-          <strong>Day 109:</strong> Orchestrating Complex Data Workflows,
-          Monitoring, and Error Handling
-        </li>
-        <li>
-          <strong>Day 110:</strong> Data Quality, Profiling, Cleansing, and
-          Automated Validation Frameworks
-        </li>
-        <li>
-          <strong>Day 111:</strong> Building Medallion Architecture: Bronze
-          (Raw), Silver (Cleaned), Gold (Curated) Layers
-        </li>
-        <li>
-          <strong>Day 112:</strong> Optimizing Spark Jobs: Catalyst Optimizer,
-          Shuffle Partitions, and Caching Strategies
-        </li>
-        <li>
-          <strong>Day 113:</strong> Integrating Azure SQL Operational Data
-          Stores with Fabric Lakehouse Sync
-        </li>
-        <li>
-          <strong>Day 114:</strong> Managing Fabric Deployment Pipelines and Git
-          Integration for Data Assets
-        </li>
-        <li>
-          <strong>Day 115:</strong> Custom Data Connectors, API Ingestion, and
-          Webhook Data Pipelines
-        </li>
-        <li>
-          <strong>Day 116:</strong> Data Mesh Concepts: Domain-Oriented
-          Decentralized Data Ownership
-        </li>
-        <li>
-          <strong>Day 117:</strong> Capacity Units Management, Throttling, and
-          Cost Optimization in Fabric
-        </li>
-        <li>
-          <strong>Day 118:</strong> Machine Learning Workloads and Model
-          Training within Fabric Notebooks
-        </li>
-        <li>
-          <strong>Day 119:</strong> Disaster Recovery, Data Replication, and
-          High Availability in Analytics Platforms
-        </li>
-        <li>
-          <strong>Day 120:</strong> Enterprise Data Platform Architecture Design
-          & Governance/li>
-        </li>
-      </ul>
-
-      <!-- MODULE 8 -->
-      <div class="toc-phase">Module 8: Containers, K8s, Messaging & GitOps</div>
-      <ul class="toc-list">
-        <li>
-          <strong>Day 121:</strong> Containerization: Linux Namespaces, Cgroups,
-          and Docker Optimization
-        </li>
-        <li>
-          <strong>Day 122:</strong> Docker Compose, Multi-Stage Builds, and
-          Container Vulnerability Scanning
-        </li>
-        <li>
-          <strong>Day 123:</strong> K8s Architecture: Control Plane, Kubelet,
-          Pods, and ReplicaSets
-        </li>
-        <li>
-          <strong>Day 124:</strong> K8s: CNI Plugins, Services, Ingress
-          Controllers, and Network Policies
-        </li>
-        <li>
-          <strong>Day 125:</strong> Persistent Storage in K8s: PVs, PVCs,
-          StorageClasses, and Statefulness
-        </li>
-        <li>
-          <strong>Day 126:</strong> Helm Package Manager: Chart Templating,
-          Values Management, and Releases
-        </li>
-        <li>
-          <strong>Day 127:</strong> Service Mesh Architecture: Istio/Linkerd
-          Sidecars, mTLS, and Traffic Shifting
-        </li>
-        <li>
-          <strong>Day 128:</strong> GitOps CD: ArgoCD, Declarative State
-          Reconciliation, and Rollbacks
-        </li>
-        <li>
-          <strong>Day 129:</strong> Kafka Architecture: Partitions, Brokers, and
-          Zookeeper/KRaft Consensus
-        </li>
-        <li>
-          <strong>Day 130:</strong> Kafka Producers, Consumers, Consumer Groups,
-          and Offset Management
-        </li>
-        <li>
-          <strong>Day 131:</strong> Microservices under Docker/K8s: RabbitMQ
-          AMQP Patterns vs. Kafka
-        </li>
-        <li>
-          <strong>Day 132:</strong> K8s Monitoring: Prometheus Metrics
-          Collection and Grafana Dashboards
-        </li>
-        <li>
-          <strong>Day 133:</strong> K8s Alerting, SLO/SLI Tracking, and
-          Alertmanager Config
-        </li>
-        <li>
-          <strong>Day 134:</strong> K8s Autoscaling: HHPA, VPA, and Cluster
-          Autoscaler
-        </li>
-        <li>
-          <strong>Day 135:</strong> Advanced K8s: Custom Resource Definitions
-          (CRDs) and Custom Operators
-        </li>
-        <li>
-          <strong>Day 136:</strong> Zero-Downtime Rolling Updates, Blue-Green
-          Deployments, and Canary Releases
-        </li>
-        <li>
-          <strong>Day 137:</strong> Chaos Engineering: Injecting Network Latency
-          and Pod Failures with Chaos Mesh
-        </li>
-        <li>
-          <strong>Day 138:</strong> Comprehensive Container and K8s
-          Engineering/li>
-        </li>
-      </ul>
-
-      <!-- MODULE 9 -->
-      <div class="toc-phase">
-        Module 9: Enterprise Security, Authentication & Cryptography
-      </div>
-      <ul class="toc-list">
-        <li>
-          <strong>Day 139:</strong> Enterprise Security Principles, Zero Trust
-          Architecture & Threat Modeling
-        </li>
-        <li>
-          <strong>Day 140:</strong> OAuth 2.0 Framework, Grant Types, Token
-          Flows & OpenID Connect (OIDC)
-        </li>
-        <li>
-          <strong>Day 141:</strong> JSON Web Tokens (JWT): Cryptographic
-          Signing, Verification, and Claims Validation
-        </li>
-        <li>
-          <strong>Day 142:</strong> Microsoft Entra ID (Azure AD): Tenants, App
-          Registrations, and Enterprise Applications
-        </li>
-        <li>
-          <strong>Day 143:</strong> Implementing Authentication and
-          Authorization Pipelines in ASP.NET Core
-        </li>
-        <li>
-          <strong>Day 144:</strong> Role-Based Access Control (RBAC) and
-          Attribute-Based Access Control (ABAC)
-        </li>
-        <li>
-          <strong>Day 145:</strong> Securing Single Page Applications (SPAs),
-          Mobile Apps, and Public Clients
-        </li>
-        <li>
-          <strong>Day 146:</strong> API Security: PKCE, Token Expiration,
-          Rotation, and Refresh Token Theft Protection
-        </li>
-        <li>
-          <strong>Day 147:</strong> Secrets: Key Vault, Managed Identities, and
-          Rotation Strategies
-        </li>
-        <li>
-          <strong>Day 148:</strong> Cryptography: Symmetric (AES), Asymmetric
-          (RSA/ECC) Encryption, and Hashing
-        </li>
-        <li>
-          <strong>Day 149:</strong> Enterprise Identity: MFA, Conditional
-          Access, and SSO Integration
-        </li>
-        <li>
-          <strong>Day 150:</strong> Comprehensive Enterprise Security and
-          Identity/li>
-        </li>
-      </ul>
-
-      <!-- MODULE 10 -->
-      <div class="toc-phase">
-        Module 10: Cloud Infrastructure, IaC & Serverless Computing
-      </div>
-      <ul class="toc-list">
-        <li>
-          <strong>Day 151:</strong> Cloud Fundamentals, Global Infrastructure,
-          Regions, and Availability Zones
-        </li>
-        <li>
-          <strong>Day 152:</strong> Azure Compute: VM Scale Sets, App Service
-          Slots, and Serverless Functions
-        </li>
-        <li>
-          <strong>Day 153:</strong> ACA: Dapr Integration and Microservices on
-          Serverless Infrastructure
-        </li>
-        <li>
-          <strong>Day 154:</strong> Azure Storage Accounts: Blob Tiers, Table
-          Storage, Queues, and File Shares
-        </li>
-        <li>
-          <strong>Day 155:</strong> Azure Networking: VNets, Subnets, and
-          Network Security Groups (NSGs)
-        </li>
-        <li>
-          <strong>Day 156:</strong> Traffic Management: Load Balancers,
-          Application Gateways, and Azure Front Door
-        </li>
-        <li>
-          <strong>Day 157:</strong> Infrastructure as Code (IaC): Bicep Language
-          Fundamentals and ARM Templates
-        </li>
-        <li>
-          <strong>Day 158:</strong> Terraform Foundations: State Management,
-          Providers, and Modular Design
-        </li>
-        <li>
-          <strong>Day 159:</strong> Managing Azure Infrastructure at Scale with
-          Terraform Enterprise Workflows
-        </li>
-        <li>
-          <strong>Day 160:</strong> Azure Observability: App Insights, Log
-          Analytics, and KQL Diagnostics
-        </li>
-        <li>
-          <strong>Day 161:</strong> Azure Cost Management, Budgets, Resource
-          Tagging, and Cloud FinOps Governance
-        </li>
-        <li>
-          <strong>Day 162:</strong> Preparing for Cloud Certifications (AZ-204 /
-          AZ-400 architectural blueprints)
-        </li>
-        <li>
-          <strong>Day 163:</strong> Azure Policy, Custom Initiatives, and
-          Governance Compliance Blueprints
-        </li>
-        <li>
-          <strong>Day 164:</strong> Hybrid Cloud Connectivity: ExpressRoute, VPN
-          Gateways, and Private Endpoints
-        </li>
-        <li>
-          <strong>Day 165:</strong> Automated Cloud Deployments via Azure DevOps
-          and GitHub Actions CI/CD
-        </li>
-        <li>
-          <strong>Day 166:</strong> Disaster Recovery, Geo-Redundancy, and
-          Backup Architectures in Azure
-        </li>
-        <li>
-          <strong>Day 167:</strong> Comprehensive Azure Platform and Cloud
-          Architecture/li>
-        </li>
-      </ul>
-
-      <!-- MODULE 11 -->
-      <div class="toc-phase">
-        Module 11: Artificial Intelligence, LLMs, Vector DBs & Multi-Agent
-        Systems
-      </div>
-      <ul class="toc-list">
-        <li>
-          <strong>Day 168:</strong> Artificial Intelligence Landscape:
-          Transformer Architecture & Attention Mechanics
-        </li>
-        <li>
-          <strong>Day 169:</strong> Vector DB: High-Dimensional Embeddings,
-          Cosine Similarity, and Inner Products
-        </li>
-        <li>
-          <strong>Day 170:</strong> Anthropic Certifications Framework &
-          Advanced Prompt Masterclass
-        </li>
-        <li>
-          <strong>Day 171:</strong> RAG: Document Chunking, Overlap Strategies,
-          and Hybrid Search
-        </li>
-        <li>
-          <strong>Day 172:</strong> Advanced RAG: Semantic Reranking,
-          Cross-Encoders, and Context Compression
-        </li>
-        <li>
-          <strong>Day 173:</strong> Agentic AI Frameworks: Autonomous Task
-          Planning, Reflection, and Tool Utilization
-        </li>
-        <li>
-          <strong>Day 174:</strong> Semantic Kernel: Plugins, Planners, and
-          Memory Connectors in C# and Python
-        </li>
-        <li>
-          <strong>Day 175:</strong> AutoGen Framework: Multi-Agent Conversations
-          and Collaborative Problem Solving
-        </li>
-        <li>
-          <strong>Day 176:</strong> Python Agentic AI: LangChain, Tool Calling,
-          and Text-to-SQL Autonomous Agents
-        </li>
-        <li>
-          <strong>Day 177:</strong> Reinforcement Learning : Markov Decision
-          Processes, Value Functions, and PPO
-        </li>
-        <li>
-          <strong>Day 178:</strong> GraphRAG: Entity Extraction, Cypher
-          Traversal, and Integrating Graph DB with LLM
-        </li>
-        <li>
-          <strong>Day 179:</strong> Building Multi-Agent Systems with the ADK
-        </li>
-        <li>
-          <strong>Day 180:</strong> Human-in-the-Loop Triage, Approval Workflows
-          & Agentic State Management
-        </li>
-        <li>
-          <strong>Day 181:</strong> Local LLM Runtime Deployment: Running Models
-          with Ollama, vLLM, and Llama.cpp
-        </li>
-        <li>
-          <strong>Day 182:</strong> Fine-Tuning Open Source LLMs: Low-Rank
-          Adaptation (LoRA) and QLoRA Techniques
-        </li>
-        <li>
-          <strong>Day 183:</strong> Ragas, BLEU, ROUGE, and LLM-as-a-Judge
-          Validation
-        </li>
-        <li>
-          <strong>Day 184:</strong> AI Guardrails: Content Moderation, Injection
-          Defense, and PII Masking
-        </li>
-        <li>
-          <strong>Day 185:</strong> Multimodal AI Architectures: Processing
-          Images, Audio, and Video Streams
-        </li>
-        <li>
-          <strong>Day 186:</strong> Optimizing Inference Costs, KV-Caching, and
-          Latency in Production AI Deployments
-        </li>
-        <li>
-          <strong>Day 187:</strong> Enterprise AI: Combining Semantic Kernel,
-          Microservices, and Local LLMs
-        </li>
-        <li>
-          <strong>Day 188:</strong> Fine-Tuning Pipeline Implementation with
-          Python, PyTorch, and Hugging Face
-        </li>
-        <li>
-          <strong>Day 189:</strong> Building Domain-Specific Knowledge
-          Assistants with Vector DBs and RAG
-        </li>
-        <li>
-          <strong>Day 190:</strong> Building Model Context Protocol (MCP)
-          Servers in Python for Standardized AI Tooling
-        </li>
-        <li>
-          <strong>Day 191:</strong> Comprehensive Multi-Agent AI and RAG
-          Engineering/li>
-        </li>
-      </ul>
-
-      <!-- MODULE 12 -->
-      <div class="toc-phase">Module 12: Client UI (.NET MAUI & Blazor)</div>
-      <ul class="toc-list">
-        <li>
-          <strong>Day 192:</strong> Client UI Architecture: Introduction to .NET
-          MAUI for Cross-Platform Apps
-        </li>
-        <li>
-          <strong>Day 193:</strong> XAML Fundamentals: Layouts, Data Binding,
-          Styles, and Triggers in MAUI
-        </li>
-        <li>
-          <strong>Day 194:</strong> MVVM Pattern MAUI: Commands, Property
-          Notifications, and Navigation Stacks
-        </li>
-        <li>
-          <strong>Day 195:</strong> Blazor Architecture: WebAssembly (WASM) vs.
-          SSR Execution Models
-        </li>
-        <li>
-          <strong>Day 196:</strong> Blazor Components, Data Binding, Lifecycle
-          Methods, and Event Handling
-        </li>
-        <li>
-          <strong>Day 197:</strong> Native Device Feature Integration in .NET
-          MAUI
-        </li>
-      </ul>
-
-      <!-- MODULE 13 -->
-      <div class="toc-phase">
-        Module 13: Core Data Structures & Algorithms (DSA)
-      </div>
-      <ul class="toc-list">
-        <li>
-          <strong>Day 198:</strong> Asymptotic Analysis: Big-O, Big-Omega, and
-          Big-Theta Mathematical Proofs
-        </li>
-        <li>
-          <strong>Day 199:</strong> Arrays, Strings, and Dynamic Array Memory
-          Allocation Mechanics
-        </li>
-        <li>
-          <strong>Day 200:</strong> Linked Lists: Singly, Doubly, and Circular
-          Pointer Manipulations
-        </li>
-        <li>
-          <strong>Day 201:</strong> Stacks, Queues, and Monotonic Stack/Queue
-          Algorithmic Patterns
-        </li>
-        <li>
-          <strong>Day 202:</strong> Hash Tables: Collision Resolution, Open
-          Addressing, and Chaining Internals
-        </li>
-        <li>
-          <strong>Day 203:</strong> Recursion, Backtracking, and
-          Divide-and-Conquer Optimization Paradigms
-        </li>
-        <li>
-          <strong>Day 204:</strong> Sorting Algorithms: Quicksort, Mergesort,
-          Heapsort, and Radix Sort Math
-        </li>
-        <li>
-          <strong>Day 205:</strong> Binary Search Mechanics and Advanced
-          Two-Pointer Techniques
-        </li>
-        <li>
-          <strong>Day 206:</strong> Binary Trees, Binary Search Trees, and AVL /
-          Red-Black Tree Balancing
-        </li>
-        <li>
-          <strong>Day 207:</strong> Heaps and Priority Queues: Implementation
-          and Pattern Applications
-        </li>
-        <li>
-          <strong>Day 208:</strong> Graph Representations: Adjacency Lists,
-          Matrices, BFS, and DFS Traversals
-        </li>
-        <li>
-          <strong>Day 209:</strong> Shortest Path Algorithms: Dijkstra,
-          Bellman-Ford, and Floyd-Warshall
-        </li>
-        <li>
-          <strong>Day 210:</strong> Minimum Spanning Trees: Kruskal's and Prim's
-          Algorithm Implementations
-        </li>
-        <li>
-          <strong>Day 211:</strong> Dynamic Programming: Memoization vs.
-          Tabulation (1D and 2D DP)
-        </li>
-        <li>
-          <strong>Day 212:</strong> Advanced Dynamic Programming: Bitmasking,
-          Digit DP, and Interval DP
-        </li>
-        <li>
-          <strong>Day 213:</strong> Greedy Algorithms and Interval Scheduling
-          Proofs
-        </li>
-        <li>
-          <strong>Day 214:</strong> Tries (Prefix Trees) and String Matching
-          Algorithms (KMP, Rabin-Karp)
-        </li>
-        <li>
-          <strong>Day 215:</strong> Disjoint Set Union (DSU) / Union-Find Data
-          Structure with Path Compression
-        </li>
-        <li>
-          <strong>Day 216:</strong> Sliding Window and Prefix Sum Masterclass
-        </li>
-        <li>
-          <strong>Day 217:</strong> Memory Optimization and Layout Strategies in
-          Data Structures
-        </li>
-        <li>
-          <strong>Day 218:</strong> Concurrency-Safe Data Structures in Practice
-        </li>
-        <li>
-          <strong>Day 219:</strong> Comprehensive Tier-1 DSA and Algorithmic
-          Mastery/li>
-        </li>
-      </ul>
-
-      <!-- MODULE 14 -->
-      <div class="toc-phase">
-        Module 14: Applied FAANG Execution & LeetCode Hard Patterns
-      </div>
-      <ul class="toc-list">
-        <li>
-          <strong>Day 220:</strong> Advanced Array Manipulation & Matrix
-          Transformations
-        </li>
-        <li>
-          <strong>Day 221:</strong> Zero-Allocation Sliding Window & Two-Pointer
-          Execution
-        </li>
-        <li>
-          <strong>Day 222:</strong> Tree Architectures & Complex Graph
-          Traversals
-        </li>
-        <li>
-          <strong>Day 223:</strong> Backtracking & 2D Dynamic Programming Grinds
-        </li>
-        <li>
-          <strong>Day 224:</strong> Specialized Structures (Tries, Segment
-          Trees, DSU)
-        </li>
-        <li>
-          <strong>Day 225:</strong> Custom LFU/LRU Cache Implementations under
-          Concurrency
-        </li>
-        <li>
-          <strong>Day 226:</strong> Multi-threading & Concurrency-Safe LeetCode
-          Hards
-        </li>
-        <li>
-          <strong>Day 227:</strong> Algorithmic Optimization: Mathematical
-          Number Theory & Combinatorics
-        </li>
-        <li>
-          <strong>Day 228:</strong> Mock Technical Interview Execution &
-          Problem-Solving Frameworks
-        </li>
-        <li>
-          <strong>Day 229:</strong> Comprehensive Applied FAANG Execution/li>
-        </li>
-      </ul>
-
-      <!-- MODULE 15 -->
-      <div class="toc-phase">
-        Module 15: Low-Level (LLD) & High-Level System Design (HLD)
-      </div>
-      <ul class="toc-list">
-        <li>
-          <strong>Day 230:</strong> Low-Level Design (LLD): Principles of
-          Object-Oriented Modeling & Domain Invariants
-        </li>
-        <li>
-          <strong>Day 231:</strong> Designing Systems: Parking Lot, Elevator
-          Controller Movie Ticket Booking
-        </li>
-        <li>
-          <strong>Day 232:</strong> Designing Tools: Splitwise Ledger,
-          Multi-player Chess, and Rate Limiters
-        </li>
-        <li>
-          <strong>Day 233:</strong> Design Patterns in Interviews: Factory,
-          Strategy, and Observer Applied to LLD
-        </li>
-        <li>
-          <strong>Day 234:</strong> High-Level System Design (HLD): Scalability,
-          Availability, and Latency Metrics
-        </li>
-        <li>
-          <strong>Day 235:</strong> Load Balancing Algorithms: L4 vs. L7, Round
-          Robin, and Consistent Hashing
-        </li>
-        <li>
-          <strong>Day 236:</strong> Caching Strategies: Cache-Aside,
-          Write-Through, Invalidation, and Eviction Policies
-        </li>
-        <li>
-          <strong>Day 237:</strong> Content Delivery Networks (CDNs) and Edge
-          Computing Architecture
-        </li>
-        <li>
-          <strong>Day 238:</strong> Database Scaling: Partitioning, Sharding,
-          Replication, and Joins
-        </li>
-        <li>
-          <strong>Day 239:</strong> Message Queues and Event Streaming:
-          Event-Driven Architectures in HLD
-        </li>
-        <li>
-          <strong>Day 240:</strong> Consensus: Paxos, Raft, and Leader Election
-          Protocols
-        </li>
-        <li>
-          <strong>Day 241:</strong> Transactions: Two-Phase Commit (2PC) and
-          Saga Patterns in HLD
-        </li>
-        <li>
-          <strong>Day 242:</strong> Designing Rate Limiters and Unique ID
-          Generators (Snowflake ID)
-        </li>
-        <li>
-          <strong>Day 243:</strong> Designing Large-Scale Systems: URL
-          Shortener, Pastebin, and Web Crawler
-        </li>
-        <li>
-          <strong>Day 244:</strong> Designing Feed Systems: Twitter / Instagram
-          Timeline Architecture
-        </li>
-        <li>
-          <strong>Day 245:</strong> Design RT Collab Platforms: Google Docs or
-          Chat Systems
-        </li>
-        <li>
-          <strong>Day 246:</strong> Designing Video Streaming Services: Netflix
-          / YouTube Ingestion & CDN Architecture
-        </li>
-        <li>
-          <strong>Day 247:</strong> Designing Ride-Sharing Systems: Uber / Lyft
-          Geospatial Indexing (H3/Quadkey)
-        </li>
-        <li>
-          <strong>Day 248:</strong> System Design Interview Framework:
-          Requirements, Estimation, and Trade-offs
-        </li>
-        <li>
-          <strong>Day 249:</strong> System Design Interview: Vocabulary,
-          Trade-off Articulation, and Architectural
-        </li>
-      </ul>
-
-      <!-- MODULE 16 -->
-      <div class="toc-phase">
-        Module 16: Performance Profiling, Observability & Compilers
-      </div>
-      <ul class="toc-list">
-        <li>
-          <strong>Day 250:</strong> Performance Profiling: Identifying CPU
-          Bottlenecks and Hot Paths in .NET
-        </li>
-        <li>
-          <strong>Day 251:</strong> Memory Profiling: Diagnose Memory Leaks, GC
-          Pressure, and Object Allocations
-        </li>
-        <li>
-          <strong>Day 252:</strong> Live Debugging: Attaching Debuggers to
-          Production Processes
-        </li>
-        <li>
-          <strong>Day 253:</strong> Analyzing Minidumps, Thread Starvation, and
-          OOM Killer Events
-        </li>
-        <li>
-          <strong>Day 254:</strong> Application Observability: OpenTelemetry
-          Tracing, Metrics, and Log Correlation
-        </li>
-        <li>
-          <strong>Day 255:</strong> Telemetry: Jaeger and Prometheus Integration
-          for Trace Propagation
-        </li>
-        <li>
-          <strong>Day 256:</strong> Compiler Internals: Roslyn Syntax Trees,
-          Semantic Models, and Compilation Pipelines
-        </li>
-        <li>
-          <strong>Day 257:</strong> Writing Custom Roslyn Analyzers and Code Fix
-          Providers
-        </li>
-        <li>
-          <strong>Day 258:</strong> Just-In-Time (JIT) Compilation and Native
-          AOT Compilation Mechanics in .NET
-        </li>
-        <li>
-          <strong>Day 259:</strong> Wireshark Mastery, TCP Streams, and TLS
-          Handshake Inspection
-        </li>
-        <li>
-          <strong>Day 260:</strong> Database Query Forensics: Lock Escalation
-          Debugging and Deadlock Forensics
-        </li>
-        <li>
-          <strong>Day 261:</strong> Comprehensive Profiling, Observability &
-          Compilers/li>
-        </li>
-      </ul>
-
-      <!-- MODULE 17 -->
-      <div class="toc-phase">
-        Module 17: Advanced Systems Engineering, Kernels & Storage Internals
-      </div>
-      <ul class="toc-list">
-        <li>
-          <strong>Day 262:</strong> Zero-Copy Serialization & Unmanaged Memory
-          Layouts
-        </li>
-        <li>
-          <strong>Day 263:</strong> Lock-Free LRU/LFU Caches & Memory Management
-        </li>
-        <li>
-          <strong>Day 264:</strong> Futexes, Reader-Writer Locks, and Memory
-          Barriers
-        </li>
-        <li>
-          <strong>Day 265:</strong> Production Deadlock Engineering: Wait-For
-          Graphs and Cycle Detection Algorithms
-        </li>
-        <li>
-          <strong>Day 266:</strong> Database Storage Internals: B+ Tree Byte
-          Layouts and Page Split Mechanics
-        </li>
-        <li>
-          <strong>Day 267:</strong> Write-Ahead Logging (WAL) & ARIES Crash
-          Recovery Architecture
-        </li>
-        <li>
-          <strong>Day 268:</strong> Concurrency Control & Isolation: Two-Phase
-          Locking (2PL) and MVCC Math
-        </li>
-        <li>
-          <strong>Day 269:</strong> Kernel Bypass Architecture: DPDK, Solarflare
-          EF_VI & Raw NIC Packet Ingress
-        </li>
-        <li>
-          <strong>Day 270:</strong> Mechanical Sympathy & CPU Caches: False
-          Sharing Mitigation & CPU Pinning
-        </li>
-        <li>
-          <strong>Day 271:</strong> The LMAX Disruptor Pattern: Lock-Free Ring
-          Buffers & Memory Barriers
-        </li>
-        <li>
-          <strong>Day 272:</strong> Zero-Allocation Message Parsing: Parsing FIX
-          Protocol without GC Triggers
-        </li>
-        <li>
-          <strong>Day 273:</strong> TCP/IP Stack: Sliding Windows, ACK Storms &
-          Congestion Control
-        </li>
-        <li>
-          <strong>Day 274:</strong> Lexical Analysis: Building State-Machine
-          Tokenizers without RegEx
-        </li>
-        <li>
-          <strong>Day 275:</strong> Parsing & Abstract Syntax Trees: Recursive
-          Descent Parsers & Operator Precedence
-        </li>
-        <li>
-          <strong>Day 276:</strong> Semantic Analysis & Bytecode Emitters:
-          Symbol Tables, Scoping & Stack-Based VMs
-        </li>
-        <li>
-          <strong>Day 277:</strong> HTTP/3 & QUIC Protocol Internals: UDP
-          Multiplexing & Connection Migration Math
-        </li>
-        <li>
-          <strong>Day 278:</strong> WebRTC Deep Dive: ICE Candidates, STUN/TURN
-          Servers & NAT Traversal Math
-        </li>
-        <li>
-          <strong>Day 279:</strong> CLR Decompilation & MSIL Injection: Reading
-          Raw IL & Obfuscation Bypass
-        </li>
-        <li>
-          <strong>Day 280:</strong> Buffer Overflows & Return-Oriented
-          Programming (ROP) on x64
-        </li>
-        <li>
-          <strong>Day 281:</strong> Anti-Debugging & DRM: Sandboxing Detection,
-          Timing Checks & Breakpoint Evasion
-        </li>
-        <li>
-          <strong>Day 282:</strong> TinyML & MC Constraints: Quantizing Neural
-          Networks FP32 -> INT8/INT4
-        </li>
-        <li>
-          <strong>Day 283:</strong> ES & IoT: Interrupt Service Routines (ISRs),
-          GPIO Registers & MQTT Binary Formatting
-        </li>
-        <li>
-          <strong>Day 284:</strong> eBPF & Linux Kernel Networking: XDP Packet
-          Filtering, Kprobes & Ring Buffers
-        </li>
-        <li>
-          <strong>Day 285:</strong> Consensus Engineering: Building the Raft
-          Protocol from Scratch
-        </li>
-        <li>
-          <strong>Day 286:</strong> Vector Search Engine Internals: IVF, Product
-          Quantization (PQ), HNSW & SIMD Math
-        </li>
-        <li>
-          <strong>Day 287:</strong> RT Stream Processing: Event-Time Semantics,
-          Windowing & Exactly-Once
-        </li>
-        <li>
-          <strong>Day 288:</strong> Formal Verification & TLA+: Modeling of
-          Systems & Proofs
-        </li>
-        <li>
-          <strong>Day 289:</strong> Envoy Proxy Internals & xDS API: Building
-          Custom Data Planes & L7 Traffic Routing
-        </li>
-        <li>
-          <strong>Day 290:</strong> Legacy Codebase: Navigating 10yo Codebases &
-          Strangler Fig Patterns
-        </li>
-        <li>
-          <strong>Day 291:</strong> Feature Flags & Progressive Delivery: &
-          Rollout Architectures
-        </li>
-        <li>
-          <strong>Day 292:</strong> CI/CD Optimization: Docker Layer Caching,
-          Test Parallelization & Flaky Test
-        </li>
-        <li>
-          <strong>Day 293:</strong> Zero-Downtime Secret Rotation & IaC Drift
-          Detection
-        </li>
-        <li>
-          <strong>Day 294:</strong> Comprehensive Advanced Systems
-          Engineering/li>
-        </li>
-      </ul>
-
-      <!-- MODULE 18 -->
-      <div class="toc-phase">
-        Module 18: DevOps, Enterprise Operations & Leadership
-      </div>
-      <ul class="toc-list">
-        <li>
-          <strong>Day 295:</strong> DevOps Culture, Continuous Delivery
-          Pipelines, and Shift-Left Security
-        </li>
-        <li>
-          <strong>Day 296:</strong> Infrastructure as Code (IaC) Advanced
-          Strategies and Immutable Infrastructure
-        </li>
-        <li>
-          <strong>Day 297:</strong> GitOps Advanced Workflows with ArgoCD and
-          Automated Rollbacks
-        </li>
-        <li>
-          <strong>Day 298:</strong> Disaster Recovery, Chaos Engineering, and
-          Resilience Testing
-        </li>
-        <li>
-          <strong>Day 299:</strong> Intent-Driven Development & Vibe Coding
-          Methodologies
-        </li>
-        <li>
-          <strong>Day 300:</strong> Intent-Based CI/CD: Integrating LLM Code
-          Generation with GitHub Actions
-        </li>
-        <li>
-          <strong>Day 301:</strong> Enterprise Architecture Governance and
-          Compliance Frameworks
-        </li>
-        <li>
-          <strong>Day 302:</strong> Staff+ Engineering Leadership: Technical
-          Strategy, Mentorship, and Influence
-        </li>
-        <li>
-          <strong>Day 303:</strong> Managing Stakeholders, Technical Debt, and
-          Engineering Velocity
-        </li>
-        <li>
-          <strong>Day 304:</strong> Cross-Team Collaboration and Large-Scale
-          Migration Planning
-        </li>
-        <li>
-          <strong>Day 305:</strong> Engineering Culture: Code Quality
-          Enforcement and Automated Governance
-        </li>
-        <li>
-          <strong>Day 306:</strong> Emerging Technology Trends: Quantum
-          Computing, Edge AI, and WebAssembly
-        </li>
-        <li>
-          <strong>Day 307:</strong> Open Source Contribution, Licensing, and
-          Community Leadership
-        </li>
-        <li>
-          <strong>Day 308:</strong> Enterprise Budgeting, Cloud Cost
-          Optimization, and FinOps Architecture
-        </li>
-        <li>
-          <strong>Day 309:</strong> Comprehensive DevOps and Enterprise
-          Operations/li>
-        </li>
-      </ul>
-
-      <!-- MODULE 19 -->
-      <div class="toc-phase">Module 19: Additional Engineering Projects</div>
-      <ul class="toc-list">
-        <li><strong>Day 310:</strong> Advanced File Systems Architecture</li>
-        <li>
-          <strong>Day 311:</strong> WebAssembly & WASI: Stack-Machine Bytecode &
-          Sandboxing Mechanics
-        </li>
-        <li>
-          <strong>Day 312:</strong> Browser Architecture: Rendering Loops,
-          Layout Trees & DevTools Internals
-        </li>
-        <li>
-          <strong>Day 313:</strong> Lock Managers: Redlock and ZooKeeper-style
-          Ephemeral Nodes
-        </li>
-        <li>
-          <strong>Day 314:</strong> Performance Rate Limiting: Token Bucket and
-          Leaky Bucket Algorithms
-        </li>
-        <li>
-          <strong>Day 315:</strong> Tracing Collector: Building an OpenTelemetry
-          Collector Ingress
-        </li>
-        <li>
-          <strong>Day 316:</strong> Custom SQL Query Engine: Implementing Lexer,
-          Parser, and Volley-Execution
-        </li>
-        <li>
-          <strong>Day 317:</strong> Key-Value Store: Building LSM-Trees and
-          MemTables
-        </li>
-        <li>
-          <strong>Day 318:</strong> Network Packet Sniffer: Building a Raw
-          Socket Packet Analyzer in C# / C++
-        </li>
-        <li>
-          <strong>Day 319:</strong> Custom Message Broker: AMQP-style Exchange,
-          Queues, and Routing Keys
-        </li>
-        <li>
-          <strong>Day 320:</strong> Job Scheduler: Cron, Locking, and
-          Fault-Tolerant Workers
-        </li>
-        <li>
-          <strong>Day 321:</strong>Static File Server: Zero-Copy sendfile
-          Implementation in User-Space
-        </li>
-        <li>
-          <strong>Day 322:</strong> Custom Memory Allocator: Implementing Slab
-          Allocation and Arena Memory Pools
-        </li>
-        <li>
-          <strong>Day 323:</strong> Graph Processing: Pregel Vertex-Centric
-          Processing Model Implementation
-        </li>
-        <li>
-          <strong>Day 324:</strong> RTCS Engine: Scaling WebSockets Concurrent
-          Connections via Epoll/IOCP
-        </li>
-        <li>
-          <strong>Day 325:</strong> Custom JSON Parser: 0 Allocation Lexical
-          Tokenizer and AST Builder
-        </li>
-        <li>
-          <strong>Day 326:</strong> Consensus Simulator: Deterministic Network
-          Partition Test Harness
-        </li>
-        <li>
-          <strong>Day 327:</strong> SIMD Library: Optimizing Matrix Operations
-          via AVX2/AVX-512 Intrinsics
-        </li>
-        <li>
-          <strong>Day 328:</strong> Custom Load Balancer: Round-Robin and
-          Least-Connections Routing
-        </li>
-        <li>
-          <strong>Day 329:</strong> Metrics Aggregator: Building a
-          High-Throughput Time-Series Ingestion Pipeline
-        </li>
-        <li>
-          <strong>Day 330:</strong> Interpreter: Lexer, Parser, Stack Machine &
-          Garbage Collector
-        </li>
-        <li>
-          <strong>Day 331:</strong> Cache Invalidation Service: Consistent
-          Hashing Ring with Virtual Nodes
-        </li>
-        <li>
-          <strong>Day 332:</strong> High-Throughput Event Sourcing Engine:
-          Append-Only Log with Zero-Copy Indexing
-        </li>
-        <li>
-          <strong>Day 333:</strong> Blob Storage Gateway: Chunking, Erasure
-          Coding, and S3-Compatible API Wrapping
-        </li>
-        <li>
-          <strong>Day 334:</strong> Custom APM Agent: Intercepting Method Calls
-          and Emitting Traces
-        </li>
-        <li>
-          <strong>Day 335:</strong> Ledger / Blockchain Simulator: Merkle Trees,
-          Proof-of-Work, and Block Validation
-        </li>
-        <li>
-          <strong>Day 336:</strong> Spatial Indexing Engine: R-Trees and
-          Quadtree Coordinate Calculations
-        </li>
-        <li>
-          <strong>Day 337:</strong> Health-Checking Heartbeats and Dynamic
-          Routing Tables
-        </li>
-        <li>
-          <strong>Day 338:</strong> Lock-Free Queue: Multi-Producer
-          Multi-Consumer (MPMC) Ring Buffer
-        </li>
-        <li>
-          <strong>Day 339:</strong> Custom Web Framework: Building Routing
-          Tables, Middleware, and Action Invokers
-        </li>
-        <li>
-          <strong>Day 340:</strong> Rate Limiting Gateway: Redis-Backed Sliding
-          Window Counter
-        </li>
-        <li>
-          <strong>Day 341:</strong> CSV Parser: SIMD-Accelerated Streaming
-          Parser for GB Datasets
-        </li>
-        <li>
-          <strong>Day 342:</strong> Custom DI Container: Lifetime Scopes,
-          Reflection, and Factory Binding
-        </li>
-        <li>
-          <strong>Day 343:</strong> Circuit Breaker Engine: State Machine
-          Transitions and Fallback Execution
-        </li>
-        <li>
-          <strong>Day 344:</strong> Config Server: Hot-Reloading Key-Value
-          Stores/ Watcher Notifications
-        </li>
-        <li>
-          <strong>Day 345:</strong> Password Manager & Cryptographic Vault
-        </li>
-        <li>
-          <strong>Day 346:</strong> Custom Chrome Extension Engine (Manifest V3
-          & Background Workers)
-        </li>
-        <li>
-          <strong>Day 347:</strong> Real-Time Todo & State Synchronization App
-        </li>
-        <li>
-          <strong>Day 348:</strong> React Architectural Deep Dive & Custom
-          Concurrent Renderer
-        </li>
-        <li>
-          <strong>Day 349:</strong> Fraud Detection: Scale AI Detection &
-          FinCrime (AML) Rules Engine
-        </li>
-        <li>
-          <strong>Day 350:</strong> Architecture Design, Multi-Region HA,
-          Failover Topologies & Domain Modeling
-        </li>
-        <li>
-          <strong>Day 351:</strong> Domain Implementation, Event-Sourced
-          Storage, DB Tuning & Exe Forensics
-        </li>
-        <li>
-          <strong>Day 352:</strong> Infrastructure Provisioning, K8s GitOps,
-          CI/CD Pipelines & Canary Rollouts
-        </li>
-        <li>
-          <strong>Day 353:</strong> Multi-Agent AI Integration, RAG & Semantic
-          Kernel
-        </li>
-        <li>
-          <strong>Day 354:</strong> Observability Instrumentation &
-          OpenTelemetry Spans
-        </li>
-        <li>
-          <strong>Day 355:</strong> Security Hardening, Zero Trust & OAuth2
-          Enforcement
-        </li>
-        <li>
-          <strong>Day 356:</strong> Load Testing, Chaos Engineering, Resilience
-          Validation, Core Dumps & Incident Triage
-        </li>
-        <li>
-          <strong>Day 357:</strong> CN Core & Internet Plumbing: DNS, BGP,
-          Router Packet Switching & TCP/IP
-        </li>
-        <li>
-          <strong>Day 358:</strong> OS: Thread vs. Process Address Spaces, Head
-          Pointers & Concurrency Invariants
-        </li>
-        <li>
-          <strong>Day 359:</strong> Bit Manipulation: Arithmetic, Bitmasking
-          Tricks & LeetCode Pattern Taxonomies
-        </li>
-        <li>
-          <strong>Day 360:</strong> Concurrent Caches, Sliding/Fixed TTLs, Async
-          DB Fetching & Graceful Shutdown
-        </li>
-        <li>
-          <strong>Day 361:</strong> Multi-Region HA, CI/CD Canary Rollouts &
-          Event-Sourced Storage
-        </li>
-        <li>
-          <strong>Day 362:</strong> Multi-Agent AI Integration, OTel
-          Observability & 0-Trust Security
-        </li>
-        <li>
-          <strong>Day 363:</strong> Chaos Engineering, Core Debugging & DB
-          Execution Forensics
-        </li>
-        <li>
-          <strong>Day 364:</strong> Go-Live: Final Security Audit, Cloud FinOps,
-          Post-Mortems & Retrospective
-        </li>
-        <li>
-          <strong>Day 365:</strong> The Ultimate Engineering Masterclass
-          Retrospective, System Go-Live & Graduation
-        </li>
-      </ul>
+    <div class="toc-phase">
+      Module 2: Client-Side Scripting, UI &amp; Extension Development
     </div>
+    <ul class="toc-list">
+      <li><strong> 17:</strong> Web Accessibility, WCAG, ARIA &amp; Screen Reader Navigation</li>
+      <li><strong> 18:</strong> JS/TS Fundamentals, Event Loop, Closures &amp; Async Mechanics</li>
+      <li><strong> 19:</strong> Browser APIs, DOM Manipulation, Fetch &amp; Web Workers</li>
+      <li><strong> 20:</strong> Web Components, Custom Elements &amp; Shadow DOM Encapsulation</li>
+      <li><strong> 21:</strong> Vite Tooling, Bundlers, Code Splitting &amp; Minification</li>
+      <li><strong> 22:</strong> React Architecture, Fiber, Hooks &amp; Concurrent Rendering</li>
+      <li><strong> 23:</strong> Chrome Extensions, Manifest V3 &amp; Content Script Sandboxing</li>
+      <li><strong> 24:</strong> Angular Architecture, Dependency Injection &amp; Lazy Loading</li>
+      <li><strong> 25:</strong> Distributed Real-Time Apps, IndexedDB &amp; Offline Sync</li>
+    </ul>
 
-    <!-- ============ HOW TO USE THIS PDF ============ -->
-    <h2 class="fm-title section-break">How to Use This PDF</h2>
-    <p class="fm-body fm-lead">
-      This book is built by an AI, though annotated and content farmed by me.
-    </p>
+    <div class="toc-phase">
+      Module 3: Scripting Languages &amp; Enterprise Automation (Python &amp; C# Core)
+    </div>
+    <ul class="toc-list">
+      <li><strong> 26:</strong> Python Foundations, Virtual Environments &amp; Control Flow</li>
+      <li><strong> 27:</strong> Python Data Model, Dunder Methods, Generators &amp; Decorators</li>
+      <li><strong> 28:</strong> Python Concurrency, GIL Internals, Asyncio &amp; GC Mechanics</li>
+      <li><strong> 29:</strong> Python Workflows, Poetry, Type Hints &amp; Pytest Architecture</li>
+      <li><strong> 30:</strong> C#/.NET Foundations, CLI, NuGet &amp; Roslyn Compilation</li>
+      <li><strong> 31:</strong> C# Type Safety, Stack vs. Heap, Records &amp; Immutability</li>
+      <li><strong> 32:</strong> C# OOP, Interfaces, Generics &amp; Type Constraints</li>
+      <li><strong> 33:</strong> C# Delegates, Lambda Closures, LINQ &amp; Expression Trees</li>
+      <li><strong> 34:</strong> C# Exception Hierarchies, Result Types &amp; Failure Policies</li>
+      <li><strong> 35:</strong> C# Async Mechanics, Task/ValueTask &amp; Async Streams</li>
+      <li><strong> 36:</strong> C# Concurrency, ThreadPool, Mutexes, Channels &amp; Backpressure</li>
+      <li><strong> 37:</strong> .NET Memory Management, GC Generations &amp; IDisposable</li>
+      <li><strong> 38:</strong> C# Zero-Allocation, Span&lt;T&gt;, Unsafe Pointers &amp; P/Invoke</li>
+      <li><strong> 39:</strong> C# Metaprogramming, Reflection &amp; Source Generators</li>
+      <li><strong> 40:</strong> C# File I/O, Binary Streams &amp; High-Performance JSON</li>
+      <li><strong> 41:</strong> C# Unit Testing, xUnit, Moq &amp; BenchmarkDotNet</li>
+      <li><strong> 42:</strong> C# Dependency Injection, Lifetimes &amp; Composition Roots</li>
+      <li><strong> 43:</strong> C# Pattern Matching, Switch Expressions &amp; Project Layouts</li>
+      <li><strong> 44:</strong> C# Automation, CLI Tooling, Structured Logging &amp; Scheduling</li>
+      <li><strong> 45:</strong> .NET Generic Host, Options Binding &amp; Graceful Shutdown</li>
+      <li><strong> 46:</strong> C# Deployment, Self-Contained Apps, AOT &amp; IL Trimming</li>
+      <li><strong> 47:</strong> C# Architecture, Ports &amp; Adapters, Services &amp; Repositories</li>
+      <li><strong> 48:</strong> Cross-Language Automation, Idempotency &amp; Process Invocation</li>
+      <li><strong> 49:</strong> Enterprise Pipelines, Worker Execution &amp; Error Handling</li>
+      <li><strong> 50:</strong> Dynamics 365 F&amp;O, X++ Development &amp; Batch Customizations</li>
+    </ul>
+    <div class="toc-phase">
+      Module 4: Code Quality, Static Analysis &amp; Architectural Patterns
+    </div>
+    <ul class="toc-list">
+      <li><strong> 51:</strong> SOLID Principles Deep Dive &amp; C# Implementations</li>
+      <li><strong> 52:</strong> Code Complexity, Coupling &amp; Maintainability Metrics</li>
+      <li><strong> 53:</strong> Code Smells, Fowler Refactoring &amp; Characterization Tests</li>
+      <li><strong> 54:</strong> Static Analysis, ASTs &amp; Custom Roslyn Analyzers</li>
+      <li><strong> 55:</strong> SonarQube Architecture, Quality Gates &amp; CI/CD</li>
+      <li><strong> 56:</strong> Code Coverage, Mutation Testing &amp; Technical Debt</li>
+      <li><strong> 57:</strong> Creational, Structural &amp; Behavioral Design Patterns</li>
+      <li><strong> 58:</strong> TDD, Code Review Workflows &amp; Test Pyramids</li>
+      <li><strong> 59:</strong> Clean Architecture &amp; Domain-Driven Design (DDD)</li>
+      <li><strong> 60:</strong> Domain Modeling, Entities, Aggregates &amp; Domain Events</li>
+      <li><strong> 61:</strong> CQRS, Event Sourcing &amp; Immutable Event Logs</li>
+      <li><strong> 62:</strong> Resilient Architecture, Circuit Breakers &amp; Polly</li>
+      <li><strong> 63:</strong> Legacy Modernization &amp; Strangler Fig Migrations</li>
+    </ul>
 
-    <h3 class="fm-sub">The Whiteboard Pages</h3>
-    <p class="fm-body">
-      Every even-numbered page is a pure, solid white workspace. Use it to trace
-      memory addresses, sketch failure state machines (e.g., worker failover,
-      split-brain quorums), and write down your spoken whiteboard answers before
-      checking the technical keys.
-    </p>
+    <div class="toc-phase">
+      Module 5: Relational Databases &amp; Storage Engines
+    </div>
+    <ul class="toc-list">
+      <li><strong> 64:</strong> Relational Databases, ACID Guarantees, Normalization &amp; SQL Joins</li>
+      <li><strong> 65:</strong> Storage Internals, B/B+ Trees, Indexes &amp; Disk I/O</li>
+      <li><strong> 66:</strong> Query Optimization, Execution Plans, Joins &amp; SARGability</li>
+      <li><strong> 67:</strong> Transactions, Isolation Levels, Deadlocks &amp; Concurrency Control</li>
+      <li><strong> 68:</strong> Azure SQL Architecture, Elastic Pools &amp; Managed Instances</li>
+      <li><strong> 69:</strong> EF Core Internals, Change Tracking &amp; LINQ Translation</li>
+      <li><strong> 70:</strong> Database Migrations, Sharding, Partitioning &amp; Zero-Downtime</li>
+      <li><strong> 71:</strong> Database Security, TDE, Row-Level Security &amp; Auditing</li>
+      <li><strong> 72:</strong> Performance Forensics, Extended Events, DMVs &amp; Parameter Sniffing</li>
+      <li><strong> 73:</strong> Polyglot Persistence, Redis Caching &amp; MongoDB Aggregations</li>
+      <li><strong> 74:</strong> Time-Series, Graph Databases &amp; Neo4j Cypher Traversals</li>
+      <li><strong> 75:</strong> High Availability, Replication, Backups &amp; Disaster Recovery</li>
+      <li><strong> 76:</strong> Data Warehousing, OLTP vs. OLAP, Star Schemas &amp; Columnar Storage</li>
+      <li><strong> 77:</strong> ETL/ELT Pipelines, CDC &amp; Data Ingestion Strategies</li>
+      <li><strong> 78:</strong> Distributed Transactions, 2PC, Saga Patterns &amp; Idempotency</li>
+    </ul>
 
-    <h3 class="fm-sub">Color Legend</h3>
-    <div class="legend-item">
-      <div class="legend-dot" style="background: #4f46e5"></div>
-      <div>
-        <strong>Indigo, Key Idea:</strong> The foundational hardware contract,
-        invariant, or architectural pattern.
-      </div>
+    <div class="toc-phase">
+      Module 6: Web APIs, Protocols &amp; Enterprise Integration
     </div>
-    <div class="legend-item">
-      <div class="legend-dot" style="background: #ea580c"></div>
-      <div>
-        <strong>Orange, Common Misconception:</strong> Latent performance traps,
-        race conditions, memory leaks, and flawed architectural assumptions.
-      </div>
-    </div>
-    <div class="legend-item">
-      <div class="legend-dot" style="background: #db2777"></div>
-      <div>
-        <strong>Pink, Interview Angle:</strong> How this exact mechanism is
-        tested during FAANG, HFT, and senior backend technical rounds.
-      </div>
-    </div>
-    <div class="legend-item">
-      <div class="legend-dot" style="background: #059669"></div>
-      <div>
-        <strong>Green, Tip / Interview-Ready Answer:</strong> Production
-        takeaways, zero-allocation micro-optimizations, and crisp whiteboard
-        phrasing.
-      </div>
-    </div>
-    <div class="legend-item">
-      <div class="legend-dot" style="background: #7c3aed"></div>
-      <div>
-        <strong>Violet, Quiz &amp; Verification:</strong> Deep-dive
-        self-assessment quizzes with comprehensive multiple-choice, writing
-        prompts, and answer keys.
-      </div>
-    </div>
+    <ul class="toc-list">
+      <li><strong> 79:</strong> Web APIs, REST, HTTP Protocols &amp; ASP.NET Core</li>
+      <li><strong> 80:</strong> ASP.NET Core Minimal APIs, Middleware &amp; RFC 7807</li>
+      <li><strong> 81:</strong> API Versioning, Contracts &amp; Idempotency</li>
+      <li><strong> 82:</strong> DTO Validation, FluentValidation &amp; Exception Middleware</li>
+      <li><strong> 83:</strong> OData Protocol, Query Options &amp; Custom Providers</li>
+      <li><strong> 84:</strong> OpenAPI, Swagger &amp; Contract Validation</li>
+      <li><strong> 85:</strong> Microsoft Kiota, OpenAPI Client Generation &amp; Type-Safe Models</li>
+      <li><strong> 86:</strong> Resilient HTTP, IHttpClientFactory &amp; Polly Pipelines</li>
+      <li><strong> 87:</strong> gRPC, Protobuf Schemas &amp; Bidirectional Streaming</li>
+      <li><strong> 88:</strong> GraphQL, DataLoader Batching &amp; HotChocolate</li>
+      <li><strong> 89:</strong> API Gateways, Reverse Proxies &amp; YARP</li>
+      <li><strong> 90:</strong> API Security, Rate Limiting, CORS &amp; mTLS</li>
+      <li><strong> 91:</strong> Real-Time APIs, WebSockets &amp; SignalR Backplanes</li>
+      <li><strong> 92:</strong> Integration Testing, TestContainers &amp; Fault Injection</li>
+      <li><strong> 93:</strong> API Observability, OpenTelemetry &amp; Health Checks</li>
+      <li><strong> 94:</strong> Hypermedia, HATEOAS &amp; RESTful Maturity Models</li>
+      <li><strong> 95:</strong> Webhooks, Delivery Guarantees &amp; Cryptographic Signatures</li>
+      <li><strong> 96:</strong> MS Graph Auth, OAuth 2.0 &amp; Token Flows</li>
+      <li><strong> 97:</strong> MS Graph Directory, Delta Links &amp; Pagination</li>
+      <li><strong> 98:</strong> MS Graph Workloads, SharePoint &amp; Outlook SDKs</li>
+      <li><strong> 99:</strong> MS Graph Batching, Delta Queries &amp; Change Notifications</li>
+      <li><strong> 100:</strong> Enterprise Integration Patterns (EIP) &amp; Message Routers</li>
+      <li><strong> 101:</strong> Python/C# Interop, Process Boundaries &amp; Contracts</li>
+      <li><strong> 102:</strong> Model Context Protocol (MCP) &amp; AI Tool Integration</li>
+      <li><strong> 103:</strong> Power Platform, Dataverse &amp; Copilot Studio</li>
+    </ul>
 
-    <!-- ============ HOW TO TAKE NOTES ============ -->
-    <h2 class="fm-title section-break">How to Take Notes</h2>
-    <p class="fm-body fm-lead">
-      The whiteboards are not for rewriting what is printed. They are for
-      synthesizing mechanics.
-    </p>
-
-    <div class="callout key">
-      <div class="callout-title">Restate the Physical Invariant</div>
-      If a section explains CPU cache line false sharing or Raft log matching,
-      sketch the multi-core or cluster topology yourself. Trace where the
-      contention or quorum partition occurs.
+    <div class="toc-phase">
+      Module 7: Microsoft Fabric &amp; Big Data Engineering
     </div>
+    <ul class="toc-list">
+      <li><strong> 104:</strong> Microsoft Fabric Architecture, OneLake &amp; Spark Compute</li>
+      <li><strong> 105:</strong> Fabric Data Engineering, PySpark &amp; JVM Interop</li>
+      <li><strong> 106:</strong> Delta Parquet, ACID Transactions, Schema Evolution &amp; Time Travel</li>
+      <li><strong> 107:</strong> Data Factory Pipelines, Integration Runtimes &amp; Transformations</li>
+      <li><strong> 108:</strong> Real-Time Intelligence, KQL, Eventstreams &amp; Materialized Views</li>
+      <li><strong> 109:</strong> Power BI Semantic Models, DAX &amp; DirectLake Trade-offs</li>
+      <li><strong> 110:</strong> Microsoft Purview, Data Governance, Lineage &amp; Classification</li>
+      <li><strong> 111:</strong> Fabric Security, OLS, RLS &amp; Workspace Roles</li>
+      <li><strong> 112:</strong> Event Hubs Streaming, Checkpoints &amp; Real-Time Analytics</li>
+      <li><strong> 113:</strong> Workflow Orchestration, Dependencies, Retries &amp; SLAs</li>
+      <li><strong> 114:</strong> Data Quality Engineering, Profiling &amp; Automated Validation</li>
+      <li><strong> 115:</strong> Medallion Architecture, Bronze/Silver/Gold Layers &amp; Idempotency</li>
+      <li><strong> 116:</strong> Spark Optimization, Catalyst Plans, Skew &amp; Shuffle Reduction</li>
+      <li><strong> 117:</strong> Azure SQL Integration, CDC &amp; Lakehouse Synchronization</li>
+      <li><strong> 118:</strong> Fabric Git Workflows, Deployment Pipelines &amp; Rollbacks</li>
+      <li><strong> 119:</strong> API Data Ingestion, Connectors &amp; Schema Drift Handling</li>
+      <li><strong> 120:</strong> Data Mesh Architecture, Data Products &amp; Federated Governance</li>
+      <li><strong> 121:</strong> Fabric Capacity Management, FinOps &amp; Cost Optimization</li>
+      <li><strong> 122:</strong> Machine Learning Workloads, Feature Prep &amp; Experiment Tracking</li>
+      <li><strong> 123:</strong> Disaster Recovery, RPO/RTO &amp; High Availability</li>
+      <li><strong> 124:</strong> Capstone: End-to-End Medallion Architecture via CDC</li>
+    </ul>
 
-    <div class="callout warn">
-      <div class="callout-title">Mark Failure Modes &amp; Gaps</div>
-      Whenever an invariant or edge case feels non-obvious (e.g., a node failing
-      mid-transaction with an uncommitted write), place a prominent
-      <code>?</code> on the whiteboard page. Re-verify the step-by-step state
-      transitions.
+    <div class="toc-phase">
+      Module 8: Containers, Kubernetes, Messaging &amp; GitOps
     </div>
+    <ul class="toc-list">
+      <li><strong> 125:</strong> Container Foundations, Namespaces, Cgroups &amp; Dockerfile Optimization</li>
+      <li><strong> 126:</strong> Docker Compose, Multi-Stage Builds, Layer Caching &amp; SBOMs</li>
+      <li><strong> 127:</strong> Kubernetes Architecture, Control Plane, Workloads &amp; RBAC</li>
+      <li><strong> 128:</strong> Kubernetes Networking, CNI, Ingress &amp; Network Policies</li>
+      <li><strong> 129:</strong> K8s Storage, CSI Drivers, PV/PVCs &amp; StatefulSets</li>
+      <li><strong> 130:</strong> Helm Package Manager, Chart Templating &amp; Release Rollbacks</li>
+      <li><strong> 131:</strong> Service Mesh Architecture, Istio Sidecars &amp; mTLS</li>
+      <li><strong> 132:</strong> GitOps Continuous Deployment, ArgoCD &amp; Drift Detection</li>
+      <li><strong> 133:</strong> Kafka Architecture, Partitions, Brokers &amp; KRaft Consensus</li>
+      <li><strong> 134:</strong> Kafka Producers/Consumers, Idempotence &amp; Consumer Groups</li>
+      <li><strong> 135:</strong> RabbitMQ Messaging, Quorum Queues &amp; Dead-Letter Exchanges</li>
+      <li><strong> 136:</strong> K8s Monitoring, Prometheus Exporters &amp; Grafana Dashboards</li>
+      <li><strong> 137:</strong> K8s Alerting, Alertmanager, SLO/SLIs &amp; Error Budgets</li>
+      <li><strong> 138:</strong> K8s Autoscaling, HPA/VPA, Affinity &amp; Resource Limits</li>
+      <li><strong> 139:</strong> K8s Extensibility, CRDs, Controllers &amp; Admission Webhooks</li>
+      <li><strong> 140:</strong> Production Operations, Readiness Probes &amp; Canary Deployments</li>
+      <li><strong> 141:</strong> Chaos Engineering, Fault Injection &amp; Chaos Mesh</li>
+      <li><strong> 142:</strong> Capstone: Zero-Trust Microservices Topology with Istio &amp; ArgoCD</li>
+    </ul>
 
-    <div class="callout tip">
-      <div class="callout-title">Cross-Reference Across Volumes</div>
-      When studying database storage engines in Volume X, cross-reference back
-      to B-Tree cache line alignment in Volume II and asynchronous I/O in Volume
-      VI. Senior systems engineering connects low-level primitives to high-level
-      systems.
+    <div class="toc-phase">
+      Module 9: Enterprise Security, Authentication &amp; Cryptography
     </div>
+    <ul class="toc-list">
+      <li><strong> 143:</strong> Enterprise Security, Zero Trust Principles &amp; Threat Modeling</li>
+      <li><strong> 144:</strong> OAuth 2.0, OpenID Connect &amp; PKCE Token Flows</li>
+      <li><strong> 145:</strong> JSON Web Tokens, Cryptographic Signing &amp; Claims Validation</li>
+      <li><strong> 146:</strong> Microsoft Entra ID, App Registrations &amp; Managed Identities</li>
+      <li><strong> 147:</strong> ASP.NET Core Identity, Policy Middleware &amp; XSS Defense</li>
+      <li><strong> 148:</strong> Authorization Models, RBAC, ABAC &amp; Least Privilege</li>
+      <li><strong> 149:</strong> AWS IAM Security, STS Federation &amp; Permission Boundaries</li>
+      <li><strong> 150:</strong> Securing SPAs, Token Storage &amp; CORS Boundaries</li>
+      <li><strong> 151:</strong> API Security Hardening, Token Rotation &amp; Replay Defense</li>
+      <li><strong> 152:</strong> Azure Key Vault, Secret Rotation &amp; Envelope Encryption</li>
+      <li><strong> 153:</strong> .NET Cryptography, AES-GCM, RSA &amp; Secure Key Derivation</li>
+      <li><strong> 154:</strong> Enterprise Identity, FIDO2 Passkeys &amp; Conditional Access</li>
+      <li><strong> 155:</strong> Capstone: Architecting an OAuth2/OIDC Zero-Trust Authorization Server</li>
+    </ul>
 
-    <div class="callout interview">
-      <div class="callout-title">Rehearse Spoken Explanations</div>
-      Answer the Pink Interview boxes out loud without looking at notes. Write
-      your exact spoken explanation on the whiteboard page. If you cannot
-      articulate the trade-offs cleanly out loud, you do not fully own the
-      concept yet.
+    <div class="toc-phase">
+      Module 10: Cloud Infrastructure, IaC &amp; Serverless Computing
     </div>
-  </body>
+    <ul class="toc-list">
+      <li><strong> 156:</strong> Azure Cloud Foundations, Resource Hierarchy &amp; Global Infrastructure</li>
+      <li><strong> 157:</strong> Azure Compute, VM Scale Sets, App Service Slots &amp; Serverless Functions</li>
+      <li><strong> 158:</strong> Azure Container Apps, Dapr Integration &amp; Serverless Microservices</li>
+      <li><strong> 159:</strong> Azure Storage Accounts, Blob Lifecycle, SAS Tokens &amp; Immutability</li>
+      <li><strong> 160:</strong> Azure Networking, VNets, NSGs, Peering &amp; Private Link</li>
+      <li><strong> 161:</strong> Azure Traffic Management, Application Gateways, WAF &amp; Front Door</li>
+      <li><strong> 162:</strong> IaC with Bicep, ARM Templates, Modules &amp; What-If Previews</li>
+      <li><strong> 163:</strong> Terraform Foundations, HCL, State Management &amp; Provider Auth</li>
+      <li><strong> 164:</strong> Enterprise Terraform, Remote State, Drift Detection &amp; Workspaces</li>
+      <li><strong> 165:</strong> Azure Observability, Application Insights &amp; Log Analytics Workspaces</li>
+      <li><strong> 166:</strong> Azure Load Testing, JMeter Plans &amp; CI/CD Performance Gates</li>
+      <li><strong> 167:</strong> Cloud FinOps, Cost Management, Resource Tagging &amp; Rightsizing</li>
+      <li><strong> 168:</strong> Azure Certification Blueprints, AZ-204 &amp; AZ-400 Architecture</li>
+      <li><strong> 169:</strong> Azure Policy, Custom Initiatives, Management Groups &amp; Compliance</li>
+      <li><strong> 170:</strong> Hybrid Connectivity, ExpressRoute, VPN Gateways &amp; Hub-and-Spoke</li>
+      <li><strong> 171:</strong> Automated Cloud Delivery, GitHub Actions &amp; Federated Credentials</li>
+      <li><strong> 172:</strong> AWS Cloud Architecture, EC2, VPC, Lambda &amp; Well-Architected Design</li>
+      <li><strong> 173:</strong> Azure Disaster Recovery, Geo-Redundancy &amp; Regional Failover</li>
+      <li><strong> 174:</strong> Capstone: Multi-Region Active-Active Failover with Terraform State Manipulation</li>
+    </ul>
+
+    <div class="toc-phase">
+      Module 11: Artificial Intelligence, LLMs, Vector DBs &amp; Multi-Agent Systems
+    </div>
+    <ul class="toc-list">
+      <li><strong> 175:</strong> AI Foundations, Neural Networks, Transformers &amp; Attention Mechanics</li>
+      <li><strong> 176:</strong> LLM Internals, Tokenization, RoPE &amp; RLHF Alignment</li>
+      <li><strong> 177:</strong> Prompt Engineering, Structured Outputs &amp; Anthropic Frameworks</li>
+      <li><strong> 178:</strong> Vector Search, High-Dimensional Embeddings &amp; Cosine Similarity</li>
+      <li><strong> 179:</strong> RAG Architecture, Document Chunking &amp; Hybrid Search</li>
+      <li><strong> 180:</strong> Advanced RAG, Semantic Reranking, Cross-Encoders &amp; Query Routing</li>
+      <li><strong> 181:</strong> Agentic AI, Autonomous Task Planning, Reflection &amp; Tool Utilization</li>
+      <li><strong> 182:</strong> Microsoft Semantic Kernel, Plugins, Planners &amp; C# Interop</li>
+      <li><strong> 183:</strong> AutoGen Framework, Multi-Agent Routing &amp; Shared State</li>
+      <li><strong> 184:</strong> Python Agentic AI, LangChain Runnables &amp; Text-to-SQL</li>
+      <li><strong> 185:</strong> Reinforcement Learning, Markov Decision Processes &amp; PPO</li>
+      <li><strong> 186:</strong> Deep RL, Q-Learning, Actor-Critic Methods &amp; Policy Gradients</li>
+      <li><strong> 187:</strong> Multi-Agent Systems via Agent Development Kit (ADK)</li>
+      <li><strong> 188:</strong> Human-in-the-Loop Triage, Approval Workflows &amp; Agent Governance</li>
+      <li><strong> 189:</strong> Local LLM Runtimes, vLLM, Llama.cpp &amp; Quantization</li>
+      <li><strong> 190:</strong> LLM Fine-Tuning, LoRA/QLoRA &amp; Preference Data</li>
+      <li><strong> 191:</strong> Model Evaluation, Ragas, LLM-as-a-Judge &amp; Groundedness</li>
+      <li><strong> 192:</strong> AI Guardrails, Prompt Injection Defense &amp; PII Masking</li>
+      <li><strong> 193:</strong> Multimodal AI, Vision-Language Models &amp; Cross-Modal Embeddings</li>
+      <li><strong> 194:</strong> Production Inference, KV-Caching &amp; Speculative Decoding</li>
+      <li><strong> 195:</strong> Enterprise AI Architecture, Model Gateways &amp; MLOps</li>
+      <li><strong> 196:</strong> Fine-Tuning Pipelines with PyTorch &amp; Hugging Face</li>
+      <li><strong> 197:</strong> Domain-Specific Knowledge Assistants &amp; Access-Controlled Retrieval</li>
+      <li><strong> 198:</strong> Production Chatbot Agents, Session Recovery &amp; Streaming</li>
+      <li><strong> 199:</strong> Capstone: Autonomous RAG Triage Agents with PII Memory Masking &amp; MCP</li>
+    </ul>
+
+    <div class="toc-phase">
+      Module 12: Client UI (.NET MAUI &amp; Blazor)
+    </div>
+    <ul class="toc-list">
+      <li><strong> 200:</strong> .NET MAUI Architecture, Cross-Platform Targets &amp; Handlers</li>
+      <li><strong> 201:</strong> MAUI XAML UI, Compiled Bindings, Triggers &amp; Visual States</li>
+      <li><strong> 202:</strong> MAUI MVVM, Shell Navigation, SQLite &amp; Offline Synchronization</li>
+      <li><strong> 203:</strong> Blazor &amp; Razor Rendering, Component Lifecycles &amp; Interactive Modes</li>
+      <li><strong> 204:</strong> Blazor App Engineering, JS Interop, Auth &amp; State Management</li>
+      <li><strong> 205:</strong> MAUI Native Integration, Device APIs, Secure Storage &amp; Deployment</li>
+    </ul>
+
+    <div class="toc-phase">
+      Module 13: Core Data Structures &amp; Algorithms (DSA)
+    </div>
+    <ul class="toc-list">
+      <li><strong> 206:</strong> Algorithmic Complexity, Big-O Proofs &amp; Amortized Analysis</li>
+      <li><strong> 207:</strong> Arrays, Strings, Dynamic Memory &amp; Prefix/Suffix Operations</li>
+      <li><strong> 208:</strong> Linked Lists, Cycle Detection &amp; Pointer Manipulation</li>
+      <li><strong> 209:</strong> Stacks, Queues, Deques &amp; Monotonic Structures</li>
+      <li><strong> 210:</strong> Hash Tables, Collision Resolution &amp; Load Factors</li>
+      <li><strong> 211:</strong> Recursion, Backtracking, Pruning &amp; Divide-and-Conquer</li>
+      <li><strong> 212:</strong> Sorting Algorithms, Quickselect &amp; In-Place Trade-offs</li>
+      <li><strong> 213:</strong> Binary Search, Two-Pointer Techniques &amp; Answer-Space Search</li>
+      <li><strong> 214:</strong> Binary Trees, AVL/Red-Black Balancing &amp; Traversals</li>
+      <li><strong> 215:</strong> Heaps, Priority Queues, K-Way Merge &amp; Top-K Selection</li>
+      <li><strong> 216:</strong> Graph Traversals, Topological Sort &amp; Connected Components</li>
+      <li><strong> 217:</strong> Shortest Paths, Dijkstra, Bellman-Ford &amp; Floyd-Warshall</li>
+      <li><strong> 218:</strong> Minimum Spanning Trees, Kruskal, Prim &amp; Cycle Properties</li>
+      <li><strong> 219:</strong> Dynamic Programming, Memoization, Tabulation &amp; State Design</li>
+      <li><strong> 220:</strong> Advanced DP, Bitmasking, Interval DP &amp; Tree DP</li>
+      <li><strong> 221:</strong> Greedy Algorithms, Interval Scheduling &amp; Huffman Coding</li>
+      <li><strong> 222:</strong> Tries, String Matching, KMP &amp; Rabin-Karp Rolling Hashes</li>
+      <li><strong> 223:</strong> Disjoint Set Union (DSU), Union by Rank &amp; Path Compression</li>
+      <li><strong> 224:</strong> Sliding Windows, Range Queries &amp; 1D/2D Prefix Sums</li>
+      <li><strong> 225:</strong> Cache Locality, Memory Layouts, SoA vs. AoS &amp; Object Overhead</li>
+      <li><strong> 226:</strong> Concurrency-Safe Data Structures, Atomics &amp; Ring Buffers</li>
+      <li><strong> 227:</strong> Capstone: Tier-1 DSA, O(1) LFU Cache &amp; Zero-Allocation Memory</li>
+    </ul>
+
+    <div class="toc-phase">
+      Module 14: Applied FAANG Execution &amp; LeetCode Hard Patterns
+    </div>
+    <ul class="toc-list">
+      <li><strong> 228:</strong> Advanced Arrays, Sweep-Line Algorithms &amp; In-Place Transformations</li>
+      <li><strong> 229:</strong> Sliding Windows, Zero-Allocation Two-Pointers &amp; Amortized Proofs</li>
+      <li><strong> 230:</strong> Advanced Graphs, Tree DP, Euler Tours &amp; Complex Traversals</li>
+      <li><strong> 231:</strong> Advanced DP, Meet-in-the-Middle, Bitmask States &amp; Pruning</li>
+      <li><strong> 232:</strong> Specialized Structures, Segment/Fenwick Trees &amp; Sparse Tables</li>
+      <li><strong> 233:</strong> Concurrent Cache Design, O(1) LFU/LRU &amp; Lock Granularity</li>
+      <li><strong> 234:</strong> Concurrent Algorithms, Memory Visibility &amp; Lock-Free Structures</li>
+      <li><strong> 235:</strong> Algorithmic Optimization, Number Theory &amp; Reservoir Sampling</li>
+      <li><strong> 236:</strong> Mock Technical Interviews, Constraint Extraction &amp; Complexity Trade-offs</li>
+      <li><strong> 237:</strong> Capstone: Applied FAANG Execution &amp; Adversarial Test Design</li>
+    </ul>
+
+    <div class="toc-phase">
+      Module 15: Low-Level (LLD) &amp; High-Level System Design (HLD)
+    </div>
+    <ul class="toc-list">
+      <li><strong> 238:</strong> Low-Level Design (LLD), Object-Oriented Modeling &amp; Domain Invariants</li>
+      <li><strong> 239:</strong> LLD Classic Systems, Parking Lots, Elevators &amp; Ticket Booking</li>
+      <li><strong> 240:</strong> LLD Collaboration Tools, Splitwise Ledgers &amp; Chess State</li>
+      <li><strong> 241:</strong> LLD Design Patterns, Factory, Strategy &amp; Observer Implementations</li>
+      <li><strong> 242:</strong> High-Level System Design (HLD), Scalability &amp; Latency Metrics</li>
+      <li><strong> 243:</strong> Load Balancing, Layer 4/7 Routing &amp; Consistent Hashing</li>
+      <li><strong> 244:</strong> Caching Strategies, Write-Through, Eviction &amp; Invalidation Policies</li>
+      <li><strong> 245:</strong> Edge Computing Architecture &amp; Content Delivery Networks (CDNs)</li>
+      <li><strong> 246:</strong> Database Scaling, Sharding, Replication &amp; Distributed Joins</li>
+      <li><strong> 247:</strong> Event-Driven Architectures, Message Queues &amp; Event Streaming</li>
+      <li><strong> 248:</strong> Distributed Consensus, Raft, Paxos &amp; Leader Election</li>
+      <li><strong> 249:</strong> Distributed Transactions, 2PC &amp; Saga Patterns</li>
+      <li><strong> 250:</strong> Distributed Rate Limiters &amp; Snowflake ID Generators</li>
+      <li><strong> 251:</strong> HLD Scale, URL Shorteners, Pastebin &amp; Distributed Web Crawlers</li>
+      <li><strong> 252:</strong> HLD Feed Systems, Twitter/Instagram Timeline Architecture</li>
+      <li><strong> 253:</strong> HLD Real-Time Collaboration, Distributed Chat &amp; Operational Transformation</li>
+      <li><strong> 254:</strong> HLD Video Streaming, Netflix Ingestion &amp; CDN Architectures</li>
+      <li><strong> 255:</strong> HLD Geospatial Indexing, H3/Quadkeys &amp; Ride-Sharing Architecture</li>
+      <li><strong> 256:</strong> Interview Frameworks, Capacity Estimation &amp; Requirement Gathering</li>
+      <li><strong> 257:</strong> Staff+ Interview Vocabulary, Trade-off Articulation &amp; Communication</li>
+    </ul>
+
+    <div class="toc-phase">
+      Module 16: Performance Profiling, Observability &amp; Compilers
+    </div>
+    <ul class="toc-list">
+      <li><strong> 238:</strong> Low-Level Design (LLD), Object-Oriented Modeling &amp; Domain Invariants</li>
+      <li><strong> 239:</strong> LLD Classic Systems, Parking Lots, Elevators &amp; Ticket Booking</li>
+      <li><strong> 240:</strong> LLD Collaboration Tools, Splitwise Ledgers &amp; Chess State</li>
+      <li><strong> 241:</strong> LLD Design Patterns, Factory, Strategy &amp; Observer Implementations</li>
+      <li><strong> 242:</strong> High-Level System Design (HLD), Scalability &amp; Latency Metrics</li>
+      <li><strong> 243:</strong> Load Balancing, Layer 4/7 Routing &amp; Consistent Hashing</li>
+      <li><strong> 244:</strong> Caching Strategies, Write-Through, Eviction &amp; Invalidation Policies</li>
+      <li><strong> 245:</strong> Edge Computing Architecture &amp; Content Delivery Networks (CDNs)</li>
+      <li><strong> 246:</strong> Database Scaling, Sharding, Replication &amp; Distributed Joins</li>
+      <li><strong> 247:</strong> Event-Driven Architectures, Message Queues &amp; Event Streaming</li>
+      <li><strong> 248:</strong> Distributed Consensus, Raft, Paxos &amp; Leader Election</li>
+      <li><strong> 249:</strong> Distributed Transactions, 2PC &amp; Saga Patterns</li>
+      <li><strong> 250:</strong> Distributed Rate Limiters &amp; Snowflake ID Generators</li>
+      <li><strong> 251:</strong> HLD Scale, URL Shorteners, Pastebin &amp; Distributed Web Crawlers</li>
+      <li><strong> 252:</strong> HLD Feed Systems, Twitter/Instagram Timeline Architecture</li>
+      <li><strong> 253:</strong> HLD Real-Time Collaboration, Distributed Chat &amp; Operational Transformation</li>
+      <li><strong> 254:</strong> HLD Video Streaming, Netflix Ingestion &amp; CDN Architectures</li>
+      <li><strong> 255:</strong> HLD Geospatial Indexing, H3/Quadkeys &amp; Ride-Sharing Architecture</li>
+      <li><strong> 256:</strong> Interview Frameworks, Capacity Estimation &amp; Requirement Gathering</li>
+      <li><strong> 257:</strong> Staff+ Interview Vocabulary, Trade-off Articulation &amp; Communication</li>
+    </ul>
+
+    <div class="toc-phase">
+      Module 17: Advanced Systems Engineering, Kernels &amp; Storage Internals
+    </div>
+    <ul class="toc-list">
+      <li><strong> 270:</strong> Zero-Copy Serialization, Struct Packing &amp; Scatter/Gather I/O</li>
+      <li><strong> 271:</strong> Lock-Free Caches, Hazard Pointers &amp; Epoch Reclamation</li>
+      <li><strong> 272:</strong> Thread Synchronization, Futexes, Seqlocks &amp; Memory Barriers</li>
+      <li><strong> 273:</strong> Production Deadlocks, Wait-For Graphs &amp; Cycle Detection</li>
+      <li><strong> 274:</strong> Database Storage Internals, B+ Trees, Buffer Pools &amp; LSM Trees</li>
+      <li><strong> 275:</strong> Write-Ahead Logging, ARIES Recovery &amp; Crash Mechanics</li>
+      <li><strong> 276:</strong> Concurrency Control, 2PL, MVCC Versions &amp; Isolation Anomalies</li>
+      <li><strong> 277:</strong> Kernel Bypass, DPDK, Solarflare EF_VI &amp; RDMA</li>
+      <li><strong> 278:</strong> Mechanical Sympathy, Cache Lines, False Sharing &amp; NUMA</li>
+      <li><strong> 279:</strong> LMAX Disruptor, Lock-Free Ring Buffers &amp; Sequence Barriers</li>
+      <li><strong> 280:</strong> Zero-Allocation Parsing, State Machines &amp; GC-Free Execution</li>
+      <li><strong> 281:</strong> Custom TCP/IP Stack, Sliding Windows, Congestion Control &amp; BBR</li>
+      <li><strong> 282:</strong> Lexical Analysis, Tokenizers &amp; RegEx-Free Scanning</li>
+      <li><strong> 283:</strong> Parsing, ASTs, Recursive Descent &amp; Pratt Parsing</li>
+      <li><strong> 284:</strong> Semantic Analysis, Bytecode Emitters &amp; Stack-Based VMs</li>
+      <li><strong> 285:</strong> HTTP/3 &amp; QUIC, UDP Multiplexing &amp; Connection Migration</li>
+      <li><strong> 286:</strong> WebRTC Internals, ICE, STUN/TURN &amp; Peer Negotiation</li>
+      <li><strong> 287:</strong> CLR Decompilation, MSIL Analysis &amp; Defensive Instrumentation</li>
+      <li><strong> 288:</strong> Memory Corruption, Buffer Overflows, ROP &amp; ASLR/DEP</li>
+      <li><strong> 289:</strong> Anti-Debugging, Sandboxing, Timing Checks &amp; DRM</li>
+      <li><strong> 290:</strong> TinyML, Microcontroller Constraints, Quantization &amp; Fixed-Point Math</li>
+      <li><strong> 291:</strong> Embedded Systems, ISRs, GPIO Registers &amp; MQTT Binary Formats</li>
+      <li><strong> 292:</strong> eBPF Kernel Networking, XDP, Kprobes &amp; Ring Buffers</li>
+      <li><strong> 293:</strong> Distributed Consensus, Raft Protocol, Log Replication &amp; Safety Invariants</li>
+      <li><strong> 294:</strong> Vector Search Internals, IVF, PQ &amp; HNSW Graphs</li>
+      <li><strong> 295:</strong> Advanced Vector Search, SIMD Optimization &amp; Hybrid Retrieval</li>
+      <li><strong> 296:</strong> Real-Time Stream Processing, Watermarks &amp; Event-Time Semantics</li>
+      <li><strong> 297:</strong> Exactly-Once Streaming, Checkpoints, Backpressure &amp; State Migration</li>
+      <li><strong> 298:</strong> Legacy Codebase Archaeology, Strangler Fig &amp; Characterization Tests</li>
+      <li><strong> 299:</strong> Feature Flags, Progressive Delivery &amp; Canary Rollouts</li>
+      <li><strong> 300:</strong> CI/CD Supply-Chain Security, SBOMs, SLSA &amp; Reproducible Builds</li>
+      <li><strong> 301:</strong> Enterprise Configuration, Secret Rotation &amp; IaC Drift Detection</li>
+      <li><strong> 302:</strong> Capstone: Zero-Allocation Network Ingress via Lock-Free Ring Buffers</li>
+    </ul>
+
+    <div class="toc-phase">
+      Module 18: DevOps, Enterprise Operations &amp; Leadership
+    </div>
+    <ul class="toc-list">
+      <li><strong> 303:</strong> DevOps Foundations, DORA Metrics, Trunk-Based Dev &amp; Shift-Left Security</li>
+      <li><strong> 304:</strong> Advanced IaC, Immutable Infrastructure, Policy as Code &amp; Drift Detection</li>
+      <li><strong> 305:</strong> Advanced GitOps, ArgoCD Sync Waves, Progressive Delivery &amp; Rollbacks</li>
+      <li><strong> 306:</strong> SRE, Error Budgets, Incident Command &amp; Chaos Engineering Game Days</li>
+      <li><strong> 307:</strong> Intent-Driven Development, Vibe Coding Boundaries &amp; AI-Assisted Planning</li>
+      <li><strong> 308:</strong> Intent-Based CI/CD, LLM-Assisted GitHub Actions &amp; Supply-Chain Validation</li>
+      <li><strong> 309:</strong> Enterprise Architecture Governance, ADRs, Capability Maps &amp; Compliance</li>
+      <li><strong> 310:</strong> Staff+ Leadership, Technical Strategy, Mentorship &amp; Organizational Change</li>
+      <li><strong> 311:</strong> Engineering Economics, Technical Debt Registers &amp; Stakeholder Negotiation</li>
+      <li><strong> 312:</strong> Workplace Resilience, Ethical Influence, Escalation Paths &amp; Layoff Resilience</li>
+      <li><strong> 313:</strong> Cross-Team Migrations, RACI Ownership, Cutover Strategies &amp; Rollbacks</li>
+      <li><strong> 314:</strong> Engineering Culture, Blameless Accountability &amp; Automated Governance Controls</li>
+      <li><strong> 315:</strong> Emerging Tech Evaluation, Edge AI, WebAssembly &amp; GreenOps Sustainability</li>
+      <li><strong> 316:</strong> Open Source Engineering, SPDX Licensing, Vulnerability Response &amp; SBOMs</li>
+      <li><strong> 317:</strong> Enterprise FinOps, Cost Allocation, Unit Economics &amp; Rightsizing</li>
+      <li><strong> 318:</strong> Capstone: Intent-Driven CI/CD and Software Supply-Chain Hardening</li>
+    </ul>
+
+    <div class="toc-phase">
+      Module 19: Additional Engineering Projects &amp; The Mega Capstone
+    </div>
+    <ul class="toc-list">
+      <li><strong> 319:</strong> Distributed File Systems, HDFS, Erasure Coding &amp; Replication</li>
+      <li><strong> 320:</strong> WebAssembly (WASI) Internals, Linear Memory &amp; Capability Sandboxing</li>
+      <li><strong> 321:</strong> Browser Engine Architecture, Rendering Loops &amp; IPC</li>
+      <li><strong> 322:</strong> Distributed Lock Managers, Redlock &amp; Split-Brain Handling</li>
+      <li><strong> 323:</strong> High-Performance Rate Limiting, Token Buckets &amp; Redis Atomicity</li>
+      <li><strong> 324:</strong> Distributed Tracing, OpenTelemetry &amp; Span Enrichment</li>
+      <li><strong> 325:</strong> Custom SQL Query Engine, ASTs &amp; Volcano Operators in C#</li>
+      <li><strong> 326:</strong> Distributed Key-Value Store, LSM Trees &amp; Quorum Reads</li>
+      <li><strong> 327:</strong> Network Packet Sniffer, Ring Buffers &amp; TLS Metadata in C#</li>
+      <li><strong> 328:</strong> Custom Message Broker, AMQP Routing &amp; Dead Letters</li>
+      <li><strong> 329:</strong> Distributed Job Scheduler, Leader Election &amp; Fault-Tolerant Execution</li>
+      <li><strong> 330:</strong> Static File Server, Zero-Copy Buffers &amp; TLS Connections</li>
+      <li><strong> 331:</strong> Custom Memory Allocator, Arena Pools &amp; Free Lists</li>
+      <li><strong> 332:</strong> Distributed Graph Engine, Pregel Processing &amp; Fault Recovery</li>
+      <li><strong> 333:</strong> Real-Time Chat Engine, WebSockets, Epoll &amp; Backpressure</li>
+      <li><strong> 334:</strong> Custom JSON Parser, Zero-Allocation Tokenizers &amp; UTF-8</li>
+      <li><strong> 335:</strong> Distributed Consensus Simulator, Jepsen Testing &amp; Network Partitions</li>
+      <li><strong> 336:</strong> SIMD Vector Math, AVX2/AVX-512 Intrinsics &amp; Matrix Kernels</li>
+      <li><strong> 337:</strong> Custom Load Balancer, Consistent Hashing &amp; Circuit Breaking</li>
+      <li><strong> 338:</strong> Distributed Metrics Aggregator, Time-Series Windows &amp; Downsampling</li>
+      <li><strong> 339:</strong> Scripting Language Interpreter, Bytecode &amp; Stack Machines</li>
+      <li><strong> 340:</strong> Distributed Cache Invalidation, Consistent Hashing &amp; Miss Storms</li>
+      <li><strong> 341:</strong> Event Sourcing Engine, Zero-Copy Indexing &amp; Idempotent Consumers</li>
+      <li><strong> 342:</strong> Distributed Blob Storage, Erasure Coding &amp; Multipart Uploads</li>
+      <li><strong> 343:</strong> Custom APM Agent, Span Creation &amp; Trace Propagation</li>
+      <li><strong> 344:</strong> Distributed Ledger, Merkle Trees &amp; Proof-of-Work Consensus</li>
+      <li><strong> 345:</strong> Spatial Indexing, R-Trees, Quadtrees &amp; Nearest Neighbor Search</li>
+      <li><strong> 346:</strong> Service Discovery Registry, Heartbeats &amp; Versioned Routing</li>
+      <li><strong> 347:</strong> Lock-Free Queues, MPMC Ring Buffers &amp; ABA Defense</li>
+      <li><strong> 348:</strong> Custom Web Framework, Middleware Pipelines &amp; HTTP Routing</li>
+      <li><strong> 349:</strong> Distributed Rate Limiter, Redis Sliding Windows &amp; Burst Policies</li>
+      <li><strong> 350:</strong> High-Performance CSV Parser, SIMD Streaming &amp; Schema Inference</li>
+      <li><strong> 351:</strong> Custom DI Container, Service Descriptors &amp; Open Generics</li>
+      <li><strong> 352:</strong> Distributed Circuit Breaker, Sliding Windows &amp; Jitter</li>
+      <li><strong> 353:</strong> Distributed Configuration Server, Watcher Notifications &amp; Hot Reload</li>
+      <li><strong> 354:</strong> Cryptographic Vault, Argon2id, AES-GCM &amp; Key Wrapping</li>
+      <li><strong> 355:</strong> Chrome Extension Engine, Manifest V3 &amp; Isolated Worlds</li>
+      <li><strong> 356:</strong> Distributed State Synchronization, LWW Vectors &amp; Optimistic Updates</li>
+      <li><strong> 357:</strong> Frontend Performance Profiling, Core Web Vitals &amp; Render Costs</li>
+      <li><strong> 358:</strong> Enterprise Fraud Detection, AML Workflows &amp; Risk Scoring</li>
+      <li><strong> 359:</strong> Staff-Level FinCrime Mega-Capstone
+        <ul>
+          <li>Architecture &amp; Domain Modeling (Multi-Region Topology)</li>
+          <li>Event-Sourced Storage (Immutable Events &amp; Projections)</li>
+          <li>Database Tuning &amp; Forensics (Query Plans &amp; Deadlocks)</li>
+          <li>Multi-Region Reliability (Failover Routing &amp; RPO/RTO)</li>
+          <li>Kubernetes GitOps Platform (ArgoCD &amp; Policy Gates)</li>
+          <li>CI/CD Canary Delivery (Feature Flags &amp; Rollback Automation)</li>
+          <li>Multi-Agent AI &amp; RAG (Semantic Kernel &amp; PII Boundaries)</li>
+          <li>OpenTelemetry Observability (Distributed Traces &amp; SLOs)</li>
+          <li>Zero-Trust Security (OAuth2, mTLS &amp; Workload Identity)</li>
+          <li>Load, Chaos &amp; Incident Triage (Fault Injection &amp; Core Dumps)</li>
+        </ul>
+      </li>
+      <li><strong> 360:</strong> Internet Plumbing, DNS, BGP Routing &amp; TCP/IP Congestion</li>
+      <li><strong> 361:</strong> OS Internals, Virtual Memory, IPC &amp; Concurrency</li>
+      <li><strong> 362:</strong> Bit Manipulation, Shifts, Masks &amp; LeetCode Hard Patterns</li>
+      <li><strong> 363:</strong> Production Concurrency, Bounded Caches &amp; Graceful Shutdown</li>
+      <li><strong> 364:</strong> System Go-Live, FinOps, SLO Readiness &amp; Post-Mortems</li>
+      <li><strong> 365:</strong> Curriculum Retrospective, Architecture Trade-offs &amp; Career Growth</li>
+    </ul>
+  </div>
+
+  <!-- ============ HOW TO USE THIS PDF ============ -->
+  <h2 class="fm-title section-break">How to Use This PDF</h2>
+  <p class="fm-body fm-lead">
+    This book is built by an AI, though annotated and content farmed by me.
+  </p>
+
+  <h3 class="fm-sub">The Whiteboard Pages</h3>
+  <p class="fm-body">
+    Every even-numbered page is a pure, solid white workspace. Use it to trace
+    memory addresses, sketch failure state machines (e.g., worker failover,
+    split-brain quorums), and write down your spoken whiteboard answers before
+    checking the technical keys.
+  </p>
+
+  <h3 class="fm-sub">Color Legend</h3>
+  <div class="legend-item">
+    <div class="legend-dot" style="background: #4f46e5"></div>
+    <div>
+      <strong>Indigo, Key Idea:</strong> The foundational hardware contract,
+      invariant, or architectural pattern.
+    </div>
+  </div>
+  <div class="legend-item">
+    <div class="legend-dot" style="background: #ea580c"></div>
+    <div>
+      <strong>Orange, Common Misconception:</strong> Latent performance traps,
+      race conditions, memory leaks, and flawed architectural assumptions.
+    </div>
+  </div>
+  <div class="legend-item">
+    <div class="legend-dot" style="background: #db2777"></div>
+    <div>
+      <strong>Pink, Interview Angle:</strong> How this exact mechanism is
+      tested during FAANG, HFT, and senior backend technical rounds.
+    </div>
+  </div>
+  <div class="legend-item">
+    <div class="legend-dot" style="background: #059669"></div>
+    <div>
+      <strong>Green, Tip / Interview-Ready Answer:</strong> Production
+      takeaways, zero-allocation micro-optimizations, and crisp whiteboard
+      phrasing.
+    </div>
+  </div>
+  <div class="legend-item">
+    <div class="legend-dot" style="background: #7c3aed"></div>
+    <div>
+      <strong>Violet, Quiz &amp; Verification:</strong> Deep-dive
+      self-assessment quizzes with comprehensive multiple-choice, writing
+      prompts, and answer keys.
+    </div>
+  </div>
+
+  <!-- ============ HOW TO TAKE NOTES ============ -->
+  <h2 class="fm-title section-break">How to Take Notes</h2>
+  <p class="fm-body fm-lead">
+    The whiteboards are not for rewriting what is printed. They are for
+    synthesizing mechanics.
+  </p>
+
+  <div class="callout key">
+    <div class="callout-title">Restate the Physical Invariant</div>
+    If a section explains CPU cache line false sharing or Raft log matching,
+    sketch the multi-core or cluster topology yourself. Trace where the
+    contention or quorum partition occurs.
+  </div>
+
+  <div class="callout warn">
+    <div class="callout-title">Mark Failure Modes &amp; Gaps</div>
+    Whenever an invariant or edge case feels non-obvious (e.g., a node failing
+    mid-transaction with an uncommitted write), place a prominent
+    <code>?</code> on the whiteboard page. Re-verify the step-by-step state
+    transitions.
+  </div>
+
+  <div class="callout tip">
+    <div class="callout-title">Cross-Reference Across Volumes</div>
+    When studying database storage engines in Volume X, cross-reference back
+    to B-Tree cache line alignment in Volume II and asynchronous I/O in Volume
+    VI. Senior systems engineering connects low-level primitives to high-level
+    systems.
+  </div>
+
+  <div class="callout interview">
+    <div class="callout-title">Rehearse Spoken Explanations</div>
+    Answer the Pink Interview boxes out loud without looking at notes. Write
+    your exact spoken explanation on the whiteboard page. If you cannot
+    articulate the trade-offs cleanly out loud, you do not fully own the
+    concept yet.
+  </div>
+</body>
+
 </html>
