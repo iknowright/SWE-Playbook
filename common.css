@@ -162,6 +162,11 @@ ol {
   color: #C7C7CC;
 }
 
+.toc-list {
+  list-style: none;
+  padding-left: 0;
+}
+
 li {
   margin-bottom: 6px;
 }
