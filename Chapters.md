@@ -1,7 +1,7 @@
 ## Module 1: Foundations, Tooling & Terminal Mastery
 
 1. Computer Systems Foundations: CPU Registers, Instruction Execution, Memory Hierarchy, Processes, POSIX Concepts & C/C++ History
-2. VS Code Development Environment: Installation, Settings, Extensions, Integrated Terminal, Workspaces, Tasks, Launch Configurations  Project Files
+2. VS Code Development Environment: Installation, Settings, Extensions, Integrated Terminal, Workspaces, Tasks, Launch Configurations Project Files
 3. Shell and Linux Fundamentals: Commands, Arguments, Pipes, Redirection, Globbing, Environment Variables, IPC, Filesystems, Permissions & Process Lifecycles
 4. Git Version Control: Repositories, Working Tree, Staging, Commits, Branches, Merges, Rebases, Tags, Remotes, Monorepos, Submodules & Pull Requests
 5. Linux Observability and Troubleshooting: Syscalls, Performance Tracing, Journald, Log Analysis, Exit Codes, Text Processing & Systematic Diagnosis
@@ -114,10 +114,10 @@
 97. Microsoft Graph Directory Queries: Users, Groups, Organizational Data, Filters, Pagination, Delta Links, Permissions & Throttling
 98. Microsoft Graph Workloads: SharePoint Sites, OneDrive Files, Outlook Mail, Calendars, Drive Items, SDKs & Resource Permissions
 99. Microsoft Graph Change and Batch Operations: JSON Batching, Dependency Ordering, Delta Queries, Change Notifications, Webhook Renewal & Throttling
-100. Enterprise Integration Patterns: Message Channels, Point-to-Point, Publish-Subscribe, Routers, Translators, Aggregators & Transformers
-101. Python/C# Interop Pipelines: Process Boundaries, Serialization Contracts, Standard Streams, Exit Codes, Scheduling, Retries & Failure Handoffs
-102. Model Context Protocol: Servers, Resources, Prompts, Tools, Transports, Capability Negotiation & Standardized AI Integrations
-103. Microsoft Power Platform Integration: Power Apps, Power Automate, Dataverse, Power Pages, Connectors, Business Events & Copilot Studio
+100.  Enterprise Integration Patterns: Message Channels, Point-to-Point, Publish-Subscribe, Routers, Translators, Aggregators & Transformers
+101.  Python/C# Interop Pipelines: Process Boundaries, Serialization Contracts, Standard Streams, Exit Codes, Scheduling, Retries & Failure Handoffs
+102.  Model Context Protocol: Servers, Resources, Prompts, Tools, Transports, Capability Negotiation & Standardized AI Integrations
+103.  Microsoft Power Platform Integration: Power Apps, Power Automate, Dataverse, Power Pages, Connectors, Business Events & Copilot Studio
 
 ## Module 7: Microsoft Fabric & Big Data Engineering
 
@@ -413,6 +413,7 @@
 357. Frontend Performance Profiling: Rendering, Bundling, Runtime Costs, Core Web Vitals, Long Tasks, Memory, Network Waterfalls, Code Splitting, Caching, RUM, Trace Correlation, Profiling & UX Metrics
 358. Enterprise Fraud Detection Capstone: Event Ingestion, Feature Engineering, Rules, Risk Scoring, Case Management, AML Workflows, Explainability, Model Integration, Human Review, Auditability, Drift Monitoring & FinCrime Operations
 359. Staff-Level Distributed FinCrime Mega-Capstone: Architecture Design, Multi-Region HA, Failover Topologies, Domain Modeling, Event-Sourced Storage, Database Tuning, Execution Forensics, Kubernetes GitOps, CI/CD Canary Rollouts, Multi-Agent AI, RAG, Semantic Kernel, OpenTelemetry, Zero Trust, OAuth2, Load Testing, Chaos Engineering, Resilience Validation, Core Dumps, Incident Triage, Auditability, Regulatory Controls & Executive Architecture Communication
+
 - Architecture and Domain Modeling Project: Requirements, bounded contexts, risk taxonomy, aggregates, invariants, event contracts, multi-region topology & trade-off records
 - Event-Sourced FinCrime Storage Project: Immutable events, snapshots, projections, replay, idempotency, retention, schema evolution & audit history
 - Database Tuning and Execution Forensics Project: Indexing, query plans, parameter behavior, locking, deadlock analysis, Query Store & workload evidence
